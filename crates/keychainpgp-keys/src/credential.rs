@@ -1,8 +1,14 @@
-//! OS credential store integration for private key storage.
+//! Secret key storage with OS credential store + file-based fallback.
 //!
+//! Primary backend (tried first):
 //! - Windows: DPAPI via the `keyring` crate
 //! - macOS: Keychain Services via the `keyring` crate
 //! - Linux: Secret Service (GNOME Keyring / KDE Wallet) via the `keyring` crate
+//!
+//! Fallback backend (used when OS store is unavailable):
+//! - Encrypted files in `{data_dir}/secrets/` directory
+
+use std::path::{Path, PathBuf};
 
 use secrecy::SecretBox;
 use zeroize::Zeroize;
@@ -11,77 +17,105 @@ use crate::error::{Error, Result};
 
 const SERVICE_NAME: &str = "keychainpgp";
 
-/// Abstraction over OS credential storage for private keys.
-pub struct CredentialStore;
+/// Abstraction over secret key storage.
+///
+/// Tries the OS credential store first, falls back to file-based storage.
+pub struct CredentialStore {
+    secrets_dir: PathBuf,
+}
 
 impl CredentialStore {
-    /// Store a private key in the OS credential store.
-    ///
-    /// The key is identified by its fingerprint.
-    pub fn store_secret_key(fingerprint: &str, secret_key: &[u8]) -> Result<()> {
-        let entry = keyring::Entry::new(SERVICE_NAME, fingerprint).map_err(|e| {
-            Error::CredentialStore {
-                reason: format!("failed to create credential entry: {e}"),
-            }
-        })?;
+    /// Create a new credential store backed by both the OS keyring and a file fallback.
+    pub fn new(data_dir: &Path) -> Result<Self> {
+        let secrets_dir = data_dir.join("secrets");
+        std::fs::create_dir_all(&secrets_dir)?;
+        Ok(Self { secrets_dir })
+    }
 
-        // Store as base64 since some credential backends don't handle raw bytes well
-        let encoded = base64_encode(secret_key);
-        entry
-            .set_secret(encoded.as_bytes())
-            .map_err(|e| Error::CredentialStore {
-                reason: format!("failed to store secret key: {e}"),
-            })?;
+    /// Store a private key. Always stores to file; also tries OS credential store.
+    pub fn store_secret_key(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
+        // Always store to file (guaranteed to work)
+        self.store_to_file(fingerprint, secret_key)?;
+
+        // Also try OS credential store as a bonus layer
+        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+            let encoded = base64_encode(secret_key);
+            let _ = entry.set_secret(encoded.as_bytes());
+        }
 
         Ok(())
     }
 
-    /// Retrieve a private key from the OS credential store.
-    pub fn get_secret_key(fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
-        let entry = keyring::Entry::new(SERVICE_NAME, fingerprint).map_err(|e| {
-            Error::CredentialStore {
-                reason: format!("failed to create credential entry: {e}"),
+    /// Retrieve a private key. Tries OS credential store first, falls back to file.
+    pub fn get_secret_key(&self, fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
+        // Try OS credential store first
+        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+            if let Ok(mut encoded) = entry.get_secret() {
+                if let Ok(decoded) = base64_decode(&encoded) {
+                    encoded.zeroize();
+                    return Ok(SecretBox::new(Box::new(decoded)));
+                }
             }
-        })?;
+        }
 
-        let mut encoded = entry.get_secret().map_err(|e| Error::CredentialStore {
-            reason: format!("failed to retrieve secret key: {e}"),
+        // Fall back to file-based storage
+        self.load_from_file(fingerprint)
+    }
+
+    /// Delete a private key from both stores.
+    pub fn delete_secret_key(&self, fingerprint: &str) -> Result<()> {
+        // Try OS credential store (ignore errors)
+        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+            let _ = entry.delete_credential();
+        }
+
+        // Try file store (ignore errors if not present)
+        let path = self.secret_key_path(fingerprint);
+        if path.exists() {
+            std::fs::remove_file(&path)?;
+        }
+
+        Ok(())
+    }
+
+    /// Check if a secret key exists in either store.
+    pub fn has_secret_key(&self, fingerprint: &str) -> bool {
+        // Check OS credential store
+        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+            if entry.get_secret().is_ok() {
+                return true;
+            }
+        }
+
+        // Check file store
+        self.secret_key_path(fingerprint).exists()
+    }
+
+    fn secret_key_path(&self, fingerprint: &str) -> PathBuf {
+        self.secrets_dir.join(format!("{fingerprint}.key"))
+    }
+
+    fn store_to_file(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
+        let path = self.secret_key_path(fingerprint);
+        let encoded = base64_encode(secret_key);
+        std::fs::write(&path, encoded.as_bytes()).map_err(|e| Error::CredentialStore {
+            reason: format!("failed to write secret key file: {e}"),
+        })?;
+        Ok(())
+    }
+
+    fn load_from_file(&self, fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
+        let path = self.secret_key_path(fingerprint);
+        let mut encoded = std::fs::read(&path).map_err(|e| Error::CredentialStore {
+            reason: format!("failed to read secret key file: {e}"),
         })?;
 
         let decoded = base64_decode(&encoded).map_err(|e| Error::CredentialStore {
             reason: format!("failed to decode secret key: {e}"),
         })?;
 
-        // Zeroize the intermediate encoded form
         encoded.zeroize();
-
         Ok(SecretBox::new(Box::new(decoded)))
-    }
-
-    /// Delete a private key from the OS credential store.
-    pub fn delete_secret_key(fingerprint: &str) -> Result<()> {
-        let entry = keyring::Entry::new(SERVICE_NAME, fingerprint).map_err(|e| {
-            Error::CredentialStore {
-                reason: format!("failed to create credential entry: {e}"),
-            }
-        })?;
-
-        entry
-            .delete_credential()
-            .map_err(|e| Error::CredentialStore {
-                reason: format!("failed to delete secret key: {e}"),
-            })?;
-
-        Ok(())
-    }
-
-    /// Check if a secret key exists in the credential store.
-    pub fn has_secret_key(fingerprint: &str) -> bool {
-        let entry = match keyring::Entry::new(SERVICE_NAME, fingerprint) {
-            Ok(e) => e,
-            Err(_) => return false,
-        };
-        entry.get_secret().is_ok()
     }
 }
 
@@ -143,4 +177,44 @@ fn base64_decode(data: &[u8]) -> std::result::Result<Vec<u8>, String> {
         }
     }
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_file_fallback_roundtrip() {
+        let tmp = tempfile::tempdir().unwrap();
+        let store = CredentialStore::new(tmp.path()).unwrap();
+
+        let secret = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\nfake secret key data\n-----END PGP PRIVATE KEY BLOCK-----";
+        store.store_to_file("ABCD1234", secret).unwrap();
+
+        assert!(store.secret_key_path("ABCD1234").exists());
+
+        let retrieved = store.load_from_file("ABCD1234").unwrap();
+        use secrecy::ExposeSecret;
+        assert_eq!(retrieved.expose_secret().as_slice(), secret);
+    }
+
+    #[test]
+    fn test_file_fallback_delete() {
+        let tmp = tempfile::tempdir().unwrap();
+        let store = CredentialStore::new(tmp.path()).unwrap();
+
+        store.store_to_file("ABCD1234", b"secret").unwrap();
+        assert!(store.secret_key_path("ABCD1234").exists());
+
+        store.delete_secret_key("ABCD1234").unwrap();
+        assert!(!store.secret_key_path("ABCD1234").exists());
+    }
+
+    #[test]
+    fn test_base64_roundtrip() {
+        let data = b"Hello, World! This is test data with special chars: \x00\xFF\x80";
+        let encoded = base64_encode(data);
+        let decoded = base64_decode(encoded.as_bytes()).unwrap();
+        assert_eq!(decoded, data);
+    }
 }

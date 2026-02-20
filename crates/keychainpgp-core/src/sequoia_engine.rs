@@ -7,14 +7,16 @@ use sequoia_openpgp::parse::Parse;
 use sequoia_openpgp::policy::StandardPolicy;
 use sequoia_openpgp::serialize::stream::*;
 use sequoia_openpgp::serialize::Marshal;
-use sequoia_openpgp::types::KeyFlags;
+use sequoia_openpgp::types::{KeyFlags, PublicKeyAlgorithm};
 use sequoia_openpgp::Cert;
 
 use secrecy::ExposeSecret;
 
 use crate::engine::CryptoEngine;
 use crate::error::{Error, Result};
-use crate::types::{Fingerprint, GeneratedKeyPair, KeyAlgorithm, KeyGenOptions};
+use crate::types::{
+    CertInfo, Fingerprint, GeneratedKeyPair, KeyAlgorithm, KeyGenOptions, UserId, VerifyResult,
+};
 
 /// Sequoia-PGP backed implementation of [`CryptoEngine`].
 pub struct SequoiaEngine {
@@ -34,6 +36,50 @@ impl SequoiaEngine {
 impl Default for SequoiaEngine {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// Parse a Sequoia User ID component value into our UserId type.
+fn parse_user_id(uid: &sequoia_openpgp::packet::UserID) -> UserId {
+    // Sequoia gives us the raw User ID string, typically "Name <email>"
+    let raw = String::from_utf8_lossy(uid.value()).to_string();
+
+    // Try to extract email from angle brackets
+    if let (Some(open), Some(close)) = (raw.rfind('<'), raw.rfind('>')) {
+        if open < close {
+            let email = raw[open + 1..close].trim().to_string();
+            let name = raw[..open].trim().to_string();
+            return UserId {
+                name: if name.is_empty() { None } else { Some(name) },
+                email: if email.is_empty() { None } else { Some(email) },
+            };
+        }
+    }
+
+    // If no angle brackets, check if it looks like an email
+    if raw.contains('@') {
+        UserId {
+            name: None,
+            email: Some(raw.trim().to_string()),
+        }
+    } else {
+        UserId {
+            name: Some(raw.trim().to_string()),
+            email: None,
+        }
+    }
+}
+
+/// Map a Sequoia `PublicKeyAlgorithm` to our `KeyAlgorithm`.
+fn map_algorithm(algo: PublicKeyAlgorithm, key_size: Option<usize>) -> KeyAlgorithm {
+    match algo {
+        PublicKeyAlgorithm::EdDSA => KeyAlgorithm::Ed25519,
+        PublicKeyAlgorithm::RSAEncryptSign => {
+            KeyAlgorithm::Rsa(key_size.unwrap_or(4096) as u32)
+        }
+        // ECDH/ECDSA with Curve25519 are part of the Ed25519 suite
+        PublicKeyAlgorithm::ECDH | PublicKeyAlgorithm::ECDSA => KeyAlgorithm::Ed25519,
+        _ => KeyAlgorithm::Ed25519,
     }
 }
 
@@ -237,11 +283,165 @@ impl CryptoEngine for SequoiaEngine {
         Ok(plaintext)
     }
 
-    fn key_fingerprint(&self, public_key: &[u8]) -> Result<String> {
-        let cert = Cert::from_bytes(public_key).map_err(|e| Error::InvalidArmor {
+    fn sign(
+        &self,
+        data: &[u8],
+        secret_key: &[u8],
+        passphrase: Option<&[u8]>,
+    ) -> Result<Vec<u8>> {
+        let cert = Cert::from_bytes(secret_key).map_err(|e| Error::Signing {
+            reason: format!("invalid secret key: {e}"),
+        })?;
+
+        let valid_cert = cert.with_policy(&self.policy, None).map_err(|e| Error::Signing {
+            reason: format!("key policy check failed: {e}"),
+        })?;
+
+        // Find a signing-capable secret key
+        let mut keypair = None;
+
+        // Try unencrypted secret keys first
+        for ka in valid_cert.keys().supported().alive().revoked(false).for_signing().unencrypted_secret() {
+            keypair = Some(ka.key().clone().into_keypair().map_err(|e| Error::Signing {
+                reason: format!("keypair conversion failed: {e}"),
+            })?);
+            break;
+        }
+
+        // Try with passphrase
+        if keypair.is_none() {
+            if let Some(passphrase) = passphrase {
+                let password = sequoia_openpgp::crypto::Password::from(passphrase);
+                for ka in valid_cert.keys().supported().alive().revoked(false).for_signing().secret() {
+                    let key = ka.key().clone();
+                    if let Ok(decrypted) = key.decrypt_secret(&password) {
+                        if let Ok(kp) = decrypted.into_keypair() {
+                            keypair = Some(kp);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        let signer_keypair = keypair.ok_or_else(|| Error::Signing {
+            reason: "no signing-capable secret key found".into(),
+        })?;
+
+        let mut output = Vec::new();
+        {
+            let mut armored_writer =
+                sequoia_openpgp::armor::Writer::new(&mut output, sequoia_openpgp::armor::Kind::Message)
+                    .map_err(|e| Error::Signing {
+                        reason: format!("armor error: {e}"),
+                    })?;
+
+            let message = Message::new(&mut armored_writer);
+            let message = Signer::new(message, signer_keypair)
+                .build()
+                .map_err(|e| Error::Signing {
+                    reason: format!("signer error: {e}"),
+                })?;
+            let mut message = LiteralWriter::new(message)
+                .build()
+                .map_err(|e| Error::Signing {
+                    reason: format!("literal writer error: {e}"),
+                })?;
+
+            message.write_all(data).map_err(|e| Error::Signing {
+                reason: format!("write error: {e}"),
+            })?;
+            message.finalize().map_err(|e| Error::Signing {
+                reason: format!("finalize error: {e}"),
+            })?;
+
+            armored_writer.finalize().map_err(|e| Error::Signing {
+                reason: format!("armor finalize error: {e}"),
+            })?;
+        }
+
+        Ok(output)
+    }
+
+    fn verify(
+        &self,
+        signed_data: &[u8],
+        signer_key: &[u8],
+    ) -> Result<VerifyResult> {
+        let signer_cert = Cert::from_bytes(signer_key).map_err(|e| Error::VerificationFailed {
+            reason: format!("invalid signer key: {e}"),
+        })?;
+
+        let signer_fp = signer_cert.fingerprint().to_hex();
+
+        let helper = VerifyHelper {
+            policy: &self.policy,
+            cert: signer_cert,
+            result: None,
+        };
+
+        let mut verifier = VerifierBuilder::from_bytes(signed_data)
+            .map_err(|e| Error::VerificationFailed {
+                reason: format!("invalid signed data: {e}"),
+            })?
+            .with_policy(&self.policy, None, helper)
+            .map_err(|e| Error::VerificationFailed {
+                reason: format!("verification setup failed: {e}"),
+            })?;
+
+        // Consume the verified content
+        let mut content = Vec::new();
+        std::io::copy(&mut verifier, &mut content).map_err(|e| Error::VerificationFailed {
+            reason: format!("read error: {e}"),
+        })?;
+
+        let helper = verifier.into_helper();
+
+        Ok(helper.result.unwrap_or(VerifyResult {
+            valid: false,
+            signer_fingerprint: Some(signer_fp),
+        }))
+    }
+
+    fn inspect_key(&self, key_data: &[u8]) -> Result<CertInfo> {
+        let cert = Cert::from_bytes(key_data).map_err(|e| Error::InvalidArmor {
             reason: e.to_string(),
         })?;
-        Ok(cert.fingerprint().to_hex())
+
+        let fingerprint = Fingerprint::new(cert.fingerprint().to_hex());
+
+        // Extract User IDs
+        let user_ids: Vec<UserId> = cert.userids().map(|uid| parse_user_id(uid.userid())).collect();
+
+        // Determine algorithm from primary key
+        let pk_algo = cert.primary_key().pk_algo();
+        let key_size = cert.primary_key().mpis().bits();
+        let algorithm = map_algorithm(pk_algo, key_size);
+
+        // Creation time
+        let created_at = {
+            let ct = cert.primary_key().creation_time();
+            chrono::DateTime::<chrono::Utc>::from(ct).to_rfc3339()
+        };
+
+        // Expiration time
+        let expires_at = cert
+            .with_policy(&self.policy, None)
+            .ok()
+            .and_then(|valid_cert| valid_cert.primary_key().key_expiration_time())
+            .map(|et| chrono::DateTime::<chrono::Utc>::from(et).to_rfc3339());
+
+        // Check for secret key material
+        let has_secret_key = cert.is_tsk();
+
+        Ok(CertInfo {
+            fingerprint,
+            user_ids,
+            algorithm,
+            created_at,
+            expires_at,
+            has_secret_key,
+        })
     }
 }
 
@@ -276,9 +476,9 @@ impl DecryptionHelper for DecryptHelper<'_> {
     where
         D: FnMut(sequoia_openpgp::types::SymmetricAlgorithm, &SessionKey) -> bool,
     {
-        // Try unencrypted secret keys first
         let valid_cert = self.cert.with_policy(self.policy, None)?;
 
+        // Try unencrypted secret keys first
         for ka in valid_cert
             .keys()
             .supported()
@@ -333,6 +533,51 @@ impl DecryptionHelper for DecryptHelper<'_> {
     }
 }
 
+/// Helper struct for the Sequoia signature verification streaming API.
+struct VerifyHelper<'a> {
+    #[allow(dead_code)]
+    policy: &'a StandardPolicy<'static>,
+    cert: Cert,
+    result: Option<VerifyResult>,
+}
+
+impl VerificationHelper for VerifyHelper<'_> {
+    fn get_certs(
+        &mut self,
+        _ids: &[sequoia_openpgp::KeyHandle],
+    ) -> sequoia_openpgp::Result<Vec<Cert>> {
+        Ok(vec![self.cert.clone()])
+    }
+
+    fn check(&mut self, structure: MessageStructure) -> sequoia_openpgp::Result<()> {
+        for layer in structure {
+            match layer {
+                MessageLayer::SignatureGroup { results } => {
+                    for result in &results {
+                        match result {
+                            Ok(GoodChecksum { ka, .. }) => {
+                                self.result = Some(VerifyResult {
+                                    valid: true,
+                                    signer_fingerprint: Some(ka.cert().fingerprint().to_hex()),
+                                });
+                                return Ok(());
+                            }
+                            Err(_) => {}
+                        }
+                    }
+                    // No good signature found
+                    self.result = Some(VerifyResult {
+                        valid: false,
+                        signer_fingerprint: Some(self.cert.fingerprint().to_hex()),
+                    });
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -354,11 +599,9 @@ mod tests {
     fn test_encrypt_decrypt_round_trip() {
         let engine = SequoiaEngine::new();
 
-        // Generate recipient key pair
         let options = KeyGenOptions::new(UserId::new("Recipient", "recipient@example.com"));
         let key_pair = engine.generate_key_pair(options).unwrap();
 
-        // Encrypt
         let plaintext = b"Hello, this is a secret message!";
         let ciphertext = engine
             .encrypt(plaintext, &[key_pair.public_key.clone()])
@@ -367,7 +610,6 @@ mod tests {
         assert!(!ciphertext.is_empty());
         assert!(String::from_utf8_lossy(&ciphertext).contains("BEGIN PGP MESSAGE"));
 
-        // Decrypt
         let decrypted = engine
             .decrypt(
                 &ciphertext,
@@ -380,10 +622,133 @@ mod tests {
     }
 
     #[test]
+    fn test_encrypt_multiple_recipients() {
+        let engine = SequoiaEngine::new();
+
+        let kp1 = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Alice", "alice@example.com")))
+            .unwrap();
+        let kp2 = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Bob", "bob@example.com")))
+            .unwrap();
+
+        let plaintext = b"Message for both Alice and Bob";
+        let ciphertext = engine
+            .encrypt(plaintext, &[kp1.public_key.clone(), kp2.public_key.clone()])
+            .unwrap();
+
+        // Both recipients should be able to decrypt
+        let dec1 = engine
+            .decrypt(&ciphertext, kp1.secret_key.expose_secret(), None)
+            .unwrap();
+        assert_eq!(dec1, plaintext);
+
+        let dec2 = engine
+            .decrypt(&ciphertext, kp2.secret_key.expose_secret(), None)
+            .unwrap();
+        assert_eq!(dec2, plaintext);
+    }
+
+    #[test]
     fn test_encrypt_no_recipients_fails() {
         let engine = SequoiaEngine::new();
         let result = engine.encrypt(b"hello", &[]);
         assert!(matches!(result, Err(Error::NoRecipients)));
+    }
+
+    #[test]
+    fn test_decrypt_wrong_key_fails() {
+        let engine = SequoiaEngine::new();
+
+        let sender = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Sender", "sender@example.com")))
+            .unwrap();
+        let wrong = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Wrong", "wrong@example.com")))
+            .unwrap();
+
+        let ciphertext = engine
+            .encrypt(b"secret", &[sender.public_key.clone()])
+            .unwrap();
+
+        let result = engine.decrypt(&ciphertext, wrong.secret_key.expose_secret(), None);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_sign_and_verify() {
+        let engine = SequoiaEngine::new();
+
+        let kp = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Signer", "signer@example.com")))
+            .unwrap();
+
+        let data = b"This message is signed by me.";
+        let signed = engine.sign(data, kp.secret_key.expose_secret(), None).unwrap();
+
+        assert!(!signed.is_empty());
+        assert!(String::from_utf8_lossy(&signed).contains("BEGIN PGP MESSAGE"));
+
+        let result = engine.verify(&signed, &kp.public_key).unwrap();
+        assert!(result.valid);
+        assert!(result.signer_fingerprint.is_some());
+    }
+
+    #[test]
+    fn test_verify_tampered_fails() {
+        let engine = SequoiaEngine::new();
+
+        let kp = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Signer", "signer@example.com")))
+            .unwrap();
+        let wrong = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Other", "other@example.com")))
+            .unwrap();
+
+        let signed = engine.sign(b"authentic", kp.secret_key.expose_secret(), None).unwrap();
+
+        // Verify with the wrong key should show invalid
+        let result = engine.verify(&signed, &wrong.public_key);
+        // This either errors out or returns valid=false
+        match result {
+            Ok(r) => assert!(!r.valid),
+            Err(_) => {} // verification failure is also acceptable
+        }
+    }
+
+    #[test]
+    fn test_inspect_key() {
+        let engine = SequoiaEngine::new();
+
+        let kp = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Alice Johnson", "alice@example.com")))
+            .unwrap();
+
+        // Inspect public key
+        let info = engine.inspect_key(&kp.public_key).unwrap();
+        assert_eq!(info.fingerprint.0, kp.fingerprint.0);
+        assert_eq!(info.name(), Some("Alice Johnson"));
+        assert_eq!(info.email(), Some("alice@example.com"));
+        assert!(!info.has_secret_key);
+        assert!(!info.created_at.is_empty());
+
+        // Inspect secret key
+        let secret_info = engine.inspect_key(kp.secret_key.expose_secret()).unwrap();
+        assert!(secret_info.has_secret_key);
+        assert_eq!(secret_info.fingerprint.0, kp.fingerprint.0);
+    }
+
+    #[test]
+    fn test_inspect_key_extracts_expiration() {
+        let engine = SequoiaEngine::new();
+
+        let kp = engine
+            .generate_key_pair(KeyGenOptions::new(UserId::new("Expiry Test", "exp@test.com")))
+            .unwrap();
+
+        let info = engine.inspect_key(&kp.public_key).unwrap();
+        // Default key gen has 2-year expiration
+        assert!(info.expires_at.is_some());
     }
 
     #[test]
@@ -392,7 +757,7 @@ mod tests {
         let options = KeyGenOptions::new(UserId::new("Test", "test@test.com"));
         let key_pair = engine.generate_key_pair(options).unwrap();
 
-        let fp = engine.key_fingerprint(&key_pair.public_key).unwrap();
-        assert_eq!(fp, key_pair.fingerprint.0);
+        let info = engine.inspect_key(&key_pair.public_key).unwrap();
+        assert_eq!(info.fingerprint.0, key_pair.fingerprint.0);
     }
 }

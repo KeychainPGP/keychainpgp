@@ -15,26 +15,11 @@ pub fn list() -> Result<()> {
     }
 
     for key in &keys {
-        let key_type = if key.is_own_key { "[own]  " } else { "[contact]" };
-        let name = key.name.as_deref().unwrap_or("(no name)");
-        let email = key
-            .email
-            .as_deref()
-            .map(|e| format!(" <{e}>"))
-            .unwrap_or_default();
-        let expires = key
-            .expires_at
-            .as_deref()
-            .map(|e| format!("  expires: {e}"))
-            .unwrap_or_default();
-
-        println!(
-            "{key_type} {name}{email}\n         {}{expires}",
-            &key.fingerprint
-        );
+        print_key_summary(key);
+        println!();
     }
 
-    eprintln!("\n{} key(s) in keyring.", keys.len());
+    eprintln!("{} key(s) in keyring.", keys.len());
     Ok(())
 }
 
@@ -42,23 +27,51 @@ pub fn import(file: &Path) -> Result<()> {
     let data = std::fs::read(file).with_context(|| format!("failed to read {}", file.display()))?;
 
     let engine = SequoiaEngine::new();
-    let fingerprint = engine.key_fingerprint(&data)?;
+    let info = engine.inspect_key(&data)
+        .with_context(|| format!("failed to parse key from {}", file.display()))?;
 
-    let keyring = Keyring::open_default()?;
-    let record = KeyRecord {
-        fingerprint: fingerprint.clone(),
-        name: None,
-        email: None,
-        algorithm: "Unknown".to_string(),
-        created_at: chrono::Utc::now().to_rfc3339(),
-        expires_at: None,
-        trust_level: 1,
-        is_own_key: false,
-        pgp_data: data,
+    let name = info.name().map(String::from);
+    let email = info.email().map(String::from);
+    let display = match (&name, &email) {
+        (Some(n), Some(e)) => format!("{n} <{e}>"),
+        (Some(n), None) => n.clone(),
+        (None, Some(e)) => e.clone(),
+        (None, None) => info.fingerprint.0.clone(),
     };
 
-    keyring.import_public_key(record)?;
-    eprintln!("Key imported: {fingerprint}");
+    if info.has_secret_key {
+        let keyring = Keyring::open_default()?;
+        let record = KeyRecord {
+            fingerprint: info.fingerprint.0.clone(),
+            name,
+            email,
+            algorithm: info.algorithm.to_string(),
+            created_at: info.created_at.clone(),
+            expires_at: info.expires_at.clone(),
+            trust_level: 2, // own key = verified
+            is_own_key: true,
+            pgp_data: data.clone(),
+        };
+        keyring.store_generated_key(record, &data)?;
+        eprintln!("Secret key imported: {display}");
+    } else {
+        let keyring = Keyring::open_default()?;
+        let record = KeyRecord {
+            fingerprint: info.fingerprint.0.clone(),
+            name,
+            email,
+            algorithm: info.algorithm.to_string(),
+            created_at: info.created_at.clone(),
+            expires_at: info.expires_at.clone(),
+            trust_level: 1, // imported = unverified
+            is_own_key: false,
+            pgp_data: data,
+        };
+        keyring.import_public_key(record)?;
+        eprintln!("Public key imported: {display}");
+    }
+
+    eprintln!("Fingerprint: {}", info.fingerprint);
     Ok(())
 }
 
@@ -92,14 +105,40 @@ pub fn search(query: &str) -> Result<()> {
     }
 
     for key in &results {
-        let name = key.name.as_deref().unwrap_or("(no name)");
-        let email = key
-            .email
-            .as_deref()
-            .map(|e| format!(" <{e}>"))
-            .unwrap_or_default();
-        println!("{name}{email}\n  {}", &key.fingerprint);
+        print_key_summary(key);
+        println!();
     }
 
     Ok(())
+}
+
+fn print_key_summary(key: &KeyRecord) {
+    let tag = if key.is_own_key { "sec" } else { "pub" };
+    let name = key.name.as_deref().unwrap_or("(no name)");
+    let email = key
+        .email
+        .as_deref()
+        .map(|e| format!(" <{e}>"))
+        .unwrap_or_default();
+    let trust = match key.trust_level {
+        0 => "[unknown]",
+        1 => "[unverified]",
+        2 => "[verified]",
+        _ => "[?]",
+    };
+    let expires = key
+        .expires_at
+        .as_deref()
+        .map(|e| format!("  expires {}", format_date(e)))
+        .unwrap_or_default();
+
+    println!("{tag}   {:<12} {trust}", key.algorithm);
+    println!("      {}", key.fingerprint);
+    println!("      {name}{email}{expires}");
+}
+
+/// Format an ISO 8601 date to just the date portion for display.
+fn format_date(iso: &str) -> &str {
+    // "2026-02-20T00:00:00+00:00" -> "2026-02-20"
+    iso.split('T').next().unwrap_or(iso)
 }

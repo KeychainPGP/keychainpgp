@@ -52,6 +52,30 @@ enum Commands {
         passphrase: Option<String>,
     },
 
+    /// Sign a message (reads from stdin, writes to stdout)
+    Sign {
+        /// Fingerprint of the signing key (uses first own key if omitted)
+        #[arg(long)]
+        key: Option<String>,
+
+        /// Passphrase for the private key
+        #[arg(long)]
+        passphrase: Option<String>,
+    },
+
+    /// Verify a signed message (reads from stdin, writes content to stdout)
+    Verify {
+        /// Fingerprint or email of the expected signer
+        #[arg(long)]
+        signer: String,
+    },
+
+    /// Inspect a key file and display its metadata
+    Inspect {
+        /// Path to the key file (or - for stdin)
+        file: String,
+    },
+
     /// Key management commands
     Keys {
         #[command(subcommand)]
@@ -113,6 +137,14 @@ fn main() -> anyhow::Result<()> {
         Commands::Encrypt { recipient } => commands::encrypt::run(&recipient)?,
 
         Commands::Decrypt { passphrase } => commands::decrypt::run(passphrase.as_deref())?,
+
+        Commands::Sign { key, passphrase } => {
+            commands::sign::run(key.as_deref(), passphrase.as_deref())?;
+        }
+
+        Commands::Verify { signer } => commands::verify::run(&signer)?,
+
+        Commands::Inspect { file } => commands::inspect::run(&file)?,
 
         Commands::Keys { action } => match action {
             KeysAction::List => commands::keys::list()?,

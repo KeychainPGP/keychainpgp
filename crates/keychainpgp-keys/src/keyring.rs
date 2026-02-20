@@ -11,9 +11,10 @@ use crate::error::{Error, Result};
 use crate::storage::{KeyRecord, KeyStorage};
 
 /// The main keyring interface. Manages both public keys (SQLite) and
-/// private keys (OS credential store).
+/// private keys (OS credential store with file-based fallback).
 pub struct Keyring {
     storage: KeyStorage,
+    credentials: CredentialStore,
     data_dir: PathBuf,
 }
 
@@ -30,8 +31,9 @@ impl Keyring {
 
         let db_path = data_dir.join("keyring.db");
         let storage = KeyStorage::open(&db_path)?;
+        let credentials = CredentialStore::new(&data_dir)?;
 
-        Ok(Self { storage, data_dir })
+        Ok(Self { storage, credentials, data_dir })
     }
 
     /// Open the keyring at a specific directory (for testing).
@@ -39,8 +41,10 @@ impl Keyring {
         std::fs::create_dir_all(data_dir)?;
         let db_path = data_dir.join("keyring.db");
         let storage = KeyStorage::open(&db_path)?;
+        let credentials = CredentialStore::new(data_dir)?;
         Ok(Self {
             storage,
+            credentials,
             data_dir: data_dir.to_path_buf(),
         })
     }
@@ -51,14 +55,14 @@ impl Keyring {
         &self.data_dir
     }
 
-    /// Store a generated key pair (public key in DB, private key in OS credential store).
+    /// Store a generated key pair (public key in DB, private key in credential store).
     pub fn store_generated_key(
         &self,
         record: KeyRecord,
         secret_key: &[u8],
     ) -> Result<()> {
-        // Store private key in OS credential store
-        CredentialStore::store_secret_key(&record.fingerprint, secret_key)?;
+        // Store private key
+        self.credentials.store_secret_key(&record.fingerprint, secret_key)?;
 
         // Store public key in SQLite
         self.storage.insert(&record)?;
@@ -88,20 +92,20 @@ impl Keyring {
 
     /// Delete a key from the keyring (both public and private if present).
     pub fn delete_key(&self, fingerprint: &str) -> Result<bool> {
-        // Try to delete private key from credential store (ignore errors if not present)
-        let _ = CredentialStore::delete_secret_key(fingerprint);
+        // Try to delete private key (ignore errors if not present)
+        let _ = self.credentials.delete_secret_key(fingerprint);
 
         self.storage.delete(fingerprint)
     }
 
-    /// Retrieve the secret key for the given fingerprint from the OS credential store.
+    /// Retrieve the secret key for the given fingerprint.
     pub fn get_secret_key(&self, fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
-        CredentialStore::get_secret_key(fingerprint)
+        self.credentials.get_secret_key(fingerprint)
     }
 
     /// Check if a secret key exists for the given fingerprint.
     pub fn has_secret_key(&self, fingerprint: &str) -> bool {
-        CredentialStore::has_secret_key(fingerprint)
+        self.credentials.has_secret_key(fingerprint)
     }
 
     /// Update the trust level for a key.

@@ -15,6 +15,10 @@ pub fn run(passphrase: Option<&str>) -> Result<()> {
         .read_to_end(&mut ciphertext)
         .context("failed to read from stdin")?;
 
+    if ciphertext.is_empty() {
+        anyhow::bail!("no input data (stdin was empty)");
+    }
+
     // Find own keys and try each
     let own_keys = keyring
         .list_keys()?
@@ -23,7 +27,9 @@ pub fn run(passphrase: Option<&str>) -> Result<()> {
         .collect::<Vec<_>>();
 
     if own_keys.is_empty() {
-        anyhow::bail!("no private keys found in keyring");
+        anyhow::bail!(
+            "no private keys found in keyring; generate one with 'keychainpgp generate' first"
+        );
     }
 
     let passphrase_bytes = passphrase.map(|p| p.as_bytes());
@@ -45,5 +51,8 @@ pub fn run(passphrase: Option<&str>) -> Result<()> {
         }
     }
 
-    anyhow::bail!("no matching private key found for this message")
+    anyhow::bail!(
+        "decryption failed: none of the {} private key(s) in the keyring could decrypt this message",
+        own_keys.len()
+    )
 }

@@ -5,6 +5,8 @@
 //! This crate provides the foundational cryptographic functionality:
 //! - Key generation (Ed25519 signing + X25519 encryption)
 //! - Message encryption and decryption
+//! - Message signing and signature verification
+//! - Key inspection (metadata extraction)
 //! - ASCII armor serialization/deserialization
 //!
 //! All operations are abstracted behind the [`CryptoEngine`] trait,

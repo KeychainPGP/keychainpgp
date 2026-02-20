@@ -138,6 +138,52 @@ impl fmt::Display for TrustLevel {
     }
 }
 
+/// Metadata extracted from a parsed OpenPGP certificate.
+#[derive(Debug, Clone)]
+pub struct CertInfo {
+    /// Primary key fingerprint.
+    pub fingerprint: Fingerprint,
+    /// User IDs bound to this certificate.
+    pub user_ids: Vec<UserId>,
+    /// Primary key algorithm.
+    pub algorithm: KeyAlgorithm,
+    /// Creation time (RFC 3339).
+    pub created_at: String,
+    /// Expiration time (RFC 3339), if any.
+    pub expires_at: Option<String>,
+    /// Whether the certificate contains secret key material.
+    pub has_secret_key: bool,
+}
+
+impl CertInfo {
+    /// Return the primary User ID, if any.
+    #[must_use]
+    pub fn primary_user_id(&self) -> Option<&UserId> {
+        self.user_ids.first()
+    }
+
+    /// Return the primary name, if any.
+    #[must_use]
+    pub fn name(&self) -> Option<&str> {
+        self.user_ids.first().and_then(|u| u.name.as_deref())
+    }
+
+    /// Return the primary email, if any.
+    #[must_use]
+    pub fn email(&self) -> Option<&str> {
+        self.user_ids.first().and_then(|u| u.email.as_deref())
+    }
+}
+
+/// The result of a signature verification.
+#[derive(Debug, Clone)]
+pub struct VerifyResult {
+    /// Whether the signature is valid.
+    pub valid: bool,
+    /// Fingerprint of the signing key, if identified.
+    pub signer_fingerprint: Option<String>,
+}
+
 /// Options for key generation.
 pub struct KeyGenOptions {
     /// The user identity to bind to the key.

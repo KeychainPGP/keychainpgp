@@ -17,14 +17,17 @@ pub fn run(name: &str, email: &str, passphrase: Option<&str>) -> Result<()> {
     eprintln!("Generating key pair for {name} <{email}>...");
     let key_pair = engine.generate_key_pair(options)?;
 
+    // Extract proper metadata from the generated key
+    let info = engine.inspect_key(&key_pair.public_key)?;
+
     let keyring = Keyring::open_default()?;
     let record = KeyRecord {
         fingerprint: key_pair.fingerprint.0.clone(),
         name: Some(name.to_string()),
         email: Some(email.to_string()),
-        algorithm: "Ed25519".to_string(),
-        created_at: chrono::Utc::now().to_rfc3339(),
-        expires_at: None,
+        algorithm: info.algorithm.to_string(),
+        created_at: info.created_at,
+        expires_at: info.expires_at,
         trust_level: 2,
         is_own_key: true,
         pgp_data: key_pair.public_key.clone(),
@@ -34,6 +37,7 @@ pub fn run(name: &str, email: &str, passphrase: Option<&str>) -> Result<()> {
 
     eprintln!("Key generated successfully!");
     eprintln!("Fingerprint: {}", key_pair.fingerprint);
+    eprintln!("Algorithm:   {}", info.algorithm);
 
     Ok(())
 }
