@@ -14,6 +14,7 @@ pub mod error;
 pub mod export;
 pub mod import;
 pub mod keyring;
+pub mod network;
 pub mod storage;
 
 pub use error::{Error, Result};

@@ -17,3 +17,6 @@ pub const DEFAULT_ENCRYPT_HOTKEY: &str = "CmdOrCtrl+Shift+E";
 
 /// Default hotkey binding for decryption.
 pub const DEFAULT_DECRYPT_HOTKEY: &str = "CmdOrCtrl+Shift+D";
+
+/// Default hotkey binding for signing.
+pub const DEFAULT_SIGN_HOTKEY: &str = "CmdOrCtrl+Shift+S";

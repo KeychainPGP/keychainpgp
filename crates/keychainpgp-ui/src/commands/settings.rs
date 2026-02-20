@@ -19,6 +19,10 @@ pub struct Settings {
     pub encrypt_to_self: bool,
     /// UI theme: "light", "dark", or "system".
     pub theme: String,
+    /// Passphrase cache duration in seconds (0 = disabled).
+    pub passphrase_cache_secs: u64,
+    /// Keyserver URL for key discovery.
+    pub keyserver_url: String,
 }
 
 impl Default for Settings {
@@ -30,6 +34,8 @@ impl Default for Settings {
             clipboard_monitoring: true,
             encrypt_to_self: true,
             theme: "system".into(),
+            passphrase_cache_secs: 600,
+            keyserver_url: "https://keys.openpgp.org".into(),
         }
     }
 }

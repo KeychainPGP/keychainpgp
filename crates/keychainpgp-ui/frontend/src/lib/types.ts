@@ -7,7 +7,10 @@ export type ModalType =
   | "key-import"
   | "key-details"
   | "confirm"
-  | "error";
+  | "error"
+  | "verify-result"
+  | "qr-export"
+  | "key-discovery";
 
 export interface ModalProps {
   /** For decrypted-viewer */
@@ -23,6 +26,8 @@ export interface ModalProps {
   suggestion?: string;
   /** For passphrase dialog */
   onSubmit?: (passphrase: string) => void;
+  /** For verify-result modal */
+  verifyResult?: import("$lib/tauri").VerifyResultInfo;
 }
 
 export const TRUST_LABELS: Record<number, string> = {

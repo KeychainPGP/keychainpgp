@@ -876,14 +876,61 @@ No feature is degraded or unavailable when offline.
 - [ ] Passphrase caching with configurable timeout.
 - [ ] Improved key details view (subkeys, capabilities, usage history).
 
-### Phase 3: Mobile Companion (Weeks 21-32)
+### Phase 3: Internationalization (Weeks 21-26)
+
+**Goal:** Full multilingual support with right-to-left (RTL) layout and CJK typographic handling, enabling worldwide adoption.
+
+- [ ] i18n framework integration (`svelte-i18n` or `paraglide-js` for frontend, `rust-i18n` or compile-time approach for Rust error messages).
+- [ ] Extract all user-facing strings from Svelte components into locale files (JSON/YAML).
+- [ ] Extract all Rust-side user-facing strings (error messages, tray menu labels, notifications) into translatable catalogs.
+- [ ] Implement locale detection (OS locale → user preference → fallback to English).
+- [ ] Language selector in Settings with instant preview (no restart required).
+- [ ] **Latin/Western European languages:**
+  - [ ] English (en) — base locale, already complete.
+  - [ ] French (fr).
+  - [ ] German (de).
+  - [ ] Spanish (es).
+  - [ ] Portuguese (pt-BR, pt-PT).
+  - [ ] Italian (it).
+  - [ ] Dutch (nl).
+- [ ] **Cyrillic languages:**
+  - [ ] Russian (ru).
+  - [ ] Ukrainian (uk).
+- [ ] **CJK languages (Chinese, Japanese, Korean):**
+  - [ ] Simplified Chinese (zh-CN).
+  - [ ] Traditional Chinese (zh-TW).
+  - [ ] Japanese (ja).
+  - [ ] Korean (ko).
+  - [ ] CJK font stack configuration (Noto Sans CJK or system fonts).
+  - [ ] Handle CJK text wrapping and line-break rules (CSS `word-break: keep-all` for Korean, `line-break: strict` for Japanese).
+- [ ] **Right-to-left (RTL) languages:**
+  - [ ] Arabic (ar).
+  - [ ] Hebrew (he).
+  - [ ] RTL layout mirroring (CSS `dir="rtl"`, logical properties `margin-inline-start` instead of `margin-left`).
+  - [ ] Bidirectional text handling in clipboard preview and decrypted message viewer.
+- [ ] **Additional languages:**
+  - [ ] Turkish (tr).
+  - [ ] Polish (pl).
+  - [ ] Hindi (hi).
+  - [ ] Thai (th).
+- [ ] Pluralization rules per locale (ICU MessageFormat or equivalent).
+- [ ] Date/time formatting per locale (relative dates like "2 years ago" adapt to language).
+- [ ] Number formatting per locale (fingerprint grouping remains hex-universal).
+- [ ] Keyboard shortcut labels adapt to locale (e.g., `Ctrl` → `Strg` on German layouts).
+- [ ] Accessibility: screen reader announcements respect the active locale (`lang` attribute on root element).
+- [ ] Translation workflow: document contributor translation process, provide template files, CI validation that all keys exist in all locales.
+- [ ] CLI internationalization: `keychainpgp-cli` output messages respect `LANG`/`LC_ALL` environment variables.
+
+**Exit criteria:** A user in any supported locale can install KeychainPGP and use all features entirely in their language, with correct text direction, date formatting, and pluralization.
+
+### Phase 4: Mobile Companion (Weeks 27-38)
 
 - [ ] Android companion app (Kotlin/Rust FFI or Tauri Mobile).
 - [ ] iOS companion app.
 - [ ] Key sync between desktop and mobile (manual export/import or encrypted sync).
 - [ ] QR code key exchange between desktop and mobile.
 
-### Phase 4: Browser & OPSEC (Weeks 33-44)
+### Phase 5: Browser & OPSEC (Weeks 39-50)
 
 - [ ] WASM build of `keychainpgp-core` for browser-based encryption.
 - [ ] Browser extension or standalone web app.
@@ -891,6 +938,38 @@ No feature is degraded or unavailable when offline.
 - [ ] Tor/Lokinet integration for anonymous keyserver access.
 - [ ] Third-party security audit.
 - [ ] v1.0 stable release.
+
+### Phase 6: Support & Donations (Weeks 51+)
+
+- [ ] In-app "Buy Me a Coffee" page accessible from Settings > About.
+- [ ] Display donation wallet addresses with QR codes:
+  - [ ] Bitcoin (BTC) — on-chain + Lightning Network for instant low-fee payments.
+  - [ ] Ethereum (ETH).
+  - [ ] Monero (XMR) — privacy-preserving option for anonymous donations.
+- [ ] No third-party payment processor — direct wallet-to-wallet transfers only.
+- [ ] Donation addresses hardcoded or loaded from a signed configuration file (prevents address-swap attacks).
+- [ ] Static donation page on the project website with the same addresses and QR codes.
+- [ ] Optional "Supporters" section in About panel (opt-in, pseudonymous).
+
+### Phase 7: Landing Page & Web Presence (Weeks 53+)
+
+**Goal:** A public-facing website that presents KeychainPGP, drives downloads, and serves as the trust anchor for the project.
+
+- [ ] Static landing page (Hugo, Astro, or plain HTML) hosted on `keychainpgp.org` (or equivalent).
+- [ ] Hero section: tagline, one-line value proposition, animated product screenshot/mockup, and prominent download buttons (Windows / macOS / Linux).
+- [ ] Features section: 3-4 key selling points with icons (clipboard-first, zero-config, cross-platform, open source).
+- [ ] "How it works" section: 3-step visual walkthrough (Copy → Encrypt → Paste).
+- [ ] Download section: platform-detected auto-suggestion ("It looks like you're on Windows — [Download for Windows]") with manual override for all platforms.
+- [ ] Verification section: GPG signatures and SHA-256 checksums for every release binary.
+- [ ] Documentation hub: links to user guide, FAQ, security model, and contribution guide.
+- [ ] Donation section: BTC / ETH / XMR addresses with QR codes (mirrors in-app Phase 6).
+- [ ] Dark/light theme toggle, responsive design (mobile-friendly).
+- [ ] SEO: Open Graph tags, structured data, sitemap, meta descriptions in all supported languages.
+- [ ] i18n: landing page available in all Phase 3 languages (at minimum EN, FR, DE, ES, RU, ZH-CN, JA, AR).
+- [ ] Privacy-respecting analytics (Plausible, Umami, or self-hosted — no Google Analytics).
+- [ ] Deployment: CI/CD from a `website/` directory in the monorepo or a separate `keychainpgp.github.io` repo, auto-deployed on push.
+
+**Exit criteria:** Visiting `keychainpgp.org` presents a professional, multilingual landing page where any user can understand the product, download the correct installer for their OS, and verify its authenticity.
 
 ---
 

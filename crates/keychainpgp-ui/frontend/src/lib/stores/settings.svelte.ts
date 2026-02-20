@@ -8,6 +8,8 @@ const defaults: Settings = {
   clipboard_monitoring: true,
   encrypt_to_self: true,
   theme: "system",
+  passphrase_cache_secs: 600,
+  keyserver_url: "https://keys.openpgp.org",
 };
 
 let settings: Settings = $state({ ...defaults });

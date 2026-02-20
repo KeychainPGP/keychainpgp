@@ -1,5 +1,5 @@
 import { readClipboard } from "$lib/tauri";
-import { isPgpMessage } from "$lib/utils";
+import { isPgpMessage, isPgpSignedMessage } from "$lib/utils";
 
 let content: string | null = $state(null);
 let pollInterval: ReturnType<typeof setInterval> | null = null;
@@ -9,6 +9,10 @@ export const clipboardStore = {
 
   get isPgpMessage() {
     return content ? isPgpMessage(content) : false;
+  },
+
+  get isSignedMessage() {
+    return content ? isPgpSignedMessage(content) : false;
   },
 
   async refresh() {

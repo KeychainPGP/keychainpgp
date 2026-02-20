@@ -15,7 +15,8 @@ use secrecy::ExposeSecret;
 use crate::engine::CryptoEngine;
 use crate::error::{Error, Result};
 use crate::types::{
-    CertInfo, Fingerprint, GeneratedKeyPair, KeyAlgorithm, KeyGenOptions, UserId, VerifyResult,
+    CertInfo, Fingerprint, GeneratedKeyPair, KeyAlgorithm, KeyCapability, KeyGenOptions,
+    SubkeyInfo, UserId, VerifyResult,
 };
 
 /// Sequoia-PGP backed implementation of [`CryptoEngine`].
@@ -434,6 +435,55 @@ impl CryptoEngine for SequoiaEngine {
         // Check for secret key material
         let has_secret_key = cert.is_tsk();
 
+        // Extract subkey information
+        let subkeys = cert
+            .with_policy(&self.policy, None)
+            .ok()
+            .map(|valid_cert| {
+                valid_cert
+                    .keys()
+                    .subkeys()
+                    .map(|ka| {
+                        let sk_fp = ka.fingerprint().to_hex();
+                        let sk_algo = ka.pk_algo();
+                        let sk_size = ka.mpis().bits();
+                        let sk_algorithm = map_algorithm(sk_algo, sk_size);
+                        let sk_created = {
+                            let ct = ka.creation_time();
+                            chrono::DateTime::<chrono::Utc>::from(ct).to_rfc3339()
+                        };
+                        let sk_expires = ka.key_expiration_time()
+                            .map(|et| chrono::DateTime::<chrono::Utc>::from(et).to_rfc3339());
+
+                        let mut capabilities = Vec::new();
+                        if ka.for_signing() {
+                            capabilities.push(KeyCapability::Sign);
+                        }
+                        if ka.for_transport_encryption() || ka.for_storage_encryption() {
+                            capabilities.push(KeyCapability::Encrypt);
+                        }
+                        if ka.for_certification() {
+                            capabilities.push(KeyCapability::Certify);
+                        }
+                        if ka.for_authentication() {
+                            capabilities.push(KeyCapability::Authenticate);
+                        }
+
+                        let is_revoked = ka.revocation_status() != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow;
+
+                        SubkeyInfo {
+                            fingerprint: sk_fp,
+                            algorithm: sk_algorithm.to_string(),
+                            created_at: sk_created,
+                            expires_at: sk_expires,
+                            capabilities,
+                            is_revoked,
+                        }
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
         Ok(CertInfo {
             fingerprint,
             user_ids,
@@ -441,6 +491,7 @@ impl CryptoEngine for SequoiaEngine {
             created_at,
             expires_at,
             has_secret_key,
+            subkeys,
         })
     }
 }

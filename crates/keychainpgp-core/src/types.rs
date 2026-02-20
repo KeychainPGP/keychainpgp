@@ -138,6 +138,47 @@ impl fmt::Display for TrustLevel {
     }
 }
 
+/// Capability flags for a key or subkey.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyCapability {
+    /// Can create signatures.
+    Sign,
+    /// Can encrypt data.
+    Encrypt,
+    /// Can certify other keys.
+    Certify,
+    /// Can authenticate.
+    Authenticate,
+}
+
+impl fmt::Display for KeyCapability {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Sign => write!(f, "Sign"),
+            Self::Encrypt => write!(f, "Encrypt"),
+            Self::Certify => write!(f, "Certify"),
+            Self::Authenticate => write!(f, "Authenticate"),
+        }
+    }
+}
+
+/// Information about a subkey.
+#[derive(Debug, Clone)]
+pub struct SubkeyInfo {
+    /// Subkey fingerprint.
+    pub fingerprint: String,
+    /// Algorithm used by this subkey.
+    pub algorithm: String,
+    /// Creation time (RFC 3339).
+    pub created_at: String,
+    /// Expiration time (RFC 3339), if any.
+    pub expires_at: Option<String>,
+    /// Capabilities of this subkey.
+    pub capabilities: Vec<KeyCapability>,
+    /// Whether this subkey has been revoked.
+    pub is_revoked: bool,
+}
+
 /// Metadata extracted from a parsed OpenPGP certificate.
 #[derive(Debug, Clone)]
 pub struct CertInfo {
@@ -153,6 +194,8 @@ pub struct CertInfo {
     pub expires_at: Option<String>,
     /// Whether the certificate contains secret key material.
     pub has_secret_key: bool,
+    /// Subkeys.
+    pub subkeys: Vec<SubkeyInfo>,
 }
 
 impl CertInfo {

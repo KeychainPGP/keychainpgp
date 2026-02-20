@@ -9,6 +9,7 @@
 
 mod commands;
 mod hotkeys;
+mod passphrase_cache;
 mod state;
 mod tray;
 
@@ -44,6 +45,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             commands::crypto::encrypt_clipboard,
             commands::crypto::decrypt_clipboard,
+            commands::crypto::sign_clipboard,
+            commands::crypto::verify_clipboard,
+            commands::crypto::clear_passphrase_cache,
             commands::keys::generate_key_pair,
             commands::keys::list_keys,
             commands::keys::import_key,
@@ -51,6 +55,12 @@ fn main() {
             commands::keys::delete_key,
             commands::keys::search_keys,
             commands::keys::inspect_key,
+            commands::keys::set_key_trust,
+            commands::keys::inspect_key_detailed,
+            commands::keys::export_key_qr,
+            commands::keys::wkd_lookup,
+            commands::keys::keyserver_search,
+            commands::keys::keyserver_upload,
             commands::clipboard::read_clipboard,
             commands::clipboard::write_clipboard,
             commands::clipboard::clear_clipboard,

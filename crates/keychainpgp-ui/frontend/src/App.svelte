@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { appStore } from "$lib/stores/app.svelte";
+  import { onMount, onDestroy } from "svelte";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+  import { appStore, type AppAction } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { settingsStore } from "$lib/stores/settings.svelte";
+  import { registerHotkeys, unregisterHotkeys } from "$lib/hotkeys";
 
   import NavBar from "./components/layout/NavBar.svelte";
   import StatusBar from "./components/layout/StatusBar.svelte";
@@ -20,8 +22,12 @@
   import KeyDetailsModal from "./components/modals/KeyDetailsModal.svelte";
   import ErrorDialog from "./components/modals/ErrorDialog.svelte";
   import ConfirmDialog from "./components/modals/ConfirmDialog.svelte";
+  import VerifyResultModal from "./components/modals/VerifyResultModal.svelte";
+  import QrExportModal from "./components/modals/QrExportModal.svelte";
+  import KeyDiscoveryModal from "./components/modals/KeyDiscoveryModal.svelte";
 
   let initialized = $state(false);
+  let unlistenTray: UnlistenFn | null = null;
 
   onMount(async () => {
     await Promise.all([
@@ -29,7 +35,26 @@
       settingsStore.load(),
     ]);
     clipboardStore.startPolling();
+
+    // Register global hotkeys
+    await registerHotkeys({
+      onEncrypt: () => appStore.dispatchAction("encrypt"),
+      onDecrypt: () => appStore.dispatchAction("decrypt"),
+      onSign: () => appStore.dispatchAction("sign"),
+    });
+
+    // Listen for tray menu actions
+    unlistenTray = await listen<string>("tray-action", (event) => {
+      const action = event.payload as AppAction;
+      if (action) appStore.dispatchAction(action);
+    });
+
     initialized = true;
+  });
+
+  onDestroy(() => {
+    unregisterHotkeys();
+    unlistenTray?.();
   });
 
   const showOnboarding = $derived(initialized && !keyStore.hasOwnKey);
@@ -73,5 +98,11 @@
     <ErrorDialog />
   {:else if appStore.activeModal === "confirm"}
     <ConfirmDialog />
+  {:else if appStore.activeModal === "verify-result"}
+    <VerifyResultModal />
+  {:else if appStore.activeModal === "qr-export"}
+    <QrExportModal />
+  {:else if appStore.activeModal === "key-discovery"}
+    <KeyDiscoveryModal />
   {/if}
 </main>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Lock, RefreshCw } from "lucide-svelte";
+  import { Lock, PenLine, RefreshCw } from "lucide-svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { truncate } from "$lib/utils";
 </script>
@@ -12,7 +12,12 @@
       Clipboard
     </span>
     <div class="flex items-center gap-2">
-      {#if clipboardStore.isPgpMessage}
+      {#if clipboardStore.isSignedMessage}
+        <span class="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+          <PenLine size={12} />
+          Signed Message
+        </span>
+      {:else if clipboardStore.isPgpMessage}
         <span class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
           <Lock size={12} />
           PGP Message

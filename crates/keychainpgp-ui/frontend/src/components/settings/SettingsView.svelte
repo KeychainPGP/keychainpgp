@@ -1,8 +1,19 @@
 <script lang="ts">
   import { settingsStore } from "$lib/stores/settings.svelte";
+  import { clearPassphraseCache } from "$lib/tauri";
+  import { appStore } from "$lib/stores/app.svelte";
 
   function toggle(key: "auto_clear_enabled" | "clipboard_monitoring" | "encrypt_to_self" | "auto_clear_after_encrypt") {
     settingsStore.save({ [key]: !settingsStore.settings[key] });
+  }
+
+  async function handleClearCache() {
+    try {
+      await clearPassphraseCache();
+      appStore.setStatus("Passphrase cache cleared.");
+    } catch (e) {
+      appStore.setStatus(`Failed to clear cache: ${e}`);
+    }
   }
 
   function setTheme(theme: string) {
@@ -86,6 +97,53 @@
       </div>
       <input type="checkbox" checked={settingsStore.settings.encrypt_to_self} onchange={() => toggle("encrypt_to_self")}
         class="w-4 h-4 accent-[var(--color-primary)]" />
+    </label>
+  </section>
+
+  <!-- Security -->
+  <section class="space-y-3">
+    <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">Security</h3>
+
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium">Passphrase cache duration</p>
+        <p class="text-xs text-[var(--color-text-secondary)]">Seconds to remember passphrases (0 = disabled)</p>
+      </div>
+      <input
+        type="number"
+        min="0"
+        max="3600"
+        value={settingsStore.settings.passphrase_cache_secs}
+        onchange={(e) => settingsStore.save({ passphrase_cache_secs: parseInt(e.currentTarget.value) || 0 })}
+        class="w-20 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+      />
+    </label>
+
+    <button
+      class="px-4 py-2 text-sm rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+      onclick={handleClearCache}
+    >
+      Clear cached passphrases
+    </button>
+  </section>
+
+  <!-- Key Discovery -->
+  <section class="space-y-3">
+    <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">Key Discovery</h3>
+
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium">Keyserver URL</p>
+        <p class="text-xs text-[var(--color-text-secondary)]">Used for key search and upload</p>
+      </div>
+      <input
+        type="text"
+        value={settingsStore.settings.keyserver_url}
+        onchange={(e) => settingsStore.save({ keyserver_url: e.currentTarget.value || "https://keys.openpgp.org" })}
+        class="w-56 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+      />
     </label>
   </section>
 

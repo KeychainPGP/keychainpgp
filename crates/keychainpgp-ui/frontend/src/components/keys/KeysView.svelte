@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Plus, Upload } from "lucide-svelte";
+  import { Plus, Upload, Search } from "lucide-svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { searchKeys } from "$lib/tauri";
@@ -52,6 +52,15 @@
       >
         <Upload size={16} />
         Import
+      </button>
+      <button
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
+               border border-[var(--color-border)] font-medium
+               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        onclick={() => appStore.openModal("key-discovery")}
+      >
+        <Search size={16} />
+        Discover
       </button>
     </div>
   </div>
