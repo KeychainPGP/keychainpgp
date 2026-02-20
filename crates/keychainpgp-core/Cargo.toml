@@ -1,0 +1,21 @@
+[package]
+name = "keychainpgp-core"
+description = "Core OpenPGP cryptographic operations for KeychainPGP"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+sequoia-openpgp.workspace = true
+zeroize.workspace = true
+subtle.workspace = true
+secrecy.workspace = true
+thiserror.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
+
+[dev-dependencies]
+tempfile.workspace = true
+anyhow.workspace = true

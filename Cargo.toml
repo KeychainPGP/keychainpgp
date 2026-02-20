@@ -1,0 +1,77 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/keychainpgp-core",
+    "crates/keychainpgp-keys",
+    "crates/keychainpgp-clipboard",
+    "crates/keychainpgp-ui",
+    "crates/keychainpgp-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["KeychainPGP Contributors"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/keychainpgp/keychainpgp"
+homepage = "https://github.com/keychainpgp/keychainpgp"
+rust-version = "1.85"
+
+[workspace.dependencies]
+# Internal crates
+keychainpgp-core = { path = "crates/keychainpgp-core" }
+keychainpgp-keys = { path = "crates/keychainpgp-keys" }
+keychainpgp-clipboard = { path = "crates/keychainpgp-clipboard" }
+
+# Crypto
+sequoia-openpgp = { version = "1", default-features = false, features = ["crypto-rust", "allow-experimental-crypto", "allow-variable-time-crypto"] }
+zeroize = { version = "1", features = ["derive"] }
+subtle = "2"
+secrecy = { version = "0.10", features = ["serde"] }
+
+# Storage
+rusqlite = { version = "0.32", features = ["bundled"] }
+keyring = "3"
+directories = "6"
+
+# Clipboard
+arboard = "3"
+
+# Async
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Regex
+regex = "1"
+
+# Testing
+tempfile = "3"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+opt-level = "s"
+panic = "abort"

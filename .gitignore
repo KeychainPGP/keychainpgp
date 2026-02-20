@@ -1,0 +1,31 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (frontend)
+node_modules/
+crates/keychainpgp-ui/frontend/build/
+crates/keychainpgp-ui/frontend/.svelte-kit/
+
+# Environment
+.env
+.env.local
+*.pem
+*.key
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib

@@ -1,0 +1,9 @@
+[build]
+# Uncomment to set a default target:
+# target = "x86_64-unknown-linux-gnu"
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "link-arg=-Wl,-z,relro,-z,now"]
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/DYNAMICBASE", "-C", "link-arg=/NXCOMPAT"]

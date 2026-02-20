@@ -1,0 +1,26 @@
+[package]
+name = "keychainpgp-keys"
+description = "Keyring management for KeychainPGP"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+keychainpgp-core.workspace = true
+rusqlite.workspace = true
+keyring.workspace = true
+directories.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+zeroize.workspace = true
+secrecy.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+
+[dev-dependencies]
+tempfile.workspace = true
+anyhow.workspace = true

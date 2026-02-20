@@ -1,0 +1,24 @@
+[package]
+name = "keychainpgp-cli"
+description = "Command-line interface for KeychainPGP"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "keychainpgp"
+path = "src/main.rs"
+
+[dependencies]
+keychainpgp-core.workspace = true
+keychainpgp-keys.workspace = true
+keychainpgp-clipboard.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+secrecy.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }

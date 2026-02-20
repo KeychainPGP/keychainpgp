@@ -1,0 +1,19 @@
+[package]
+name = "keychainpgp-clipboard"
+description = "Clipboard monitoring and management for KeychainPGP"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+keychainpgp-core.workspace = true
+arboard.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
