@@ -11,7 +11,7 @@ use secrecy::{ExposeSecret, SecretBox};
 use crate::state::AppState;
 
 /// Key information returned to the frontend.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct KeyInfo {
     pub fingerprint: String,
     pub name: Option<String>,
@@ -58,14 +58,19 @@ pub fn generate_key_pair(
         .generate_key_pair(options)
         .map_err(|e| format!("Key generation failed: {e}"))?;
 
+    let info = state
+        .engine
+        .inspect_key(&key_pair.public_key)
+        .map_err(|e| format!("Failed to inspect generated key: {e}"))?;
+
     let record = KeyRecord {
         fingerprint: key_pair.fingerprint.0.clone(),
         name: Some(name),
         email: Some(email),
-        algorithm: "Ed25519".to_string(),
-        created_at: chrono::Utc::now().to_rfc3339(),
-        expires_at: None, // TODO: compute from key
-        trust_level: 2,   // Own key = verified
+        algorithm: info.algorithm.to_string(),
+        created_at: info.created_at,
+        expires_at: info.expires_at,
+        trust_level: 2, // Own key = verified
         is_own_key: true,
         pgp_data: key_pair.public_key.clone(),
     };
@@ -88,33 +93,43 @@ pub fn list_keys(state: State<'_, AppState>) -> Result<Vec<KeyInfo>, String> {
     Ok(keys.into_iter().map(KeyInfo::from).collect())
 }
 
-/// Import a public key from ASCII-armored text.
+/// Import a key from ASCII-armored text.
 #[tauri::command]
 pub fn import_key(
     state: State<'_, AppState>,
     key_data: String,
 ) -> Result<KeyInfo, String> {
-    let fingerprint = state
+    let cert_info = state
         .engine
-        .key_fingerprint(key_data.as_bytes())
+        .inspect_key(key_data.as_bytes())
         .map_err(|e| format!("Invalid key data: {e}"))?;
 
+    let name = cert_info.name().map(String::from);
+    let email = cert_info.email().map(String::from);
+
     let record = KeyRecord {
-        fingerprint,
-        name: None,    // TODO: extract from key User ID
-        email: None,   // TODO: extract from key User ID
-        algorithm: "Unknown".to_string(), // TODO: detect from key
-        created_at: chrono::Utc::now().to_rfc3339(),
-        expires_at: None,
-        trust_level: 1, // Imported = unverified
-        is_own_key: false,
-        pgp_data: key_data.into_bytes(),
+        fingerprint: cert_info.fingerprint.0.clone(),
+        name,
+        email,
+        algorithm: cert_info.algorithm.to_string(),
+        created_at: cert_info.created_at,
+        expires_at: cert_info.expires_at,
+        trust_level: if cert_info.has_secret_key { 2 } else { 1 },
+        is_own_key: cert_info.has_secret_key,
+        pgp_data: key_data.as_bytes().to_vec(),
     };
 
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
-    keyring
-        .import_public_key(record.clone())
-        .map_err(|e| format!("Failed to import key: {e}"))?;
+
+    if cert_info.has_secret_key {
+        keyring
+            .store_generated_key(record.clone(), key_data.as_bytes())
+            .map_err(|e| format!("Failed to import key: {e}"))?;
+    } else {
+        keyring
+            .import_public_key(record.clone())
+            .map_err(|e| format!("Failed to import key: {e}"))?;
+    }
 
     Ok(KeyInfo::from(record))
 }
@@ -157,4 +172,19 @@ pub fn search_keys(
         .search_keys(&query)
         .map_err(|e| format!("Search failed: {e}"))?;
     Ok(keys.into_iter().map(KeyInfo::from).collect())
+}
+
+/// Inspect a key and return detailed metadata.
+#[tauri::command]
+pub fn inspect_key(
+    state: State<'_, AppState>,
+    fingerprint: String,
+) -> Result<KeyInfo, String> {
+    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let record = keyring
+        .get_key(&fingerprint)
+        .map_err(|e| format!("Failed to look up key: {e}"))?
+        .ok_or_else(|| format!("Key not found: {fingerprint}"))?;
+
+    Ok(KeyInfo::from(record))
 }

@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "identifier": "com.keychainpgp.app",
   "build": {
-    "frontendDist": "../frontend/build",
+    "frontendDist": "frontend/build",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "cd ../frontend && npm run dev",
-    "beforeBuildCommand": "cd ../frontend && npm run build"
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
   },
   "app": {
     "withGlobalTauri": true,

@@ -3,7 +3,7 @@
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    App,
+    App, Manager,
 };
 
 /// Set up the system tray icon and menu.

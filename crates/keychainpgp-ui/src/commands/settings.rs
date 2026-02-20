@@ -1,6 +1,8 @@
 //! Tauri commands for application settings.
 
 use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
+use tauri_plugin_store::StoreExt;
 
 /// Application settings exposed to the frontend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,17 +34,32 @@ impl Default for Settings {
     }
 }
 
+const SETTINGS_KEY: &str = "settings";
+
 /// Get the current application settings.
 #[tauri::command]
-pub fn get_settings() -> Settings {
-    // TODO: load from persistent store
-    Settings::default()
+pub fn get_settings(app: AppHandle) -> Settings {
+    let store = match app.store("settings.json") {
+        Ok(s) => s,
+        Err(_) => return Settings::default(),
+    };
+
+    match store.get(SETTINGS_KEY) {
+        Some(val) => serde_json::from_value(val).unwrap_or_default(),
+        None => Settings::default(),
+    }
 }
 
 /// Update application settings.
 #[tauri::command]
-pub fn update_settings(settings: Settings) -> Result<(), String> {
-    // TODO: persist to store
+pub fn update_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
+    let store = app
+        .store("settings.json")
+        .map_err(|e| format!("Failed to open settings store: {e}"))?;
+
+    let val = serde_json::to_value(&settings).map_err(|e| format!("Serialize error: {e}"))?;
+    store.set(SETTINGS_KEY, val);
+
     tracing::info!("settings updated: {settings:?}");
     Ok(())
 }

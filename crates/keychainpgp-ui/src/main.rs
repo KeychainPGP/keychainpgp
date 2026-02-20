@@ -12,6 +12,7 @@ mod hotkeys;
 mod state;
 mod tray;
 
+use tauri::Manager;
 use tracing_subscriber::EnvFilter;
 
 fn main() {
@@ -49,6 +50,7 @@ fn main() {
             commands::keys::export_key,
             commands::keys::delete_key,
             commands::keys::search_keys,
+            commands::keys::inspect_key,
             commands::clipboard::read_clipboard,
             commands::clipboard::write_clipboard,
             commands::clipboard::clear_clipboard,

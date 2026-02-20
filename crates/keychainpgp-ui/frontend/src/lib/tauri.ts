@@ -86,6 +86,10 @@ export async function searchKeys(query: string): Promise<KeyInfo[]> {
   return invoke("search_keys", { query });
 }
 
+export async function inspectKey(fingerprint: string): Promise<KeyInfo> {
+  return invoke("inspect_key", { fingerprint });
+}
+
 // --- Clipboard ---
 
 export async function readClipboard(): Promise<string | null> {

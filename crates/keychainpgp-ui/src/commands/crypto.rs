@@ -1,6 +1,6 @@
 //! Tauri commands for encryption and decryption.
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tauri::State;
 
 use keychainpgp_core::CryptoEngine;

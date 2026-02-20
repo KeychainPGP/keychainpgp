@@ -13,14 +13,24 @@
   --color-border: #e2e8f0;
 }
 
+/* System dark mode (when no data-theme is set, or data-theme="system") */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg: #0f172a;
     --color-bg-secondary: #1e293b;
     --color-text: #f1f5f9;
     --color-text-secondary: #94a3b8;
     --color-border: #334155;
   }
+}
+
+/* Manual dark theme */
+:root[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
 }
 
 body {
