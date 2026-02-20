@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Lock, Unlock, PenLine, ShieldCheck } from "lucide-svelte";
   import ClipboardPreview from "./ClipboardPreview.svelte";
+  import Kbd from "../shared/Kbd.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
@@ -151,7 +152,7 @@
     >
       <Lock size={20} />
       ENCRYPT
-      <span class="text-xs font-normal opacity-75">Ctrl+Shift+E</span>
+      <Kbd keys={["Ctrl", "Shift", "E"]} variant="light" />
     </button>
     <button
       class="py-4 rounded-lg bg-[var(--color-primary)] text-white font-semibold
@@ -161,7 +162,7 @@
     >
       <Unlock size={20} />
       DECRYPT
-      <span class="text-xs font-normal opacity-75">Ctrl+Shift+D</span>
+      <Kbd keys={["Ctrl", "Shift", "D"]} variant="light" />
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -171,7 +172,7 @@
     >
       <PenLine size={20} />
       SIGN
-      <span class="text-xs font-normal opacity-75">Ctrl+Shift+S</span>
+      <Kbd keys={["Ctrl", "Shift", "S"]} />
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -181,7 +182,7 @@
     >
       <ShieldCheck size={20} />
       VERIFY
-      <span class="text-xs font-normal opacity-75">Ctrl+Shift+V</span>
+      <Kbd keys={["Ctrl", "Shift", "V"]} />
     </button>
   </div>
 </div>
