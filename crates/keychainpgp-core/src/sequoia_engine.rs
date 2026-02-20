@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use sequoia_openpgp::cert::prelude::*;
 use sequoia_openpgp::crypto::SessionKey;
@@ -22,6 +23,7 @@ use crate::types::{
 /// Sequoia-PGP backed implementation of [`CryptoEngine`].
 pub struct SequoiaEngine {
     policy: StandardPolicy<'static>,
+    include_armor_headers: AtomicBool,
 }
 
 impl SequoiaEngine {
@@ -30,6 +32,29 @@ impl SequoiaEngine {
     pub fn new() -> Self {
         Self {
             policy: StandardPolicy::new(),
+            include_armor_headers: AtomicBool::new(true),
+        }
+    }
+
+    /// Enable or disable promotional armor headers (Comment, Version) in PGP output.
+    pub fn set_include_armor_headers(&self, enabled: bool) {
+        self.include_armor_headers.store(enabled, Ordering::Relaxed);
+    }
+
+    /// Create an armor writer, optionally including promotional headers.
+    fn armor_writer<'a, W: Write + Send + Sync + 'a>(
+        &self,
+        output: &'a mut W,
+        kind: sequoia_openpgp::armor::Kind,
+    ) -> std::result::Result<sequoia_openpgp::armor::Writer<&'a mut W>, std::io::Error> {
+        if self.include_armor_headers.load(Ordering::Relaxed) {
+            let headers = vec![
+                ("Version", "KeychainPGP 0.1.0"),
+                ("Comment", "https://keychainpgp.com"),
+            ];
+            sequoia_openpgp::armor::Writer::with_headers(output, kind, headers)
+        } else {
+            sequoia_openpgp::armor::Writer::new(output, kind)
         }
     }
 }
@@ -135,7 +160,7 @@ impl CryptoEngine for SequoiaEngine {
         let mut public_key = Vec::new();
         {
             let mut writer =
-                sequoia_openpgp::armor::Writer::new(&mut public_key, sequoia_openpgp::armor::Kind::PublicKey)
+                self.armor_writer(&mut public_key, sequoia_openpgp::armor::Kind::PublicKey)
                     .map_err(|e| Error::KeyGeneration {
                         reason: format!("armor error: {e}"),
                     })?;
@@ -150,7 +175,7 @@ impl CryptoEngine for SequoiaEngine {
         // Serialize secret key
         let mut secret_key_bytes = Vec::new();
         {
-            let mut writer = sequoia_openpgp::armor::Writer::new(
+            let mut writer = self.armor_writer(
                 &mut secret_key_bytes,
                 sequoia_openpgp::armor::Kind::SecretKey,
             )
@@ -219,7 +244,7 @@ impl CryptoEngine for SequoiaEngine {
         let mut output = Vec::new();
         {
             let mut armored_writer =
-                sequoia_openpgp::armor::Writer::new(&mut output, sequoia_openpgp::armor::Kind::Message)
+                self.armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
                     .map_err(|e| Error::Encryption {
                         reason: format!("armor error: {e}"),
                     })?;
@@ -332,7 +357,7 @@ impl CryptoEngine for SequoiaEngine {
         let mut output = Vec::new();
         {
             let mut armored_writer =
-                sequoia_openpgp::armor::Writer::new(&mut output, sequoia_openpgp::armor::Kind::Message)
+                self.armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
                     .map_err(|e| Error::Signing {
                         reason: format!("armor error: {e}"),
                     })?;

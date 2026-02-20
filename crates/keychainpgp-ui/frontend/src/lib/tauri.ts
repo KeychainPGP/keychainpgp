@@ -77,6 +77,7 @@ export interface Settings {
   theme: string;
   passphrase_cache_secs: number;
   keyserver_url: string;
+  include_armor_headers: boolean;
 }
 
 // --- Crypto ---

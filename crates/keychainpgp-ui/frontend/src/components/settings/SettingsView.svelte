@@ -3,7 +3,7 @@
   import { clearPassphraseCache } from "$lib/tauri";
   import { appStore } from "$lib/stores/app.svelte";
 
-  function toggle(key: "auto_clear_enabled" | "clipboard_monitoring" | "encrypt_to_self" | "auto_clear_after_encrypt") {
+  function toggle(key: "auto_clear_enabled" | "clipboard_monitoring" | "encrypt_to_self" | "auto_clear_after_encrypt" | "include_armor_headers") {
     settingsStore.save({ [key]: !settingsStore.settings[key] });
   }
 
@@ -96,6 +96,15 @@
         <p class="text-xs text-[var(--color-text-secondary)]">Always include your own key as a recipient</p>
       </div>
       <input type="checkbox" checked={settingsStore.settings.encrypt_to_self} onchange={() => toggle("encrypt_to_self")}
+        class="w-4 h-4 accent-[var(--color-primary)]" />
+    </label>
+
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium">Include armor headers</p>
+        <p class="text-xs text-[var(--color-text-secondary)]">Add Version and Comment metadata to PGP output</p>
+      </div>
+      <input type="checkbox" checked={settingsStore.settings.include_armor_headers} onchange={() => toggle("include_armor_headers")}
         class="w-4 h-4 accent-[var(--color-primary)]" />
     </label>
   </section>

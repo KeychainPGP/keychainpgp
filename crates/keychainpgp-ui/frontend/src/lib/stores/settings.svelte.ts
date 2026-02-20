@@ -10,6 +10,7 @@ const defaults: Settings = {
   theme: "system",
   passphrase_cache_secs: 600,
   keyserver_url: "https://keys.openpgp.org",
+  include_armor_headers: true,
 };
 
 let settings: Settings = $state({ ...defaults });

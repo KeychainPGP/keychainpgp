@@ -1,8 +1,10 @@
 //! Tauri commands for application settings.
 
 use serde::{Deserialize, Serialize};
-use tauri::AppHandle;
+use tauri::{AppHandle, State};
 use tauri_plugin_store::StoreExt;
+
+use crate::state::AppState;
 
 /// Application settings exposed to the frontend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,7 +25,12 @@ pub struct Settings {
     pub passphrase_cache_secs: u64,
     /// Keyserver URL for key discovery.
     pub keyserver_url: String,
+    /// Include armor headers (Version, Comment) in PGP output.
+    #[serde(default = "default_true")]
+    pub include_armor_headers: bool,
 }
+
+fn default_true() -> bool { true }
 
 impl Default for Settings {
     fn default() -> Self {
@@ -36,6 +43,7 @@ impl Default for Settings {
             theme: "system".into(),
             passphrase_cache_secs: 600,
             keyserver_url: "https://keys.openpgp.org".into(),
+            include_armor_headers: true,
         }
     }
 }
@@ -58,7 +66,14 @@ pub fn get_settings(app: AppHandle) -> Settings {
 
 /// Update application settings.
 #[tauri::command]
-pub fn update_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
+pub fn update_settings(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    settings: Settings,
+) -> Result<(), String> {
+    // Sync armor header setting to the engine
+    state.engine.set_include_armor_headers(settings.include_armor_headers);
+
     let store = app
         .store("settings.json")
         .map_err(|e| format!("Failed to open settings store: {e}"))?;
