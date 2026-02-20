@@ -7,6 +7,7 @@ export interface HotkeyHandlers {
   onEncrypt: () => void;
   onDecrypt: () => void;
   onSign: () => void;
+  onVerify: () => void;
 }
 
 export async function registerHotkeys(handlers: HotkeyHandlers) {
@@ -19,6 +20,9 @@ export async function registerHotkeys(handlers: HotkeyHandlers) {
     });
     await register("CmdOrCtrl+Shift+S", (event) => {
       if (event.state === "Pressed") handlers.onSign();
+    });
+    await register("CmdOrCtrl+Shift+V", (event) => {
+      if (event.state === "Pressed") handlers.onVerify();
     });
   } catch (e) {
     console.warn("Failed to register global hotkeys:", e);

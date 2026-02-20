@@ -181,6 +181,7 @@
     >
       <ShieldCheck size={20} />
       VERIFY
+      <span class="text-xs font-normal opacity-75">Ctrl+Shift+V</span>
     </button>
   </div>
 </div>

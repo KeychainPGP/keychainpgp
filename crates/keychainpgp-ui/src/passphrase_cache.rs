@@ -59,10 +59,6 @@ impl PassphraseCache {
         self.entries.clear();
     }
 
-    /// Update the TTL for the cache.
-    pub fn set_ttl(&mut self, ttl_secs: u64) {
-        self.ttl = Duration::from_secs(ttl_secs);
-    }
 }
 
 impl Drop for PassphraseCache {

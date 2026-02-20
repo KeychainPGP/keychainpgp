@@ -8,7 +8,6 @@
 )]
 
 mod commands;
-mod hotkeys;
 mod passphrase_cache;
 mod state;
 mod tray;

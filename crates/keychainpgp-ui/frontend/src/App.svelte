@@ -41,6 +41,7 @@
       onEncrypt: () => appStore.dispatchAction("encrypt"),
       onDecrypt: () => appStore.dispatchAction("decrypt"),
       onSign: () => appStore.dispatchAction("sign"),
+      onVerify: () => appStore.dispatchAction("verify"),
     });
 
     // Listen for tray menu actions
