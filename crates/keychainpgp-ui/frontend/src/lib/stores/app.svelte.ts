@@ -1,4 +1,4 @@
-import type { View, ModalType, ModalProps } from "$lib/types";
+import type { View, ModalType, ModalProps, InputMode } from "$lib/types";
 
 export type AppAction = "encrypt" | "decrypt" | "sign" | "verify" | null;
 
@@ -8,6 +8,8 @@ let modalProps: ModalProps = $state({});
 let statusMessage: string = $state("Ready");
 let statusTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingAction: AppAction = $state(null);
+let inputMode: InputMode = $state("clipboard");
+let composeText: string = $state("");
 
 export const appStore = {
   get currentView() { return currentView; },
@@ -19,6 +21,12 @@ export const appStore = {
   get statusMessage() { return statusMessage; },
 
   get pendingAction() { return pendingAction; },
+
+  get inputMode() { return inputMode; },
+  set inputMode(v: InputMode) { inputMode = v; },
+
+  get composeText() { return composeText; },
+  set composeText(v: string) { composeText = v; },
 
   openModal(type: ModalType, props: ModalProps = {}) {
     activeModal = type;

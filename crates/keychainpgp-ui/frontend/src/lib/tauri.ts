@@ -91,10 +91,24 @@ export async function encryptClipboard(
   });
 }
 
+export async function encryptText(
+  text: string,
+  recipientFingerprints: string[]
+): Promise<EncryptResult> {
+  return invoke("encrypt_text", { text, recipientFingerprints });
+}
+
 export async function decryptClipboard(
   passphrase?: string
 ): Promise<DecryptResult> {
   return invoke("decrypt_clipboard", { passphrase: passphrase ?? null });
+}
+
+export async function decryptText(
+  text: string,
+  passphrase?: string
+): Promise<DecryptResult> {
+  return invoke("decrypt_text", { text, passphrase: passphrase ?? null });
 }
 
 export async function signClipboard(
@@ -103,8 +117,19 @@ export async function signClipboard(
   return invoke("sign_clipboard", { passphrase: passphrase ?? null });
 }
 
+export async function signText(
+  text: string,
+  passphrase?: string
+): Promise<SignResult> {
+  return invoke("sign_text", { text, passphrase: passphrase ?? null });
+}
+
 export async function verifyClipboard(): Promise<VerifyResultInfo> {
   return invoke("verify_clipboard");
+}
+
+export async function verifyText(text: string): Promise<VerifyResultInfo> {
+  return invoke("verify_text", { text });
 }
 
 // --- Keys ---

@@ -1,4 +1,5 @@
 export type View = "home" | "keys" | "settings";
+export type InputMode = "clipboard" | "compose";
 
 export type ModalType =
   | "recipient-selector"
@@ -28,6 +29,8 @@ export interface ModalProps {
   onSubmit?: (passphrase: string) => void;
   /** For verify-result modal */
   verifyResult?: import("$lib/tauri").VerifyResultInfo;
+  /** For recipient-selector: text to encrypt (compose mode) */
+  text?: string;
 }
 
 export const TRUST_LABELS: Record<number, string> = {

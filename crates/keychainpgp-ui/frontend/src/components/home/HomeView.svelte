@@ -1,11 +1,26 @@
 <script lang="ts">
-  import { Lock, Unlock, PenLine, ShieldCheck } from "lucide-svelte";
+  import { Lock, Unlock, PenLine, ShieldCheck, Clipboard, MessageSquare } from "lucide-svelte";
   import ClipboardPreview from "./ClipboardPreview.svelte";
+  import ComposeInput from "./ComposeInput.svelte";
   import Kbd from "../shared/Kbd.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
-  import { decryptClipboard, signClipboard, verifyClipboard } from "$lib/tauri";
+  import { isPgpMessage } from "$lib/utils";
+  import {
+    decryptClipboard, signClipboard, verifyClipboard,
+    decryptText, signText, verifyText, writeClipboard,
+  } from "$lib/tauri";
+
+  let isCompose = $derived(appStore.inputMode === "compose");
+
+  /** Get the active text content depending on input mode. */
+  function getContent(): string | null {
+    if (isCompose) {
+      return appStore.composeText || null;
+    }
+    return clipboardStore.content;
+  }
 
   // React to external actions (hotkeys, tray)
   $effect(() => {
@@ -21,29 +36,35 @@
   });
 
   function handleEncrypt() {
-    if (!clipboardStore.content) {
-      appStore.setStatus("Clipboard is empty. Copy some text first.");
+    const content = getContent();
+    if (!content) {
+      appStore.setStatus(isCompose ? "Compose field is empty. Type a message first." : "Clipboard is empty. Copy some text first.");
       return;
     }
     if (keyStore.keys.length === 0) {
       appStore.setStatus("No keys available. Generate or import a key first.");
       return;
     }
-    appStore.openModal("recipient-selector");
+    if (isCompose) {
+      appStore.openModal("recipient-selector", { text: content });
+    } else {
+      appStore.openModal("recipient-selector");
+    }
   }
 
   async function handleDecrypt() {
-    if (!clipboardStore.content) {
-      appStore.setStatus("Clipboard is empty. Copy an encrypted message first.");
+    const content = getContent();
+    if (!content) {
+      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy an encrypted message first.");
       return;
     }
-    if (!clipboardStore.isPgpMessage) {
-      appStore.setStatus("Clipboard doesn't contain a PGP message.");
+    if (!isPgpMessage(content)) {
+      appStore.setStatus("No PGP message detected.");
       return;
     }
     appStore.setStatus("Decrypting...", 0);
     try {
-      const result = await decryptClipboard();
+      const result = isCompose ? await decryptText(content) : await decryptClipboard();
       if (result.success) {
         appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
         appStore.setStatus("Decrypted successfully.");
@@ -56,7 +77,7 @@
         appStore.openModal("passphrase", {
           onSubmit: async (passphrase: string) => {
             try {
-              const result = await decryptClipboard(passphrase);
+              const result = isCompose ? await decryptText(content, passphrase) : await decryptClipboard(passphrase);
               if (result.success) {
                 appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
                 appStore.setStatus("Decrypted successfully.");
@@ -75,8 +96,9 @@
   }
 
   async function handleSign() {
-    if (!clipboardStore.content) {
-      appStore.setStatus("Clipboard is empty. Copy some text first.");
+    const content = getContent();
+    if (!content) {
+      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy some text first.");
       return;
     }
     if (!keyStore.hasOwnKey) {
@@ -84,28 +106,38 @@
       return;
     }
     appStore.setStatus("Signing...", 0);
-    try {
-      const result = await signClipboard();
-      if (result.success) {
-        appStore.setStatus(result.message);
-        clipboardStore.refresh();
+
+    async function doSign(passphrase?: string) {
+      if (isCompose) {
+        const result = await signText(content, passphrase);
+        if (result.success) {
+          appStore.composeText = result.message;
+          appStore.setStatus("Message signed.");
+          appStore.closeModal();
+        } else {
+          appStore.openModal("error", { error: result.message });
+        }
       } else {
-        appStore.setStatus(result.message);
+        const result = await signClipboard(passphrase);
+        if (result.success) {
+          appStore.setStatus(result.message);
+          appStore.closeModal();
+          clipboardStore.refresh();
+        } else {
+          appStore.openModal("error", { error: result.message });
+        }
       }
+    }
+
+    try {
+      await doSign();
     } catch (e) {
       const msg = String(e);
       if (msg.includes("passphrase")) {
         appStore.openModal("passphrase", {
           onSubmit: async (passphrase: string) => {
             try {
-              const result = await signClipboard(passphrase);
-              if (result.success) {
-                appStore.setStatus(result.message);
-                appStore.closeModal();
-                clipboardStore.refresh();
-              } else {
-                appStore.openModal("error", { error: result.message });
-              }
+              await doSign(passphrase);
             } catch (e2) {
               appStore.openModal("error", { error: String(e2) });
             }
@@ -118,13 +150,14 @@
   }
 
   async function handleVerify() {
-    if (!clipboardStore.content) {
-      appStore.setStatus("Clipboard is empty. Copy a signed message first.");
+    const content = getContent();
+    if (!content) {
+      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy a signed message first.");
       return;
     }
     appStore.setStatus("Verifying...", 0);
     try {
-      const result = await verifyClipboard();
+      const result = isCompose ? await verifyText(content) : await verifyClipboard();
       appStore.openModal("verify-result", { verifyResult: result });
       appStore.setStatus(result.valid ? "Signature verified." : "Verification failed.");
     } catch (e) {
@@ -137,11 +170,39 @@
   <div class="text-center space-y-2">
     <h1 class="text-2xl font-bold">KeychainPGP</h1>
     <p class="text-[var(--color-text-secondary)]">
-      Copy text, then choose an action below.
+      {isCompose ? "Type your message, then choose an action below." : "Copy text, then choose an action below."}
     </p>
   </div>
 
-  <ClipboardPreview />
+  <!-- Input mode toggle -->
+  <div class="flex justify-center">
+    <div class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5">
+      <button
+        class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+        class:bg-[var(--color-primary)]={!isCompose}
+        class:text-white={!isCompose}
+        onclick={() => appStore.inputMode = "clipboard"}
+      >
+        <Clipboard size={14} />
+        Clipboard
+      </button>
+      <button
+        class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+        class:bg-[var(--color-primary)]={isCompose}
+        class:text-white={isCompose}
+        onclick={() => appStore.inputMode = "compose"}
+      >
+        <MessageSquare size={14} />
+        Compose
+      </button>
+    </div>
+  </div>
+
+  {#if isCompose}
+    <ComposeInput />
+  {:else}
+    <ClipboardPreview />
+  {/if}
 
   <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
     <button

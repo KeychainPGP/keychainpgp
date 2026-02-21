@@ -26,22 +26,16 @@ pub struct DecryptResult {
     pub message: String,
 }
 
-/// Encrypt the current clipboard content for the given recipients.
-#[tauri::command]
-pub fn encrypt_clipboard(
-    state: State<'_, AppState>,
-    recipient_fingerprints: Vec<String>,
-) -> Result<EncryptResult, String> {
-    // Read clipboard
-    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
-        .map_err(|e| format!("Your clipboard is empty. Copy some text first, then try again. ({e})"))?
-        .ok_or_else(|| "Your clipboard is empty. Copy some text first, then try again.".to_string())?;
-
-    // Look up recipient public keys
+/// Shared encrypt logic: encrypt plaintext for given recipients, return armored ciphertext.
+fn encrypt_impl(
+    state: &AppState,
+    plaintext: &str,
+    recipient_fingerprints: &[String],
+) -> Result<String, String> {
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
 
     let mut recipient_keys = Vec::new();
-    for fp in &recipient_fingerprints {
+    for fp in recipient_fingerprints {
         let record = keyring
             .get_key(fp)
             .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -51,15 +45,26 @@ pub fn encrypt_clipboard(
 
     drop(keyring);
 
-    // Encrypt
     let ciphertext = state
         .engine
-        .encrypt(clipboard_text.as_bytes(), &recipient_keys)
+        .encrypt(plaintext.as_bytes(), &recipient_keys)
         .map_err(|e| format!("Encryption failed: {e}"))?;
 
-    // Write ciphertext to clipboard
-    let armored = String::from_utf8(ciphertext)
-        .map_err(|_| "Internal error: encrypted output is not valid text".to_string())?;
+    String::from_utf8(ciphertext)
+        .map_err(|_| "Internal error: encrypted output is not valid text".to_string())
+}
+
+/// Encrypt the current clipboard content for the given recipients.
+#[tauri::command]
+pub fn encrypt_clipboard(
+    state: State<'_, AppState>,
+    recipient_fingerprints: Vec<String>,
+) -> Result<EncryptResult, String> {
+    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
+        .map_err(|e| format!("Your clipboard is empty. Copy some text first, then try again. ({e})"))?
+        .ok_or_else(|| "Your clipboard is empty. Copy some text first, then try again.".to_string())?;
+
+    let armored = encrypt_impl(&state, &clipboard_text, &recipient_fingerprints)?;
 
     keychainpgp_clipboard::monitor::write_clipboard_text(&armored)
         .map_err(|e| format!("Failed to write to clipboard: {e}"))?;
@@ -70,26 +75,35 @@ pub fn encrypt_clipboard(
     })
 }
 
-/// Decrypt the current clipboard content.
+/// Encrypt a given text for the given recipients (does not touch clipboard).
 #[tauri::command]
-pub fn decrypt_clipboard(
+pub fn encrypt_text(
     state: State<'_, AppState>,
-    passphrase: Option<String>,
-) -> Result<DecryptResult, String> {
-    // Read clipboard
-    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
-        .map_err(|e| format!("Could not read clipboard: {e}"))?
-        .ok_or_else(|| "Your clipboard is empty. Copy an encrypted message first.".to_string())?;
+    text: String,
+    recipient_fingerprints: Vec<String>,
+) -> Result<EncryptResult, String> {
+    let armored = encrypt_impl(&state, &text, &recipient_fingerprints)?;
 
-    if !keychainpgp_clipboard::detect::is_encrypted_message(&clipboard_text) {
+    Ok(EncryptResult {
+        success: true,
+        message: armored,
+    })
+}
+
+/// Shared decrypt logic: decrypt ciphertext, return plaintext.
+fn decrypt_impl(
+    state: &AppState,
+    ciphertext: &str,
+    passphrase: Option<&str>,
+) -> Result<DecryptResult, String> {
+    if !keychainpgp_clipboard::detect::is_encrypted_message(ciphertext) {
         return Err(
-            "The clipboard doesn't contain a valid encrypted message. \
-             Make sure you copied the entire message, including the BEGIN and END lines."
+            "The text doesn't contain a valid encrypted message. \
+             Make sure you have the entire message, including the BEGIN and END lines."
                 .into(),
         );
     }
 
-    // Find a matching secret key
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
     let own_keys = keyring
         .list_keys()
@@ -104,31 +118,28 @@ pub fn decrypt_clipboard(
         );
     }
 
-    // Try each own key
     for key_record in &own_keys {
         let secret_key = match keyring.get_secret_key(&key_record.fingerprint) {
             Ok(sk) => sk,
             Err(_) => continue,
         };
 
-        // Check passphrase cache if no explicit passphrase provided
         let cached = if passphrase.is_none() {
             state.passphrase_cache.lock().ok()
                 .and_then(|c| c.get(&key_record.fingerprint).map(|b| b.to_vec()))
         } else {
             None
         };
-        let pp = passphrase.as_deref().map(|p| p.as_bytes())
+        let pp = passphrase.map(|p| p.as_bytes())
             .or(cached.as_deref());
 
         match state.engine.decrypt(
-            clipboard_text.as_bytes(),
+            ciphertext.as_bytes(),
             secret_key.expose_secret(),
             pp,
         ) {
             Ok(plaintext) => {
-                // Cache the passphrase on success
-                if let Some(ref p) = passphrase {
+                if let Some(p) = passphrase {
                     if let Ok(mut cache) = state.passphrase_cache.lock() {
                         cache.store(&key_record.fingerprint, p.as_bytes());
                     }
@@ -151,6 +162,29 @@ pub fn decrypt_clipboard(
     )
 }
 
+/// Decrypt the current clipboard content.
+#[tauri::command]
+pub fn decrypt_clipboard(
+    state: State<'_, AppState>,
+    passphrase: Option<String>,
+) -> Result<DecryptResult, String> {
+    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
+        .map_err(|e| format!("Could not read clipboard: {e}"))?
+        .ok_or_else(|| "Your clipboard is empty. Copy an encrypted message first.".to_string())?;
+
+    decrypt_impl(&state, &clipboard_text, passphrase.as_deref())
+}
+
+/// Decrypt a given text (does not touch clipboard).
+#[tauri::command]
+pub fn decrypt_text(
+    state: State<'_, AppState>,
+    text: String,
+    passphrase: Option<String>,
+) -> Result<DecryptResult, String> {
+    decrypt_impl(&state, &text, passphrase.as_deref())
+}
+
 #[derive(Debug, Serialize)]
 pub struct SignResult {
     pub success: bool,
@@ -167,16 +201,12 @@ pub struct VerifyResultInfo {
     pub message: String,
 }
 
-/// Sign the current clipboard content with the user's private key.
-#[tauri::command]
-pub fn sign_clipboard(
-    state: State<'_, AppState>,
-    passphrase: Option<String>,
-) -> Result<SignResult, String> {
-    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
-        .map_err(|e| format!("Could not read clipboard: {e}"))?
-        .ok_or_else(|| "Your clipboard is empty. Copy some text first.".to_string())?;
-
+/// Shared sign logic: sign plaintext, return armored signed text.
+fn sign_impl(
+    state: &AppState,
+    plaintext: &str,
+    passphrase: Option<&str>,
+) -> Result<String, String> {
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
     let own_keys = keyring
         .list_keys()
@@ -195,39 +225,29 @@ pub fn sign_clipboard(
             Err(_) => continue,
         };
 
-        // Check passphrase cache if no explicit passphrase provided
         let cached = if passphrase.is_none() {
             state.passphrase_cache.lock().ok()
                 .and_then(|c| c.get(&key_record.fingerprint).map(|b| b.to_vec()))
         } else {
             None
         };
-        let pp = passphrase.as_deref().map(|p| p.as_bytes())
+        let pp = passphrase.map(|p| p.as_bytes())
             .or(cached.as_deref());
 
         match state.engine.sign(
-            clipboard_text.as_bytes(),
+            plaintext.as_bytes(),
             secret_key.expose_secret(),
             pp,
         ) {
             Ok(signed_data) => {
-                // Cache the passphrase on success
-                if let Some(ref p) = passphrase {
+                if let Some(p) = passphrase {
                     if let Ok(mut cache) = state.passphrase_cache.lock() {
                         cache.store(&key_record.fingerprint, p.as_bytes());
                     }
                 }
 
-                let signed_text = String::from_utf8(signed_data)
-                    .map_err(|_| "Internal error: signed output is not valid text".to_string())?;
-
-                keychainpgp_clipboard::monitor::write_clipboard_text(&signed_text)
-                    .map_err(|e| format!("Failed to write to clipboard: {e}"))?;
-
-                return Ok(SignResult {
-                    success: true,
-                    message: "Message signed and copied to clipboard.".into(),
-                });
+                return String::from_utf8(signed_data)
+                    .map_err(|_| "Internal error: signed output is not valid text".to_string());
             }
             Err(_) => continue,
         }
@@ -236,15 +256,11 @@ pub fn sign_clipboard(
     Err("Failed to sign. Your key may require a passphrase.".into())
 }
 
-/// Verify a signed message on the clipboard.
-#[tauri::command]
-pub fn verify_clipboard(
-    state: State<'_, AppState>,
+/// Shared verify logic: verify signed text against all keys in keyring.
+fn verify_impl(
+    state: &AppState,
+    signed_text: &str,
 ) -> Result<VerifyResultInfo, String> {
-    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
-        .map_err(|e| format!("Could not read clipboard: {e}"))?
-        .ok_or_else(|| "Your clipboard is empty. Copy a signed message first.".to_string())?;
-
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
     let all_keys = keyring
         .list_keys()
@@ -262,7 +278,7 @@ pub fn verify_clipboard(
     }
 
     for key_record in &all_keys {
-        match state.engine.verify(clipboard_text.as_bytes(), &key_record.pgp_data) {
+        match state.engine.verify(signed_text.as_bytes(), &key_record.pgp_data) {
             Ok(result) if result.valid => {
                 return Ok(VerifyResultInfo {
                     valid: true,
@@ -288,6 +304,63 @@ pub fn verify_clipboard(
         trust_level: 0,
         message: "Signature could not be verified. The signer's key may not be in your keyring.".into(),
     })
+}
+
+/// Sign the current clipboard content with the user's private key.
+#[tauri::command]
+pub fn sign_clipboard(
+    state: State<'_, AppState>,
+    passphrase: Option<String>,
+) -> Result<SignResult, String> {
+    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
+        .map_err(|e| format!("Could not read clipboard: {e}"))?
+        .ok_or_else(|| "Your clipboard is empty. Copy some text first.".to_string())?;
+
+    let signed_text = sign_impl(&state, &clipboard_text, passphrase.as_deref())?;
+
+    keychainpgp_clipboard::monitor::write_clipboard_text(&signed_text)
+        .map_err(|e| format!("Failed to write to clipboard: {e}"))?;
+
+    Ok(SignResult {
+        success: true,
+        message: "Message signed and copied to clipboard.".into(),
+    })
+}
+
+/// Sign a given text (does not touch clipboard, returns signed text in message).
+#[tauri::command]
+pub fn sign_text(
+    state: State<'_, AppState>,
+    text: String,
+    passphrase: Option<String>,
+) -> Result<SignResult, String> {
+    let signed_text = sign_impl(&state, &text, passphrase.as_deref())?;
+
+    Ok(SignResult {
+        success: true,
+        message: signed_text,
+    })
+}
+
+/// Verify a signed message on the clipboard.
+#[tauri::command]
+pub fn verify_clipboard(
+    state: State<'_, AppState>,
+) -> Result<VerifyResultInfo, String> {
+    let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
+        .map_err(|e| format!("Could not read clipboard: {e}"))?
+        .ok_or_else(|| "Your clipboard is empty. Copy a signed message first.".to_string())?;
+
+    verify_impl(&state, &clipboard_text)
+}
+
+/// Verify a signed message from text (does not touch clipboard).
+#[tauri::command]
+pub fn verify_text(
+    state: State<'_, AppState>,
+    text: String,
+) -> Result<VerifyResultInfo, String> {
+    verify_impl(&state, &text)
 }
 
 /// Clear all cached passphrases.
