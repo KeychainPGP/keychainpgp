@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "scripts": {
+    "tauri": "npx @tauri-apps/cli"
+  }
+}

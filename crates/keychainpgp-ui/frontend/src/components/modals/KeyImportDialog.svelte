@@ -3,7 +3,14 @@
   import { importKey, importBackup } from "$lib/tauri";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import { isMobile } from "$lib/platform";
+  import { cancelScan } from "$lib/qr-scan";
+  import QrScanOverlay from "../shared/QrScanOverlay.svelte";
+  import { Camera } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
+
+  const mobile = isMobile();
+  let scanning = $state(false);
 
   let keyData = $state("");
   let importing = $state(false);
@@ -77,8 +84,46 @@
   }
 </script>
 
+{#if scanning}
+  <QrScanOverlay
+    onscan={(content) => {
+      if (content.startsWith("KCPGP:")) {
+        error = "This is a sync QR code. Use Settings → Key Sync → Import Keys.";
+        scanning = false;
+        return true;
+      }
+      importKey(content)
+        .then(async (result) => {
+          await keyStore.refresh();
+          appStore.setStatus(m.import_success_key({ name: result.name ?? result.fingerprint.slice(-8) }));
+          appStore.closeModal();
+        })
+        .catch((e) => {
+          error = String(e);
+        });
+      scanning = false;
+      return true;
+    }}
+    oncancel={() => { cancelScan(); scanning = false; }}
+  />
+{/if}
+
 <ModalContainer title={m.import_title()}>
   <div class="space-y-3">
+    {#if mobile}
+      <button
+        class="w-full flex items-center justify-center gap-2 py-3 text-sm rounded-lg
+               bg-[var(--color-primary)] text-white font-medium
+               hover:bg-[var(--color-primary-hover)] transition-colors"
+        onclick={() => { error = ""; scanning = true; }}
+      >
+        <Camera size={16} />
+        {m.onboarding_scan_qr()}
+      </button>
+      <div class="text-center text-xs text-[var(--color-text-secondary)]">
+        {m.import_or()}
+      </div>
+    {/if}
     <textarea
       placeholder={m.import_textarea_placeholder()}
       bind:value={keyData}

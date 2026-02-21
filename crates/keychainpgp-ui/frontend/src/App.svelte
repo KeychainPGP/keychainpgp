@@ -7,6 +7,7 @@
   import { settingsStore } from "$lib/stores/settings.svelte";
   import { registerHotkeys, unregisterHotkeys } from "$lib/hotkeys";
   import { initLocale, localeStore } from "$lib/stores/locale.svelte";
+  import { initPlatform, isDesktop, isMobile } from "$lib/platform";
   import * as m from "$lib/paraglide/messages.js";
 
   import NavBar from "./components/layout/NavBar.svelte";
@@ -27,44 +28,56 @@
   import VerifyResultModal from "./components/modals/VerifyResultModal.svelte";
   import QrExportModal from "./components/modals/QrExportModal.svelte";
   import KeyDiscoveryModal from "./components/modals/KeyDiscoveryModal.svelte";
+  import KeySyncExportModal from "./components/modals/KeySyncExportModal.svelte";
+  import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
 
   let initialized = $state(false);
   let unlistenTray: UnlistenFn | null = null;
 
   onMount(async () => {
+    await initPlatform();
+
     await Promise.all([
       keyStore.refresh(),
       settingsStore.load(),
     ]);
     initLocale(settingsStore.settings.locale);
-    clipboardStore.startPolling();
 
-    // Register global hotkeys
-    await registerHotkeys({
-      onEncrypt: () => appStore.dispatchAction("encrypt"),
-      onDecrypt: () => appStore.dispatchAction("decrypt"),
-      onSign: () => appStore.dispatchAction("sign"),
-      onVerify: () => appStore.dispatchAction("verify"),
-    });
+    if (isDesktop()) {
+      clipboardStore.startPolling();
 
-    // Listen for tray menu actions
-    unlistenTray = await listen<string>("tray-action", (event) => {
-      const action = event.payload as AppAction;
-      if (action) appStore.dispatchAction(action);
-    });
+      // Register global hotkeys (desktop only)
+      await registerHotkeys({
+        onEncrypt: () => appStore.dispatchAction("encrypt"),
+        onDecrypt: () => appStore.dispatchAction("decrypt"),
+        onSign: () => appStore.dispatchAction("sign"),
+        onVerify: () => appStore.dispatchAction("verify"),
+      });
+
+      // Listen for tray menu actions (desktop only)
+      unlistenTray = await listen<string>("tray-action", (event) => {
+        const action = event.payload as AppAction;
+        if (action) appStore.dispatchAction(action);
+      });
+    } else {
+      // On mobile, default to compose mode (no system clipboard monitoring)
+      appStore.inputMode = "compose";
+    }
 
     initialized = true;
   });
 
   onDestroy(() => {
-    unregisterHotkeys();
-    unlistenTray?.();
+    if (isDesktop()) {
+      unregisterHotkeys();
+      unlistenTray?.();
+    }
   });
 
   const showOnboarding = $derived(initialized && !keyStore.hasOwnKey);
 </script>
 
-<main class="flex flex-col h-screen">
+<main class="flex flex-col h-screen" class:safe-area-top={isMobile()}>
   {#if !initialized}
     <div class="flex items-center justify-center h-full">
       <p class="text-[var(--color-text-secondary)]">{m.loading()}</p>
@@ -76,7 +89,7 @@
       {:else}
         <NavBar />
 
-        <div class="flex-1 overflow-auto p-6">
+        <div class="flex-1 overflow-auto p-6" class:pb-24={isMobile()}>
           {#if appStore.currentView === "home"}
             <HomeView />
           {:else if appStore.currentView === "keys"}
@@ -112,5 +125,9 @@
     <QrExportModal />
   {:else if appStore.activeModal === "key-discovery"}
     <KeyDiscoveryModal />
+  {:else if appStore.activeModal === "key-sync-export"}
+    <KeySyncExportModal />
+  {:else if appStore.activeModal === "key-sync-import"}
+    <KeySyncImportModal />
   {/if}
 </main>

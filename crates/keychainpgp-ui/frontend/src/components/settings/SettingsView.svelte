@@ -4,8 +4,12 @@
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { shortFingerprint } from "$lib/utils";
+  import { isDesktop } from "$lib/platform";
   import { changeLocale, localeStore } from "$lib/stores/locale.svelte";
+  import { RefreshCw } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
+
+  const desktop = isDesktop();
 
   /** Native labels for each locale (always displayed in the locale's own language). */
   const LOCALE_LABELS: Record<string, string> = {
@@ -130,7 +134,8 @@
     </label>
   </section>
 
-  <!-- Clipboard -->
+  <!-- Clipboard (desktop only) -->
+  {#if desktop}
   <section class="space-y-3">
     <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">{m.settings_clipboard()}</h3>
 
@@ -161,6 +166,7 @@
       </label>
     {/if}
   </section>
+  {/if}
 
   <!-- Encryption -->
   <section class="space-y-3">
@@ -262,6 +268,32 @@
                focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
       />
     </label>
+  </section>
+
+  <!-- Key Sync -->
+  <section class="space-y-3">
+    <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">{m.settings_sync()}</h3>
+    <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_sync_desc()}</p>
+    <div class="flex gap-2">
+      <button
+        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg
+               border border-[var(--color-border)] font-medium
+               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        onclick={() => appStore.openModal("key-sync-export")}
+      >
+        <RefreshCw size={16} />
+        {m.settings_sync_export()}
+      </button>
+      <button
+        class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg
+               border border-[var(--color-border)] font-medium
+               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        onclick={() => appStore.openModal("key-sync-import")}
+      >
+        <RefreshCw size={16} />
+        {m.settings_sync_import()}
+      </button>
+    </div>
   </section>
 
   <!-- About -->

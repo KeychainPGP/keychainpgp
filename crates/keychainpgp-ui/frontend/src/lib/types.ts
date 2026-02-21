@@ -11,7 +11,9 @@ export type ModalType =
   | "error"
   | "verify-result"
   | "qr-export"
-  | "key-discovery";
+  | "key-discovery"
+  | "key-sync-export"
+  | "key-sync-import";
 
 export interface ModalProps {
   /** For decrypted-viewer */

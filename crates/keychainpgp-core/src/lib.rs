@@ -23,3 +23,10 @@ pub mod types;
 pub use engine::CryptoEngine;
 pub use error::{Error, Result};
 pub use sequoia_engine::SequoiaEngine;
+
+/// Fill a buffer with cryptographically secure random bytes.
+///
+/// Wraps the Sequoia-PGP random number generator.
+pub fn crypto_random(buf: &mut [u8]) {
+    sequoia_openpgp::crypto::random(buf);
+}

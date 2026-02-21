@@ -738,6 +738,37 @@ impl CryptoEngine for SequoiaEngine {
             subkeys,
         })
     }
+
+    fn encrypt_symmetric(&self, plaintext: &[u8], passphrase: &[u8]) -> Result<Vec<u8>> {
+        use sequoia_openpgp::crypto::Password;
+
+        let mut output = Vec::new();
+        {
+            let message = Message::new(&mut output);
+            let encryptor = Encryptor2::with_passwords(
+                message,
+                Some(Password::from(passphrase)),
+            )
+            .build()
+            .map_err(|e| Error::Encryption {
+                reason: e.to_string(),
+            })?;
+
+            let mut literal = LiteralWriter::new(encryptor)
+                .build()
+                .map_err(|e| Error::Encryption {
+                    reason: e.to_string(),
+                })?;
+            literal.write_all(plaintext).map_err(|e| Error::Encryption {
+                reason: e.to_string(),
+            })?;
+            literal.finalize().map_err(|e| Error::Encryption {
+                reason: e.to_string(),
+            })?;
+        }
+
+        Ok(output)
+    }
 }
 
 /// Helper struct for the Sequoia decryption streaming API.
@@ -1146,5 +1177,22 @@ mod tests {
 
         let result = engine.decrypt_skesk(&ciphertext, "wrong-password");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_encrypt_symmetric_round_trip() {
+        let engine = SequoiaEngine::new();
+        let plaintext = b"Hello from KeychainPGP sync!";
+        let passphrase = b"test-passphrase-1234";
+
+        let encrypted = engine
+            .encrypt_symmetric(plaintext, passphrase)
+            .expect("symmetric encryption should succeed");
+        assert!(!encrypted.is_empty());
+
+        let decrypted = engine
+            .decrypt_skesk(&encrypted, "test-passphrase-1234")
+            .expect("decryption should succeed with same passphrase");
+        assert_eq!(plaintext.as_slice(), decrypted.as_slice());
     }
 }

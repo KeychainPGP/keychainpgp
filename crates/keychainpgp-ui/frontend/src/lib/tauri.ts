@@ -226,6 +226,25 @@ export async function clearClipboard(): Promise<void> {
   return invoke("clear_clipboard");
 }
 
+// --- Sync ---
+
+export interface SyncBundle {
+  passphrase: string;
+  qr_parts: string[];
+  file_data: string;
+}
+
+export async function exportKeyBundle(): Promise<SyncBundle> {
+  return invoke("export_key_bundle");
+}
+
+export async function importKeyBundle(
+  encryptedData: string,
+  passphrase: string
+): Promise<number> {
+  return invoke("import_key_bundle", { encryptedData, passphrase });
+}
+
 // --- Settings ---
 
 export async function getSettings(): Promise<Settings> {

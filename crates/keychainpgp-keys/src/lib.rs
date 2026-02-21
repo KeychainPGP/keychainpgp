@@ -16,6 +16,8 @@ pub mod import;
 pub mod keyring;
 pub mod network;
 pub mod storage;
+pub mod sync;
 
 pub use error::{Error, Result};
 pub use keyring::Keyring;
+pub use storage::KeyRecord;

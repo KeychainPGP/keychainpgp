@@ -1,13 +1,15 @@
 {
-  "$schema": "https://raw.githubusercontent.com/nicedoc/tauri/v2/crates/tauri-utils/schema/capability.json",
-  "identifier": "default",
-  "description": "Default capabilities for the main window",
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-default",
+  "description": "Default capabilities for desktop platforms",
   "windows": ["main"],
+  "platforms": ["linux", "macOS", "windows"],
   "permissions": [
     "core:default",
     "global-shortcut:default",
     "notification:default",
     "clipboard-manager:default",
-    "store:default"
+    "store:default",
+    "os:default"
   ]
 }

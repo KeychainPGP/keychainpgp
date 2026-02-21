@@ -1,15 +1,21 @@
 <script lang="ts">
-  import { KeyRound, Upload } from "lucide-svelte";
-  import { generateKeyPair } from "$lib/tauri";
+  import { KeyRound, Upload, Camera, RefreshCw } from "lucide-svelte";
+  import { generateKeyPair, importKey } from "$lib/tauri";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import { isMobile } from "$lib/platform";
+  import { cancelScan } from "$lib/qr-scan";
+  import QrScanOverlay from "../shared/QrScanOverlay.svelte";
   import * as m from "$lib/paraglide/messages.js";
+
+  const mobile = isMobile();
 
   let name = $state("");
   let email = $state("");
   let passphrase = $state("");
   let generating = $state(false);
   let error = $state("");
+  let scanning = $state(false);
 
   async function handleGenerate() {
     if (!name.trim() || !email.trim()) {
@@ -28,7 +34,38 @@
       generating = false;
     }
   }
+
+  function handleScanResult(content: string): boolean {
+    if (content.startsWith("KCPGP:")) {
+      error = "This is a sync QR code. Use the Sync function instead.";
+      return true;
+    }
+    importKey(content)
+      .then(async () => {
+        await keyStore.refresh();
+      })
+      .catch((e) => {
+        error = String(e);
+      });
+    return true;
+  }
+
+  function handleCancelScan() {
+    cancelScan();
+    scanning = false;
+  }
 </script>
+
+{#if scanning}
+  <QrScanOverlay
+    onscan={(content) => {
+      const done = handleScanResult(content);
+      if (done) scanning = false;
+      return done;
+    }}
+    oncancel={handleCancelScan}
+  />
+{/if}
 
 <div class="flex flex-col items-center justify-center h-full px-6">
   <div class="max-w-md w-full space-y-6">
@@ -91,6 +128,28 @@
       >
         <Upload size={16} />
         {m.onboarding_import()}
+      </button>
+      {#if mobile}
+        <button
+          class="w-full py-3 rounded-lg border border-[var(--color-border)]
+                 text-[var(--color-text)] font-medium
+                 hover:bg-[var(--color-bg-secondary)] transition-colors
+                 flex items-center justify-center gap-2"
+          onclick={() => { error = ""; scanning = true; }}
+        >
+          <Camera size={16} />
+          {m.onboarding_scan_qr()}
+        </button>
+      {/if}
+      <button
+        class="w-full py-3 rounded-lg border border-[var(--color-border)]
+               text-[var(--color-text)] font-medium
+               hover:bg-[var(--color-bg-secondary)] transition-colors
+               flex items-center justify-center gap-2"
+        onclick={() => appStore.openModal("key-sync-import")}
+      >
+        <RefreshCw size={16} />
+        {m.onboarding_sync()}
       </button>
     </div>
   </div>

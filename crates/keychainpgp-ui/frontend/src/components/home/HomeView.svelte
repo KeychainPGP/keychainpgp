@@ -7,6 +7,7 @@
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { isPgpMessage } from "$lib/utils";
+  import { isDesktop } from "$lib/platform";
   import {
     decryptClipboard, signClipboard, verifyClipboard,
     decryptText, signText, verifyText, writeClipboard,
@@ -14,6 +15,7 @@
   import * as m from "$lib/paraglide/messages.js";
 
   let isCompose = $derived(appStore.inputMode === "compose");
+  const desktop = isDesktop();
 
   /** Get the active text content depending on input mode. */
   function getContent(): string | null {
@@ -175,29 +177,31 @@
     </p>
   </div>
 
-  <!-- Input mode toggle -->
-  <div class="flex justify-center">
-    <div class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5">
-      <button
-        class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
-        class:bg-[var(--color-primary)]={!isCompose}
-        class:text-white={!isCompose}
-        onclick={() => appStore.inputMode = "clipboard"}
-      >
-        <Clipboard size={14} />
-        {m.mode_clipboard()}
-      </button>
-      <button
-        class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
-        class:bg-[var(--color-primary)]={isCompose}
-        class:text-white={isCompose}
-        onclick={() => appStore.inputMode = "compose"}
-      >
-        <MessageSquare size={14} />
-        {m.mode_compose()}
-      </button>
+  <!-- Input mode toggle (desktop only — mobile always uses compose) -->
+  {#if desktop}
+    <div class="flex justify-center">
+      <div class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5">
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+          class:bg-[var(--color-primary)]={!isCompose}
+          class:text-white={!isCompose}
+          onclick={() => appStore.inputMode = "clipboard"}
+        >
+          <Clipboard size={14} />
+          {m.mode_clipboard()}
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+          class:bg-[var(--color-primary)]={isCompose}
+          class:text-white={isCompose}
+          onclick={() => appStore.inputMode = "compose"}
+        >
+          <MessageSquare size={14} />
+          {m.mode_compose()}
+        </button>
+      </div>
     </div>
-  </div>
+  {/if}
 
   {#if isCompose}
     <ComposeInput />
@@ -214,7 +218,7 @@
     >
       <Lock size={20} />
       {m.action_encrypt()}
-      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />
+      {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />{/if}
     </button>
     <button
       class="py-4 rounded-lg bg-[var(--color-primary)] text-white font-semibold
@@ -224,7 +228,7 @@
     >
       <Unlock size={20} />
       {m.action_decrypt()}
-      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />
+      {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />{/if}
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -234,7 +238,7 @@
     >
       <PenLine size={20} />
       {m.action_sign()}
-      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />
+      {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />{/if}
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -244,7 +248,7 @@
     >
       <ShieldCheck size={20} />
       {m.action_verify()}
-      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]} />
+      {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]} />{/if}
     </button>
   </div>
 </div>

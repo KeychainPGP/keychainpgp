@@ -55,6 +55,7 @@ fn encrypt_impl(
 }
 
 /// Encrypt the current clipboard content for the given recipients.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn encrypt_clipboard(
     state: State<'_, AppState>,
@@ -96,7 +97,9 @@ fn decrypt_impl(
     ciphertext: &str,
     passphrase: Option<&str>,
 ) -> Result<DecryptResult, String> {
-    if !keychainpgp_clipboard::detect::is_encrypted_message(ciphertext) {
+    if keychainpgp_core::armor::detect_pgp_block(ciphertext.as_bytes())
+        != Some(keychainpgp_core::armor::PgpBlockKind::Message)
+    {
         return Err(
             "The text doesn't contain a valid encrypted message. \
              Make sure you have the entire message, including the BEGIN and END lines."
@@ -163,6 +166,7 @@ fn decrypt_impl(
 }
 
 /// Decrypt the current clipboard content.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn decrypt_clipboard(
     state: State<'_, AppState>,
@@ -307,6 +311,7 @@ fn verify_impl(
 }
 
 /// Sign the current clipboard content with the user's private key.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn sign_clipboard(
     state: State<'_, AppState>,
@@ -343,6 +348,7 @@ pub fn sign_text(
 }
 
 /// Verify a signed message on the clipboard.
+#[cfg(desktop)]
 #[tauri::command]
 pub fn verify_clipboard(
     state: State<'_, AppState>,
