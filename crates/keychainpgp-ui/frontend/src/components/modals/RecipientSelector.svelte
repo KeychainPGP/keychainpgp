@@ -8,17 +8,23 @@
   import { encryptClipboard } from "$lib/tauri";
   import { shortFingerprint } from "$lib/utils";
 
-  let selected: Set<string> = $state(new Set());
   let encrypting = $state(false);
 
-  // Auto-select own key if encrypt-to-self is on
-  $effect(() => {
+  // Compute initial selection from encrypt-to-self settings
+  function getInitialSelection(): Set<string> {
+    const set = new Set<string>();
     if (settingsStore.settings.encrypt_to_self) {
-      for (const k of keyStore.ownKeys) {
-        selected.add(k.fingerprint);
+      const selfKeys = settingsStore.settings.encrypt_to_self_keys;
+      if (selfKeys.length > 0) {
+        for (const fp of selfKeys) set.add(fp);
+      } else {
+        for (const k of keyStore.ownKeys) set.add(k.fingerprint);
       }
     }
-  });
+    return set;
+  }
+
+  let selected: Set<string> = $state(getInitialSelection());
 
   function toggleKey(fp: string) {
     if (selected.has(fp)) {
@@ -59,7 +65,7 @@
           <button
             class="w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left"
             class:border-[var(--color-primary)]={selected.has(k.fingerprint)}
-            class:bg-blue-50={selected.has(k.fingerprint)}
+            class:bg-[var(--color-bg-secondary)]={selected.has(k.fingerprint)}
             class:border-[var(--color-border)]={!selected.has(k.fingerprint)}
             onclick={() => toggleKey(k.fingerprint)}
           >

@@ -7,6 +7,7 @@ const defaults: Settings = {
   auto_clear_after_encrypt: false,
   clipboard_monitoring: true,
   encrypt_to_self: true,
+  encrypt_to_self_keys: [],
   theme: "system",
   passphrase_cache_secs: 600,
   keyserver_url: "https://keys.openpgp.org",

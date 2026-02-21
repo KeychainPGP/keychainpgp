@@ -19,6 +19,9 @@ pub struct Settings {
     pub clipboard_monitoring: bool,
     /// Always encrypt to self.
     pub encrypt_to_self: bool,
+    /// Which own keys to encrypt to (fingerprints). Empty = all own keys.
+    #[serde(default)]
+    pub encrypt_to_self_keys: Vec<String>,
     /// UI theme: "light", "dark", or "system".
     pub theme: String,
     /// Passphrase cache duration in seconds (0 = disabled).
@@ -40,6 +43,7 @@ impl Default for Settings {
             auto_clear_after_encrypt: false,
             clipboard_monitoring: true,
             encrypt_to_self: true,
+            encrypt_to_self_keys: Vec::new(),
             theme: "system".into(),
             passphrase_cache_secs: 600,
             keyserver_url: "https://keys.openpgp.org".into(),

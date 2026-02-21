@@ -2,6 +2,23 @@
   import { settingsStore } from "$lib/stores/settings.svelte";
   import { clearPassphraseCache } from "$lib/tauri";
   import { appStore } from "$lib/stores/app.svelte";
+  import { keyStore } from "$lib/stores/keys.svelte";
+  import { shortFingerprint } from "$lib/utils";
+
+  function toggleSelfKey(fp: string) {
+    let current = settingsStore.settings.encrypt_to_self_keys;
+    // If empty (= all keys), initialize with all own key fingerprints first
+    if (current.length === 0) {
+      current = keyStore.ownKeys.map(k => k.fingerprint);
+    }
+    const next = current.includes(fp)
+      ? current.filter(k => k !== fp)
+      : [...current, fp];
+    // If all own keys are selected, reset to empty (= "all")
+    const allOwn = keyStore.ownKeys.map(k => k.fingerprint);
+    const isAll = allOwn.length > 0 && allOwn.every(f => next.includes(f));
+    settingsStore.save({ encrypt_to_self_keys: isAll ? [] : next });
+  }
 
   function toggle(key: "auto_clear_enabled" | "clipboard_monitoring" | "encrypt_to_self" | "auto_clear_after_encrypt" | "include_armor_headers") {
     settingsStore.save({ [key]: !settingsStore.settings[key] });
@@ -98,6 +115,36 @@
       <input type="checkbox" checked={settingsStore.settings.encrypt_to_self} onchange={() => toggle("encrypt_to_self")}
         class="w-4 h-4 accent-[var(--color-primary)]" />
     </label>
+
+    {#if settingsStore.settings.encrypt_to_self && keyStore.ownKeys.length > 0}
+      <div class="p-3 rounded-lg border border-[var(--color-border)] space-y-2">
+        <p class="text-xs text-[var(--color-text-secondary)]">
+          {#if settingsStore.settings.encrypt_to_self_keys.length === 0}
+            All your keys will be used. Select specific keys to restrict.
+          {:else}
+            {settingsStore.settings.encrypt_to_self_keys.length} key{settingsStore.settings.encrypt_to_self_keys.length !== 1 ? "s" : ""} selected.
+          {/if}
+        </p>
+        <div class="space-y-1">
+          {#each keyStore.ownKeys as k (k.fingerprint)}
+            <label class="flex items-center gap-2 p-2 rounded hover:bg-[var(--color-bg-secondary)] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settingsStore.settings.encrypt_to_self_keys.length === 0 || settingsStore.settings.encrypt_to_self_keys.includes(k.fingerprint)}
+                onchange={() => toggleSelfKey(k.fingerprint)}
+                class="w-3.5 h-3.5 accent-[var(--color-primary)]"
+              />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm truncate">{k.name ?? "(unnamed)"}</p>
+                <p class="text-xs text-[var(--color-text-secondary)] truncate">
+                  {k.email ?? shortFingerprint(k.fingerprint)}
+                </p>
+              </div>
+            </label>
+          {/each}
+        </div>
+      </div>
+    {/if}
 
     <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
       <div>

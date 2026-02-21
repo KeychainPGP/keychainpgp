@@ -74,6 +74,7 @@ export interface Settings {
   auto_clear_after_encrypt: boolean;
   clipboard_monitoring: boolean;
   encrypt_to_self: boolean;
+  encrypt_to_self_keys: string[];
   theme: string;
   passphrase_cache_secs: number;
   keyserver_url: string;
