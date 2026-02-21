@@ -1,3 +1,6 @@
+import { getLocale } from "$lib/paraglide/runtime.js";
+import * as m from "$lib/paraglide/messages.js";
+
 /** Format a full fingerprint as grouped hex: "ABCD 1234 ..." */
 export function formatFingerprint(fp: string): string {
   return fp.replace(/(.{4})/g, "$1 ").trim();
@@ -10,10 +13,10 @@ export function shortFingerprint(fp: string): string {
 
 /** Format an ISO 8601 date string to a readable date. */
 export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "N/A";
+  if (!iso) return m.date_na();
   const date = new Date(iso);
   if (isNaN(date.getTime())) return iso.split("T")[0] ?? iso;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(getLocale(), {
     year: "numeric",
     month: "short",
     day: "numeric",

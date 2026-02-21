@@ -11,6 +11,7 @@
     decryptClipboard, signClipboard, verifyClipboard,
     decryptText, signText, verifyText, writeClipboard,
   } from "$lib/tauri";
+  import * as m from "$lib/paraglide/messages.js";
 
   let isCompose = $derived(appStore.inputMode === "compose");
 
@@ -38,11 +39,11 @@
   function handleEncrypt() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(isCompose ? "Compose field is empty. Type a message first." : "Clipboard is empty. Copy some text first.");
+      appStore.setStatus(isCompose ? m.encrypt_empty_compose() : m.encrypt_empty_clipboard());
       return;
     }
     if (keyStore.keys.length === 0) {
-      appStore.setStatus("No keys available. Generate or import a key first.");
+      appStore.setStatus(m.encrypt_no_keys());
       return;
     }
     if (isCompose) {
@@ -55,19 +56,19 @@
   async function handleDecrypt() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy an encrypted message first.");
+      appStore.setStatus(isCompose ? m.decrypt_empty_compose() : m.decrypt_empty_clipboard());
       return;
     }
     if (!isPgpMessage(content)) {
-      appStore.setStatus("No PGP message detected.");
+      appStore.setStatus(m.decrypt_no_pgp());
       return;
     }
-    appStore.setStatus("Decrypting...", 0);
+    appStore.setStatus(m.decrypt_in_progress(), 0);
     try {
       const result = isCompose ? await decryptText(content) : await decryptClipboard();
       if (result.success) {
         appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
-        appStore.setStatus("Decrypted successfully.");
+        appStore.setStatus(m.decrypt_success());
       } else {
         appStore.setStatus(result.message);
       }
@@ -80,7 +81,7 @@
               const result = isCompose ? await decryptText(content, passphrase) : await decryptClipboard(passphrase);
               if (result.success) {
                 appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
-                appStore.setStatus("Decrypted successfully.");
+                appStore.setStatus(m.decrypt_success());
               } else {
                 appStore.openModal("error", { error: result.message });
               }
@@ -90,7 +91,7 @@
           },
         });
       } else {
-        appStore.openModal("error", { error: msg, suggestion: "Make sure you have the correct private key imported." });
+        appStore.openModal("error", { error: msg, suggestion: m.decrypt_wrong_key_hint() });
       }
     }
   }
@@ -98,21 +99,21 @@
   async function handleSign() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy some text first.");
+      appStore.setStatus(isCompose ? m.sign_empty_compose() : m.sign_empty_clipboard());
       return;
     }
     if (!keyStore.hasOwnKey) {
-      appStore.setStatus("No private key available. Generate or import one first.");
+      appStore.setStatus(m.sign_no_key());
       return;
     }
-    appStore.setStatus("Signing...", 0);
+    appStore.setStatus(m.sign_in_progress(), 0);
 
     async function doSign(passphrase?: string) {
       if (isCompose) {
         const result = await signText(content, passphrase);
         if (result.success) {
           appStore.composeText = result.message;
-          appStore.setStatus("Message signed.");
+          appStore.setStatus(m.sign_success_compose());
           appStore.closeModal();
         } else {
           appStore.openModal("error", { error: result.message });
@@ -152,14 +153,14 @@
   async function handleVerify() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(isCompose ? "Compose field is empty." : "Clipboard is empty. Copy a signed message first.");
+      appStore.setStatus(isCompose ? m.verify_empty_compose() : m.verify_empty_clipboard());
       return;
     }
-    appStore.setStatus("Verifying...", 0);
+    appStore.setStatus(m.verify_in_progress(), 0);
     try {
       const result = isCompose ? await verifyText(content) : await verifyClipboard();
       appStore.openModal("verify-result", { verifyResult: result });
-      appStore.setStatus(result.valid ? "Signature verified." : "Verification failed.");
+      appStore.setStatus(result.valid ? m.verify_success() : m.verify_failed());
     } catch (e) {
       appStore.openModal("error", { error: String(e) });
     }
@@ -168,9 +169,9 @@
 
 <div class="max-w-2xl mx-auto space-y-6">
   <div class="text-center space-y-2">
-    <h1 class="text-2xl font-bold">KeychainPGP</h1>
+    <h1 class="text-2xl font-bold">{m.home_title()}</h1>
     <p class="text-[var(--color-text-secondary)]">
-      {isCompose ? "Type your message, then choose an action below." : "Copy text, then choose an action below."}
+      {isCompose ? m.home_tagline_compose() : m.home_tagline_clipboard()}
     </p>
   </div>
 
@@ -184,7 +185,7 @@
         onclick={() => appStore.inputMode = "clipboard"}
       >
         <Clipboard size={14} />
-        Clipboard
+        {m.mode_clipboard()}
       </button>
       <button
         class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
@@ -193,7 +194,7 @@
         onclick={() => appStore.inputMode = "compose"}
       >
         <MessageSquare size={14} />
-        Compose
+        {m.mode_compose()}
       </button>
     </div>
   </div>
@@ -212,8 +213,8 @@
       onclick={handleEncrypt}
     >
       <Lock size={20} />
-      ENCRYPT
-      <Kbd keys={["Ctrl", "Shift", "E"]} variant="light" />
+      {m.action_encrypt()}
+      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />
     </button>
     <button
       class="py-4 rounded-lg bg-[var(--color-primary)] text-white font-semibold
@@ -222,8 +223,8 @@
       onclick={handleDecrypt}
     >
       <Unlock size={20} />
-      DECRYPT
-      <Kbd keys={["Ctrl", "Shift", "D"]} variant="light" />
+      {m.action_decrypt()}
+      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -232,8 +233,8 @@
       onclick={handleSign}
     >
       <PenLine size={20} />
-      SIGN
-      <Kbd keys={["Ctrl", "Shift", "S"]} />
+      {m.action_sign()}
+      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />
     </button>
     <button
       class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
@@ -242,8 +243,8 @@
       onclick={handleVerify}
     >
       <ShieldCheck size={20} />
-      VERIFY
-      <Kbd keys={["Ctrl", "Shift", "V"]} />
+      {m.action_verify()}
+      <Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]} />
     </button>
   </div>
 </div>

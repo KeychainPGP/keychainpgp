@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Copy, Check } from "lucide-svelte";
   import { formatFingerprint } from "$lib/utils";
+  import * as m from "$lib/paraglide/messages.js";
 
   interface Props {
     fingerprint: string;
@@ -26,7 +27,7 @@
   <button
     class="p-0.5 rounded hover:bg-[var(--color-bg-secondary)] transition-colors"
     onclick={copyToClipboard}
-    title="Copy fingerprint"
+    title={m.fingerprint_copy()}
   >
     {#if copied}
       <Check size={12} class="text-[var(--color-success)]" />

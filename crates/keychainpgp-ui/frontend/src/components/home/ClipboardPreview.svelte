@@ -2,6 +2,7 @@
   import { Lock, PenLine, RefreshCw } from "lucide-svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { truncate } from "$lib/utils";
+  import * as m from "$lib/paraglide/messages.js";
 </script>
 
 <div
@@ -9,24 +10,24 @@
 >
   <div class="flex items-center justify-between mb-2">
     <span class="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
-      Clipboard
+      {m.clipboard_label()}
     </span>
     <div class="flex items-center gap-2">
       {#if clipboardStore.isSignedMessage}
         <span class="inline-flex items-center gap-1 text-xs font-medium text-green-600">
           <PenLine size={12} />
-          Signed Message
+          {m.clipboard_signed_message()}
         </span>
       {:else if clipboardStore.isPgpMessage}
         <span class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
           <Lock size={12} />
-          PGP Message
+          {m.clipboard_pgp_message()}
         </span>
       {/if}
       <button
         class="p-1 rounded hover:bg-[var(--color-border)] transition-colors"
         onclick={() => clipboardStore.refresh()}
-        title="Refresh clipboard"
+        title={m.clipboard_refresh()}
       >
         <RefreshCw size={14} class="text-[var(--color-text-secondary)]" />
       </button>
@@ -39,7 +40,7 @@
     </p>
   {:else}
     <p class="text-[var(--color-text-secondary)] text-sm italic">
-      Your clipboard is empty. Copy some text to get started.
+      {m.clipboard_empty()}
     </p>
   {/if}
 </div>

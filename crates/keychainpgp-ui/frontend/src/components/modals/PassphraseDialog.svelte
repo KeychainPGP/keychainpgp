@@ -2,6 +2,7 @@
   import { Eye, EyeOff } from "lucide-svelte";
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   let passphrase = $state("");
   let showPassword = $state(false);
@@ -13,15 +14,15 @@
   }
 </script>
 
-<ModalContainer title="Enter Passphrase">
+<ModalContainer title={m.passphrase_title()}>
   <div class="space-y-4">
     <p class="text-sm text-[var(--color-text-secondary)]">
-      This key is protected with a passphrase. Enter it to decrypt.
+      {m.passphrase_desc()}
     </p>
     <div class="relative">
       <input
         type={showPassword ? "text" : "password"}
-        placeholder="Passphrase"
+        placeholder={m.passphrase_placeholder()}
         bind:value={passphrase}
         class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
                bg-[var(--color-bg)] pr-10 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -45,7 +46,7 @@
                hover:bg-[var(--color-bg-secondary)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Cancel
+        {m.passphrase_cancel()}
       </button>
       <button
         class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
@@ -53,7 +54,7 @@
         onclick={handleSubmit}
         disabled={!passphrase}
       >
-        Decrypt
+        {m.passphrase_submit()}
       </button>
     </div>
   </div>

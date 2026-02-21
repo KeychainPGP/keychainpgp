@@ -3,6 +3,7 @@
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { wkdLookup, keyserverSearch, importKey, exportKey, type KeyInfo } from "$lib/tauri";
+  import * as m from "$lib/paraglide/messages.js";
 
   let query = $state("");
   let results: KeyInfo[] = $state([]);
@@ -32,7 +33,7 @@
       results = ksResults;
 
       if (results.length === 0) {
-        error = "No keys found.";
+        error = m.discovery_not_found();
       }
     } catch (e) {
       error = String(e);
@@ -43,22 +44,16 @@
 
   async function handleImport(key: KeyInfo) {
     try {
-      // We need to get the key data — re-fetch from keyserver
       const ksResults = await keyserverSearch(
         key.email ?? key.fingerprint
       );
       if (ksResults.length === 0) {
-        appStore.setStatus("Could not retrieve key data for import.");
+        appStore.setStatus(m.discovery_import_fail());
         return;
       }
-      // For WKD results, the key data is already fetched on the backend.
-      // We need to export it from the search result. Since we don't have raw data
-      // in KeyInfo, we'll search and import via the keyserver endpoint.
-      // The actual import happens through the backend directly.
-      // Let's use a direct approach: import from keyserver by fingerprint
-      appStore.setStatus("Key imported via discovery is not yet supported for direct import. Copy the key data and use Import.");
+      appStore.setStatus(m.discovery_import_hint());
     } catch (e) {
-      appStore.setStatus(`Import failed: ${e}`);
+      appStore.setStatus(`${e}`);
     }
   }
 
@@ -67,14 +62,14 @@
   }
 </script>
 
-<ModalContainer title="Discover Keys">
+<ModalContainer title={m.discovery_title()}>
   <div class="space-y-4">
     <div class="flex gap-2">
       <input
         type="text"
         bind:value={query}
         onkeydown={handleKeydown}
-        placeholder="Email address or name..."
+        placeholder={m.discovery_placeholder()}
         class="flex-1 px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
                focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
       />
@@ -84,7 +79,7 @@
         onclick={handleSearch}
         disabled={searching || !query.trim()}
       >
-        {searching ? "Searching..." : "Search"}
+        {searching ? m.discovery_searching() : m.discovery_search()}
       </button>
     </div>
 
@@ -97,16 +92,16 @@
         {#each results as key}
           <div class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
             <div class="text-sm">
-              <p class="font-medium">{key.name ?? "(unnamed)"}</p>
+              <p class="font-medium">{key.name ?? m.unnamed()}</p>
               <p class="text-[var(--color-text-secondary)]">{key.email ?? ""}</p>
               <p class="text-xs font-mono text-[var(--color-text-secondary)]">{key.fingerprint.slice(-16)}</p>
             </div>
-            <span class="text-xs text-green-600 font-medium">Found</span>
+            <span class="text-xs text-green-600 font-medium">{m.discovery_found()}</span>
           </div>
         {/each}
       </div>
       <p class="text-xs text-[var(--color-text-secondary)]">
-        To import a discovered key, copy its public key and use the Import function in the Keys view.
+        {m.discovery_import_hint()}
       </p>
     {/if}
 
@@ -116,7 +111,7 @@
                hover:bg-[var(--color-bg-secondary)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Close
+        {m.discovery_close()}
       </button>
     </div>
   </div>

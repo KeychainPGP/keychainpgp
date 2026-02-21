@@ -2,6 +2,7 @@
   import { Copy, Check } from "lucide-svelte";
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   let copied = $state(false);
   const plaintext = appStore.modalProps.plaintext ?? "";
@@ -13,7 +14,7 @@
   }
 </script>
 
-<ModalContainer title="Decrypted Message">
+<ModalContainer title={m.decrypted_title()}>
   <div class="space-y-3">
     <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 max-h-64 overflow-auto">
       <pre class="text-sm whitespace-pre-wrap break-words font-mono">{plaintext}</pre>
@@ -27,10 +28,10 @@
       >
         {#if copied}
           <Check size={14} class="text-[var(--color-success)]" />
-          Copied
+          {m.decrypted_copied()}
         {:else}
           <Copy size={14} />
-          Copy
+          {m.decrypted_copy()}
         {/if}
       </button>
       <button
@@ -38,7 +39,7 @@
                hover:bg-[var(--color-primary-hover)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Close
+        {m.decrypted_close()}
       </button>
     </div>
   </div>

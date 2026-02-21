@@ -6,6 +6,8 @@
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { settingsStore } from "$lib/stores/settings.svelte";
   import { registerHotkeys, unregisterHotkeys } from "$lib/hotkeys";
+  import { initLocale, localeStore } from "$lib/stores/locale.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   import NavBar from "./components/layout/NavBar.svelte";
   import StatusBar from "./components/layout/StatusBar.svelte";
@@ -34,6 +36,7 @@
       keyStore.refresh(),
       settingsStore.load(),
     ]);
+    initLocale(settingsStore.settings.locale);
     clipboardStore.startPolling();
 
     // Register global hotkeys
@@ -64,24 +67,28 @@
 <main class="flex flex-col h-screen">
   {#if !initialized}
     <div class="flex items-center justify-center h-full">
-      <p class="text-[var(--color-text-secondary)]">Loading...</p>
+      <p class="text-[var(--color-text-secondary)]">{m.loading()}</p>
     </div>
-  {:else if showOnboarding}
-    <OnboardingView />
   {:else}
-    <NavBar />
+    {#key localeStore.current}
+      {#if showOnboarding}
+        <OnboardingView />
+      {:else}
+        <NavBar />
 
-    <div class="flex-1 overflow-auto p-6">
-      {#if appStore.currentView === "home"}
-        <HomeView />
-      {:else if appStore.currentView === "keys"}
-        <KeysView />
-      {:else if appStore.currentView === "settings"}
-        <SettingsView />
+        <div class="flex-1 overflow-auto p-6">
+          {#if appStore.currentView === "home"}
+            <HomeView />
+          {:else if appStore.currentView === "keys"}
+            <KeysView />
+          {:else if appStore.currentView === "settings"}
+            <SettingsView />
+          {/if}
+        </div>
+
+        <StatusBar />
       {/if}
-    </div>
-
-    <StatusBar />
+    {/key}
   {/if}
 
   <!-- Modal layer -->

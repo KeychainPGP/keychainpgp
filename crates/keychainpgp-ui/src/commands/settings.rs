@@ -31,9 +31,13 @@ pub struct Settings {
     /// Include armor headers (Version, Comment) in PGP output.
     #[serde(default = "default_true")]
     pub include_armor_headers: bool,
+    /// User's preferred display language. "auto" = detect from OS.
+    #[serde(default = "default_locale")]
+    pub locale: String,
 }
 
 fn default_true() -> bool { true }
+fn default_locale() -> String { "auto".into() }
 
 impl Default for Settings {
     fn default() -> Self {
@@ -48,6 +52,7 @@ impl Default for Settings {
             passphrase_cache_secs: 600,
             keyserver_url: "https://keys.openpgp.org".into(),
             include_armor_headers: true,
+            locale: "auto".into(),
         }
     }
 }

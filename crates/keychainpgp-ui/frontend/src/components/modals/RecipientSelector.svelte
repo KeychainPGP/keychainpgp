@@ -8,6 +8,7 @@
   import { encryptClipboard, encryptText, writeClipboard } from "$lib/tauri";
   import { shortFingerprint } from "$lib/utils";
   import type { KeyInfo } from "$lib/tauri";
+  import * as m from "$lib/paraglide/messages.js";
 
   let encrypting = $state(false);
   let searchQuery = $state("");
@@ -61,6 +62,11 @@
     return keys.filter(k => selected.has(k.fingerprint)).length;
   }
 
+  function encryptButtonLabel(count: number): string {
+    if (count === 1) return m.recipient_encrypt_btn_one();
+    return m.recipient_encrypt_btn_other({ count });
+  }
+
   async function handleEncrypt() {
     if (selected.size === 0) return;
     encrypting = true;
@@ -69,7 +75,7 @@
         const result = await encryptText(textToEncrypt, [...selected]);
         if (result.success) {
           await writeClipboard(result.message);
-          appStore.setStatus("Message encrypted and copied to clipboard.");
+          appStore.setStatus(m.recipient_encrypt_success());
           appStore.closeModal();
         } else {
           appStore.openModal("error", { error: result.message });
@@ -92,14 +98,14 @@
   }
 </script>
 
-<ModalContainer title="Select Recipients">
+<ModalContainer title={m.recipient_title()}>
   <div class="space-y-3">
     <!-- Search bar -->
     <div class="relative">
       <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" />
       <input
         type="text"
-        placeholder="Search keys..."
+        placeholder={m.recipient_search_placeholder()}
         bind:value={searchQuery}
         class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
                bg-[var(--color-bg)] text-[var(--color-text)]
@@ -109,7 +115,7 @@
     </div>
 
     {#if keyStore.keys.length === 0}
-      <p class="text-sm text-[var(--color-text-secondary)]">No keys available.</p>
+      <p class="text-sm text-[var(--color-text-secondary)]">{m.recipient_no_keys()}</p>
     {:else}
       <div class="max-h-72 overflow-auto space-y-2">
         <!-- My Keys -->
@@ -125,7 +131,7 @@
               {:else}
                 <ChevronRight size={14} />
               {/if}
-              My Keys
+              {m.recipient_my_keys()}
               {#if selectedInGroup(keyStore.ownKeys) > 0}
                 <span class="text-[var(--color-primary)] normal-case tracking-normal">
                   ({selectedInGroup(keyStore.ownKeys)})
@@ -152,7 +158,7 @@
                       {/if}
                     </div>
                     <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium truncate">{k.name ?? "(unnamed)"}</p>
+                      <p class="text-sm font-medium truncate">{k.name ?? m.unnamed()}</p>
                       <p class="text-xs text-[var(--color-text-secondary)] truncate">
                         {k.email ?? shortFingerprint(k.fingerprint)}
                       </p>
@@ -160,7 +166,7 @@
                   </button>
                 {/each}
                 {#if filteredOwnKeys.length === 0 && searchQuery}
-                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">No match</p>
+                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">{m.recipient_no_match()}</p>
                 {/if}
               </div>
             {/if}
@@ -180,7 +186,7 @@
               {:else}
                 <ChevronRight size={14} />
               {/if}
-              Contacts
+              {m.recipient_contacts()}
               {#if selectedInGroup(keyStore.contactKeys) > 0}
                 <span class="text-[var(--color-primary)] normal-case tracking-normal">
                   ({selectedInGroup(keyStore.contactKeys)})
@@ -207,7 +213,7 @@
                       {/if}
                     </div>
                     <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium truncate">{k.name ?? "(unnamed)"}</p>
+                      <p class="text-sm font-medium truncate">{k.name ?? m.unnamed()}</p>
                       <p class="text-xs text-[var(--color-text-secondary)] truncate">
                         {k.email ?? shortFingerprint(k.fingerprint)}
                       </p>
@@ -215,7 +221,7 @@
                   </button>
                 {/each}
                 {#if filteredContactKeys.length === 0 && searchQuery}
-                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">No match</p>
+                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">{m.recipient_no_match()}</p>
                 {/if}
               </div>
             {/if}
@@ -223,7 +229,7 @@
         {/if}
 
         {#if filteredOwnKeys.length === 0 && filteredContactKeys.length === 0 && searchQuery}
-          <p class="text-sm text-[var(--color-text-secondary)] text-center py-2">No keys matching "{searchQuery}"</p>
+          <p class="text-sm text-[var(--color-text-secondary)] text-center py-2">{m.recipient_no_match_global({ query: searchQuery })}</p>
         {/if}
       </div>
     {/if}
@@ -234,7 +240,7 @@
                hover:bg-[var(--color-bg-secondary)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Cancel
+        {m.recipient_cancel()}
       </button>
       <button
         class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
@@ -242,7 +248,7 @@
         onclick={handleEncrypt}
         disabled={selected.size === 0 || encrypting}
       >
-        {encrypting ? "Encrypting..." : `Encrypt for ${selected.size} recipient${selected.size !== 1 ? "s" : ""}`}
+        {encrypting ? m.recipient_encrypting() : encryptButtonLabel(selected.size)}
       </button>
     </div>
   </div>

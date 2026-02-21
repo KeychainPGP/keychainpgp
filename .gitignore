@@ -17,6 +17,7 @@ Thumbs.db
 node_modules/
 crates/keychainpgp-ui/frontend/build/
 crates/keychainpgp-ui/frontend/.svelte-kit/
+crates/keychainpgp-ui/frontend/src/lib/paraglide/
 
 # Environment
 .env

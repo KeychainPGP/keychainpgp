@@ -1,11 +1,12 @@
 import type { View, ModalType, ModalProps, InputMode } from "$lib/types";
+import * as m from "$lib/paraglide/messages.js";
 
 export type AppAction = "encrypt" | "decrypt" | "sign" | "verify" | null;
 
 let currentView: View = $state("home");
 let activeModal: ModalType | null = $state(null);
 let modalProps: ModalProps = $state({});
-let statusMessage: string = $state("Ready");
+let statusMessage: string = $state(m.ready());
 let statusTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingAction: AppAction = $state(null);
 let inputMode: InputMode = $state("clipboard");
@@ -43,7 +44,7 @@ export const appStore = {
     if (statusTimeout) clearTimeout(statusTimeout);
     if (durationMs > 0) {
       statusTimeout = setTimeout(() => {
-        statusMessage = "Ready";
+        statusMessage = m.ready();
       }, durationMs);
     }
   },

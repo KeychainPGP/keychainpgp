@@ -79,6 +79,7 @@ export interface Settings {
   passphrase_cache_secs: number;
   keyserver_url: string;
   include_armor_headers: boolean;
+  locale: string;
 }
 
 // --- Crypto ---

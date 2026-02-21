@@ -7,6 +7,7 @@
   import TrustBadge from "../shared/TrustBadge.svelte";
   import FingerprintDisplay from "../shared/FingerprintDisplay.svelte";
   import { formatDate } from "$lib/utils";
+  import * as m from "$lib/paraglide/messages.js";
 
   interface Props {
     key: KeyInfo;
@@ -17,7 +18,7 @@
     try {
       const armored = await exportKey(keyInfo.fingerprint);
       await navigator.clipboard.writeText(armored);
-      appStore.setStatus("Public key copied to clipboard.");
+      appStore.setStatus(m.keys_export_success());
     } catch (e) {
       appStore.openModal("error", { error: String(e) });
     }
@@ -25,13 +26,13 @@
 
   function handleDelete() {
     appStore.openModal("confirm", {
-      title: "Delete Key",
-      message: `Are you sure you want to delete the key for ${keyInfo.name ?? keyInfo.email ?? keyInfo.fingerprint.slice(-8)}? This cannot be undone.`,
+      title: m.key_delete_title(),
+      message: m.key_delete_message({ name: keyInfo.name ?? keyInfo.email ?? keyInfo.fingerprint.slice(-8) }),
       onConfirm: async () => {
         try {
           await deleteKey(keyInfo.fingerprint);
           await keyStore.refresh();
-          appStore.setStatus("Key deleted.");
+          appStore.setStatus(m.keys_deleted());
           appStore.closeModal();
         } catch (e) {
           appStore.openModal("error", { error: String(e) });
@@ -53,7 +54,7 @@
     <div class="min-w-0 flex-1">
       <div class="flex items-center gap-2 mb-1">
         <span class="font-medium truncate">
-          {keyInfo.name ?? "(unnamed)"}
+          {keyInfo.name ?? m.unnamed()}
         </span>
         <TrustBadge level={keyInfo.trust_level} />
       </div>
@@ -71,21 +72,21 @@
       <button
         class="p-1.5 rounded hover:bg-[var(--color-border)] transition-colors"
         onclick={handleDetails}
-        title="Details"
+        title={m.key_details_btn()}
       >
         <Info size={16} class="text-[var(--color-text-secondary)]" />
       </button>
       <button
         class="p-1.5 rounded hover:bg-[var(--color-border)] transition-colors"
         onclick={handleExport}
-        title="Export public key"
+        title={m.key_export_btn()}
       >
         <Download size={16} class="text-[var(--color-text-secondary)]" />
       </button>
       <button
         class="p-1.5 rounded hover:bg-[var(--color-danger)]/10 transition-colors"
         onclick={handleDelete}
-        title="Delete key"
+        title={m.key_delete_btn()}
       >
         <Trash2 size={16} class="text-[var(--color-danger)]" />
       </button>

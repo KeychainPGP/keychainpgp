@@ -2,6 +2,7 @@
   import { generateKeyPair } from "$lib/tauri";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   interface Props {
     onDone: () => void;
@@ -16,7 +17,7 @@
 
   async function handleGenerate() {
     if (!name.trim() || !email.trim()) {
-      error = "Name and email are required.";
+      error = m.keygen_required();
       return;
     }
     error = "";
@@ -24,7 +25,7 @@
     try {
       await generateKeyPair(name.trim(), email.trim(), passphrase || undefined);
       await keyStore.refresh();
-      appStore.setStatus("Key pair generated successfully!");
+      appStore.setStatus(m.keygen_success());
       onDone();
     } catch (e) {
       error = String(e);
@@ -35,18 +36,18 @@
 </script>
 
 <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-3">
-  <h3 class="font-medium">Generate New Key Pair</h3>
+  <h3 class="font-medium">{m.keygen_title()}</h3>
   <div class="grid grid-cols-2 gap-3">
     <input
       type="text"
-      placeholder="Name"
+      placeholder={m.keygen_name_placeholder()}
       bind:value={name}
       class="px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
              bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
     />
     <input
       type="email"
-      placeholder="Email"
+      placeholder={m.keygen_email_placeholder()}
       bind:value={email}
       class="px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
              bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -54,7 +55,7 @@
   </div>
   <input
     type="password"
-    placeholder="Passphrase (optional)"
+    placeholder={m.keygen_passphrase_placeholder()}
     bind:value={passphrase}
     class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
            bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -68,7 +69,7 @@
              hover:bg-[var(--color-bg)] transition-colors"
       onclick={onDone}
     >
-      Cancel
+      {m.keygen_cancel()}
     </button>
     <button
       class="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
@@ -76,7 +77,7 @@
       onclick={handleGenerate}
       disabled={generating}
     >
-      {generating ? "Generating..." : "Generate"}
+      {generating ? m.keygen_loading() : m.keygen_submit()}
     </button>
   </div>
 </div>

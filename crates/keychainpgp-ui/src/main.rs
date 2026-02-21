@@ -35,18 +35,20 @@ fn main() {
             let app_state = state::AppState::initialize()?;
 
             // Load persisted settings and apply to engine
+            let mut locale = "auto".to_string();
             if let Ok(store) = tauri_plugin_store::StoreExt::store(app, "settings.json") {
                 if let Some(val) = store.get("settings") {
                     if let Ok(settings) = serde_json::from_value::<commands::settings::Settings>(val) {
                         app_state.engine.set_include_armor_headers(settings.include_armor_headers);
+                        locale = settings.locale;
                     }
                 }
             }
 
             app.manage(app_state);
 
-            // Set up system tray
-            tray::setup_tray(app)?;
+            // Set up system tray with locale-aware labels
+            tray::setup_tray(app, &locale)?;
 
             tracing::info!("KeychainPGP initialized");
             Ok(())

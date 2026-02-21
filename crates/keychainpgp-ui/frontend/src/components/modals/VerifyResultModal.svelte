@@ -3,13 +3,14 @@
   import ModalContainer from "./ModalContainer.svelte";
   import FingerprintDisplay from "../shared/FingerprintDisplay.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   const result = appStore.modalProps.verifyResult;
   const valid = result?.valid ?? false;
   const trustLevel = result?.trust_level ?? 0;
 </script>
 
-<ModalContainer title="Signature Verification">
+<ModalContainer title={m.verify_modal_title()}>
   <div class="space-y-4">
     <div class="flex items-center gap-3">
       {#if valid && trustLevel >= 2}
@@ -17,9 +18,9 @@
           <ShieldCheck size={28} class="text-green-600" />
         </div>
         <div>
-          <p class="font-semibold text-green-600">Valid Signature — Verified</p>
+          <p class="font-semibold text-green-600">{m.verify_valid_verified()}</p>
           <p class="text-sm text-[var(--color-text-secondary)]">
-            This message was signed by a verified key.
+            {m.verify_valid_verified_desc()}
           </p>
         </div>
       {:else if valid}
@@ -27,9 +28,9 @@
           <ShieldAlert size={28} class="text-yellow-600" />
         </div>
         <div>
-          <p class="font-semibold text-yellow-600">Valid Signature — Unverified Key</p>
+          <p class="font-semibold text-yellow-600">{m.verify_valid_unverified()}</p>
           <p class="text-sm text-[var(--color-text-secondary)]">
-            The signature is valid, but the key has not been verified.
+            {m.verify_valid_unverified_desc()}
           </p>
         </div>
       {:else}
@@ -37,9 +38,9 @@
           <ShieldX size={28} class="text-red-600" />
         </div>
         <div>
-          <p class="font-semibold text-red-600">Verification Failed</p>
+          <p class="font-semibold text-red-600">{m.verify_invalid()}</p>
           <p class="text-sm text-[var(--color-text-secondary)]">
-            {result?.message ?? "Signature could not be verified."}
+            {result?.message ?? ""}
           </p>
         </div>
       {/if}
@@ -49,19 +50,19 @@
       <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-2">
         {#if result.signer_name}
           <div class="flex justify-between text-sm">
-            <span class="text-[var(--color-text-secondary)]">Signer</span>
+            <span class="text-[var(--color-text-secondary)]">{m.verify_signer_label()}</span>
             <span class="font-medium">{result.signer_name}</span>
           </div>
         {/if}
         {#if result.signer_email}
           <div class="flex justify-between text-sm">
-            <span class="text-[var(--color-text-secondary)]">Email</span>
+            <span class="text-[var(--color-text-secondary)]">{m.verify_email_label()}</span>
             <span>{result.signer_email}</span>
           </div>
         {/if}
         {#if result.signer_fingerprint}
           <div class="flex justify-between items-center text-sm">
-            <span class="text-[var(--color-text-secondary)]">Fingerprint</span>
+            <span class="text-[var(--color-text-secondary)]">{m.verify_fingerprint_label()}</span>
             <FingerprintDisplay fingerprint={result.signer_fingerprint} short />
           </div>
         {/if}
@@ -74,7 +75,7 @@
                hover:bg-[var(--color-primary-hover)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Close
+        {m.qr_close()}
       </button>
     </div>
   </div>

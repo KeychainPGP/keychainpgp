@@ -1,12 +1,13 @@
 <script lang="ts">
   import { Shield, KeyRound, Settings } from "lucide-svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
   import type { View } from "$lib/types";
 
-  const tabs: { id: View; label: string; icon: typeof Shield }[] = [
-    { id: "home", label: "Encrypt / Decrypt", icon: Shield },
-    { id: "keys", label: "Keys", icon: KeyRound },
-    { id: "settings", label: "Settings", icon: Settings },
+  const tabs: { id: View; label: () => string; icon: typeof Shield }[] = [
+    { id: "home", label: () => m.nav_home(), icon: Shield },
+    { id: "keys", label: () => m.nav_keys(), icon: KeyRound },
+    { id: "settings", label: () => m.nav_settings(), icon: Settings },
   ];
 </script>
 
@@ -21,7 +22,7 @@
       onclick={() => (appStore.currentView = tab.id)}
     >
       <tab.icon size={16} />
-      {tab.label}
+      {tab.label()}
     </button>
   {/each}
 </nav>

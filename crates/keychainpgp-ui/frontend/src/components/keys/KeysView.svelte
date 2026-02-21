@@ -8,6 +8,7 @@
   import LoadingSpinner from "../shared/LoadingSpinner.svelte";
   import KeyCard from "./KeyCard.svelte";
   import KeyGenerateForm from "./KeyGenerateForm.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   let query = $state("");
   let filteredKeys: KeyInfo[] = $state([]);
@@ -33,7 +34,7 @@
 
 <div class="max-w-2xl mx-auto space-y-4">
   <div class="flex items-center justify-between gap-3">
-    <h2 class="text-xl font-bold">Key Manager</h2>
+    <h2 class="text-xl font-bold">{m.keys_title()}</h2>
     <div class="flex items-center gap-2">
       <button
         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
@@ -42,7 +43,7 @@
         onclick={() => (showGenerateForm = !showGenerateForm)}
       >
         <Plus size={16} />
-        Generate
+        {m.keys_generate()}
       </button>
       <button
         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
@@ -51,7 +52,7 @@
         onclick={() => appStore.openModal("key-import")}
       >
         <Upload size={16} />
-        Import
+        {m.keys_import_btn()}
       </button>
       <button
         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
@@ -60,7 +61,7 @@
         onclick={() => appStore.openModal("key-discovery")}
       >
         <Search size={16} />
-        Discover
+        {m.keys_discover()}
       </button>
     </div>
   </div>
@@ -69,19 +70,19 @@
     <KeyGenerateForm onDone={() => (showGenerateForm = false)} />
   {/if}
 
-  <SearchBar value={query} placeholder="Search by name, email, or fingerprint..." oninput={(v) => (query = v)} />
+  <SearchBar value={query} placeholder={m.keys_search_placeholder()} oninput={(v) => (query = v)} />
 
   {#if keyStore.loading}
     <LoadingSpinner />
   {:else if filteredKeys.length === 0}
     <p class="text-center text-[var(--color-text-secondary)] py-8">
-      {query ? "No keys match your search." : "No keys yet. Generate or import one to get started."}
+      {query ? m.keys_empty_search() : m.keys_empty_all()}
     </p>
   {:else}
     {#if ownKeys.length > 0}
       <div>
         <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
-          Your Keys
+          {m.keys_section_own()}
         </h3>
         <div class="space-y-2">
           {#each ownKeys as k (k.fingerprint)}
@@ -94,7 +95,7 @@
     {#if contactKeys.length > 0}
       <div>
         <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
-          Contacts
+          {m.keys_section_contacts()}
         </h3>
         <div class="space-y-2">
           {#each contactKeys as k (k.fingerprint)}

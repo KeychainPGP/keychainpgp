@@ -3,6 +3,7 @@
   import { importKey, importBackup } from "$lib/tauri";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 
   let keyData = $state("");
   let importing = $state(false);
@@ -22,13 +23,13 @@
 
   async function handleImport() {
     if (!keyData.trim()) {
-      error = "Paste a PGP key or backup file.";
+      error = m.import_empty_error();
       return;
     }
 
     if (isBackup) {
       if (!transferCode.trim()) {
-        error = "Enter the transfer code shown during OpenKeychain backup.";
+        error = m.import_backup_transfer_error();
         return;
       }
       error = "";
@@ -38,12 +39,14 @@
         await keyStore.refresh();
         const parts = [];
         if (result.imported_count > 0) {
-          parts.push(`Imported ${result.imported_count} key${result.imported_count !== 1 ? "s" : ""}`);
+          parts.push(result.imported_count === 1
+            ? m.import_backup_success_one()
+            : m.import_backup_success_other({ count: result.imported_count }));
         }
         if (result.skipped_count > 0) {
-          parts.push(`${result.skipped_count} already in keyring`);
+          parts.push(m.import_backup_skipped({ count: result.skipped_count }));
         }
-        appStore.setStatus(parts.join(", ") + ".");
+        appStore.setStatus(parts.join("") + ".");
         appStore.closeModal();
       } catch (e) {
         error = String(e);
@@ -56,7 +59,7 @@
       try {
         const info = await importKey(keyData.trim());
         await keyStore.refresh();
-        appStore.setStatus(`Imported key for ${info.name ?? info.fingerprint.slice(-8)}.`);
+        appStore.setStatus(m.import_success_key({ name: info.name ?? info.fingerprint.slice(-8) }));
         appStore.closeModal();
       } catch (e) {
         error = String(e);
@@ -74,10 +77,10 @@
   }
 </script>
 
-<ModalContainer title="Import Key">
+<ModalContainer title={m.import_title()}>
   <div class="space-y-3">
     <textarea
-      placeholder="Paste ASCII-armored PGP key or backup file..."
+      placeholder={m.import_textarea_placeholder()}
       bind:value={keyData}
       rows={8}
       class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
@@ -86,29 +89,29 @@
     ></textarea>
 
     <div class="text-center text-xs text-[var(--color-text-secondary)]">
-      or
+      {m.import_or()}
     </div>
 
     <label
       class="block w-full py-3 text-center text-sm rounded-lg border-2 border-dashed
              border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer"
     >
-      Choose file...
+      {m.import_choose_file()}
       <input type="file" accept=".asc,.gpg,.pgp,.pub,.key,.sec.pgp" class="hidden" onchange={handleFileInput} />
     </label>
 
     {#if isBackup}
       <div class="p-3 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border)] space-y-2">
-        <p class="text-sm font-medium">OpenKeychain Backup Detected</p>
+        <p class="text-sm font-medium">{m.import_backup_detected()}</p>
         <p class="text-xs text-[var(--color-text-secondary)]">
-          Enter the transfer code shown when you created this backup.
+          {m.import_backup_desc()}
           {#if passphraseBegin}
-            It starts with <strong>{passphraseBegin}</strong>.
+            {m.import_backup_starts_with({ begin: passphraseBegin })}
           {/if}
         </p>
         <input
           type="text"
-          placeholder="1234-5678-9012-3456-7890-1234-5678-9012-3456"
+          placeholder={m.import_backup_placeholder()}
           bind:value={transferCode}
           class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
                  bg-[var(--color-bg)] font-mono tracking-wider text-center
@@ -127,7 +130,7 @@
                hover:bg-[var(--color-bg-secondary)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Cancel
+        {m.import_cancel()}
       </button>
       <button
         class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
@@ -135,7 +138,7 @@
         onclick={handleImport}
         disabled={!keyData.trim() || (isBackup && !transferCode.trim()) || importing}
       >
-        {importing ? "Importing..." : isBackup ? "Import Backup" : "Import"}
+        {importing ? m.import_loading() : isBackup ? m.import_submit_backup() : m.import_submit()}
       </button>
     </div>
   </div>

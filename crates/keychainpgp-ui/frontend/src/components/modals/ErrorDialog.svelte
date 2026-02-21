@@ -2,14 +2,15 @@
   import { AlertTriangle } from "lucide-svelte";
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
+  import * as m from "$lib/paraglide/messages.js";
 </script>
 
-<ModalContainer title="Error">
+<ModalContainer title={m.error_title()}>
   <div class="space-y-3">
     <div class="flex items-start gap-3">
       <AlertTriangle size={20} class="text-[var(--color-danger)] shrink-0 mt-0.5" />
       <div>
-        <p class="text-sm">{appStore.modalProps.error ?? "An unexpected error occurred."}</p>
+        <p class="text-sm">{appStore.modalProps.error ?? m.error_fallback()}</p>
         {#if appStore.modalProps.suggestion}
           <p class="text-xs text-[var(--color-text-secondary)] mt-1">
             {appStore.modalProps.suggestion}
@@ -23,7 +24,7 @@
                hover:bg-[var(--color-primary-hover)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        OK
+        {m.error_ok()}
       </button>
     </div>
   </div>

@@ -2,6 +2,7 @@
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { exportKeyQr } from "$lib/tauri";
+  import * as m from "$lib/paraglide/messages.js";
 
   const fp = appStore.modalProps.fingerprint ?? "";
 
@@ -17,7 +18,7 @@
   });
 </script>
 
-<ModalContainer title="QR Code Export">
+<ModalContainer title={m.qr_title()}>
   <div class="space-y-4">
     {#if error}
       <p class="text-sm text-red-600">{error}</p>
@@ -26,10 +27,10 @@
         {@html svgData}
       </div>
       <p class="text-xs text-center text-[var(--color-text-secondary)]">
-        Scan this QR code to import the public key.
+        {m.qr_desc()}
       </p>
     {:else}
-      <p class="text-sm text-[var(--color-text-secondary)]">Generating QR code...</p>
+      <p class="text-sm text-[var(--color-text-secondary)]">{m.qr_generating()}</p>
     {/if}
 
     <div class="flex justify-end">
@@ -38,7 +39,7 @@
                hover:bg-[var(--color-primary-hover)] transition-colors"
         onclick={() => appStore.closeModal()}
       >
-        Close
+        {m.qr_close()}
       </button>
     </div>
   </div>
