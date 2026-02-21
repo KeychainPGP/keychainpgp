@@ -2,7 +2,7 @@ name: Deploy Web App
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "web/**"
       - "crates/keychainpgp-wasm/**"
