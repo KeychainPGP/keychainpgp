@@ -172,6 +172,19 @@ export async function keyserverUpload(fingerprint: string, keyserverUrl?: string
   return invoke("keyserver_upload", { fingerprint, keyserverUrl: keyserverUrl ?? null });
 }
 
+export interface BackupImportResult {
+  imported_count: number;
+  keys: KeyInfo[];
+  skipped_count: number;
+}
+
+export async function importBackup(
+  backupData: string,
+  transferCode: string
+): Promise<BackupImportResult> {
+  return invoke("import_backup", { backupData, transferCode });
+}
+
 // --- Clipboard ---
 
 export async function readClipboard(): Promise<string | null> {

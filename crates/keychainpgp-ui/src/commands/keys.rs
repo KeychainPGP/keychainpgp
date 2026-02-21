@@ -410,3 +410,110 @@ pub async fn keyserver_upload(
         .await
         .map_err(|e| e.to_string())
 }
+
+/// Result of importing an OpenKeychain backup.
+#[derive(Debug, Clone, Serialize)]
+pub struct BackupImportResult {
+    pub imported_count: usize,
+    pub keys: Vec<KeyInfo>,
+    pub skipped_count: usize,
+}
+
+/// Import keys from an OpenKeychain backup file.
+///
+/// The backup is a symmetrically-encrypted PGP message containing one or more
+/// transferable secret keys. The `transfer_code` is a numeric passphrase
+/// (typically 9 groups of 4 digits) provided by OpenKeychain during export.
+#[tauri::command]
+pub fn import_backup(
+    state: State<'_, AppState>,
+    backup_data: String,
+    transfer_code: String,
+) -> Result<BackupImportResult, String> {
+    // Decrypt the SKESK-encrypted message (engine tries multiple password formats)
+    let decrypted = state
+        .engine
+        .decrypt_skesk(backup_data.as_bytes(), &transfer_code)
+        .map_err(|e| format!("Failed to decrypt backup: {e}"))?;
+
+    // Parse decrypted bytes into individual certificates
+    let cert_entries = state
+        .engine
+        .parse_backup_certs(&decrypted)
+        .map_err(|e| format!("Failed to parse keys from backup: {e}"))?;
+
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
+
+    let mut imported_keys: Vec<KeyInfo> = Vec::new();
+    let mut skipped = 0;
+
+    for (public_bytes, secret_bytes, cert_info) in cert_entries {
+        let fingerprint = cert_info.fingerprint.0.clone();
+        let is_own = cert_info.has_secret_key;
+
+        // Check if key already exists in keyring
+        if let Ok(Some(existing)) = keyring.get_key(&fingerprint) {
+            // Upgrade: if existing is public-only but this cert has secret material,
+            // replace it (OpenKeychain backups have PUBLIC block then PRIVATE block
+            // for the same key — CertParser may emit them as separate certs).
+            if is_own && !existing.is_own_key {
+                let record = KeyRecord {
+                    fingerprint,
+                    name: cert_info.name().map(String::from).or(existing.name),
+                    email: cert_info.email().map(String::from).or(existing.email),
+                    algorithm: cert_info.algorithm.to_string(),
+                    created_at: cert_info.created_at,
+                    expires_at: cert_info.expires_at,
+                    trust_level: 2,
+                    is_own_key: true,
+                    pgp_data: public_bytes,
+                };
+                // Delete the public-only record and re-store with secret material
+                let _ = keyring.delete_key(&record.fingerprint);
+                keyring
+                    .store_generated_key(record.clone(), &secret_bytes)
+                    .map_err(|e| format!("Failed to upgrade key: {e}"))?;
+                // Update the previously-added KeyInfo in imported_keys
+                if let Some(prev) = imported_keys.iter_mut().find(|k: &&mut KeyInfo| k.fingerprint == record.fingerprint) {
+                    *prev = KeyInfo::from(record);
+                }
+            } else {
+                skipped += 1;
+            }
+            continue;
+        }
+
+        let record = KeyRecord {
+            fingerprint,
+            name: cert_info.name().map(String::from),
+            email: cert_info.email().map(String::from),
+            algorithm: cert_info.algorithm.to_string(),
+            created_at: cert_info.created_at,
+            expires_at: cert_info.expires_at,
+            trust_level: if is_own { 2 } else { 1 },
+            is_own_key: is_own,
+            pgp_data: public_bytes,
+        };
+
+        if is_own {
+            keyring
+                .store_generated_key(record.clone(), &secret_bytes)
+                .map_err(|e| format!("Failed to store key: {e}"))?;
+        } else {
+            keyring
+                .import_public_key(record.clone())
+                .map_err(|e| format!("Failed to import key: {e}"))?;
+        }
+
+        imported_keys.push(KeyInfo::from(record));
+    }
+
+    Ok(BackupImportResult {
+        imported_count: imported_keys.len(),
+        keys: imported_keys,
+        skipped_count: skipped,
+    })
+}

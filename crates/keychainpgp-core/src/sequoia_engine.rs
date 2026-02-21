@@ -57,6 +57,225 @@ impl SequoiaEngine {
             sequoia_openpgp::armor::Writer::new(output, kind)
         }
     }
+
+    /// Parse decrypted backup bytes into individual certificates.
+    ///
+    /// Returns a list of `(public_key_armored, secret_key_armored, CertInfo)` for
+    /// each certificate found in the data.
+    pub fn parse_backup_certs(
+        &self,
+        data: &[u8],
+    ) -> Result<Vec<(Vec<u8>, Vec<u8>, CertInfo)>> {
+        use sequoia_openpgp::cert::CertParser;
+
+        let certs: Vec<Cert> = CertParser::from_bytes(data)
+            .map_err(|e| Error::InvalidArmor {
+                reason: format!("failed to parse backup keys: {e}"),
+            })?
+            .filter_map(|r| r.ok())
+            .collect();
+
+        if certs.is_empty() {
+            return Err(Error::InvalidArmor {
+                reason: "no valid keys found in the decrypted backup".into(),
+            });
+        }
+
+        let mut results = Vec::new();
+        for cert in &certs {
+            // Serialize public key
+            let mut public_bytes = Vec::new();
+            {
+                let mut writer = self.armor_writer(
+                    &mut public_bytes,
+                    sequoia_openpgp::armor::Kind::PublicKey,
+                )
+                .map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+                cert.serialize(&mut writer).map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+                writer.finalize().map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+            }
+
+            // Serialize secret key (TSK)
+            let mut secret_bytes = Vec::new();
+            {
+                let mut writer = self.armor_writer(
+                    &mut secret_bytes,
+                    sequoia_openpgp::armor::Kind::SecretKey,
+                )
+                .map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+                cert.as_tsk().serialize(&mut writer).map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+                writer.finalize().map_err(|e| Error::InvalidArmor {
+                    reason: format!("serialization error: {e}"),
+                })?;
+            }
+
+            // Inspect metadata — use secret_bytes so has_secret_key is correct
+            let info = self.inspect_key(&secret_bytes)?;
+            results.push((public_bytes, secret_bytes, info));
+        }
+
+        Ok(results)
+    }
+
+    /// Decrypt a symmetrically-encrypted PGP message (SKESK) using a password.
+    ///
+    /// Used to decrypt OpenKeychain backup files. The structure is:
+    /// `SKESK → SEIP → CompressedData → Literal Data → cert bytes`.
+    /// We use low-level PacketParser to walk into each container layer
+    /// and extract the Literal Data body containing the key material.
+    pub fn decrypt_skesk(&self, ciphertext: &[u8], password: &str) -> Result<Vec<u8>> {
+        use sequoia_openpgp::crypto::Password;
+
+        // Build password variants: digits-only, with dashes, with spaces, and raw input.
+        // OpenKeychain may use different formats depending on the version.
+        let digits_only: String = password.chars().filter(|c| c.is_ascii_digit()).collect();
+        let with_dashes: String = digits_only
+            .as_bytes()
+            .chunks(4)
+            .map(|c| std::str::from_utf8(c).unwrap_or(""))
+            .collect::<Vec<_>>()
+            .join("-");
+        let with_spaces: String = digits_only
+            .as_bytes()
+            .chunks(4)
+            .map(|c| std::str::from_utf8(c).unwrap_or(""))
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        let mut passwords = vec![
+            Password::from(digits_only.as_bytes()),
+            Password::from(with_dashes.as_bytes()),
+            Password::from(with_spaces.as_bytes()),
+        ];
+        if password != digits_only && password != with_dashes && password != with_spaces {
+            passwords.push(Password::from(password.as_bytes()));
+        }
+
+        // Try each password variant with a fresh PacketParser.
+        // SKESK with esk=None always derives a key (can't fail at SKESK level),
+        // so the real check is whether the derived key decrypts the SEIP correctly.
+        for pw in &passwords {
+            match Self::try_decrypt_skesk_with_password(ciphertext, pw) {
+                Ok(data) if !data.is_empty() => return Ok(data),
+                _ => continue,
+            }
+        }
+
+        Err(Error::Decryption {
+            reason: "incorrect transfer code or not a valid backup".into(),
+        })
+    }
+
+    /// Try decrypting SKESK-encrypted data with a single password.
+    ///
+    /// Uses PacketParser with `recurse()` to walk into the SEIP and
+    /// CompressedData containers, letting Sequoia handle both decryption
+    /// and decompression transparently through its streaming pipeline.
+    fn try_decrypt_skesk_with_password(
+        ciphertext: &[u8],
+        password: &sequoia_openpgp::crypto::Password,
+    ) -> Result<Vec<u8>> {
+        use sequoia_openpgp::parse::{PacketParser, PacketParserResult};
+        use sequoia_openpgp::Packet;
+
+        let mut ppr = PacketParser::from_bytes(ciphertext).map_err(|e| Error::Decryption {
+            reason: format!("invalid data: {e}"),
+        })?;
+        let mut session_key = None;
+        let mut output = Vec::new();
+        let mut inside_encrypted = false;
+
+        while let PacketParserResult::Some(mut pp) = ppr {
+            match &pp.packet {
+                Packet::SKESK(skesk) => {
+                    if let Ok((algo, sk)) = skesk.decrypt(password) {
+                        session_key = Some((algo, sk));
+                    }
+                    ppr = pp.next().map_err(|e| Error::Decryption {
+                        reason: format!("parse error: {e}"),
+                    })?.1;
+                }
+                Packet::SEIP(_) | Packet::AED(_) => {
+                    if let Some((algo, ref sk)) = session_key {
+                        pp.decrypt(algo, sk).map_err(|e| Error::Decryption {
+                            reason: format!("wrong key: {e}"),
+                        })?;
+                        inside_encrypted = true;
+                        // Recurse INTO the decrypted container
+                        ppr = pp.recurse().map_err(|e| Error::Decryption {
+                            reason: format!("parse error: {e}"),
+                        })?.1;
+                    } else {
+                        return Err(Error::Decryption {
+                            reason: "no SKESK packet found".into(),
+                        });
+                    }
+                }
+                Packet::CompressedData(_) if inside_encrypted => {
+                    // Recurse INTO the compressed container (Sequoia decompresses)
+                    ppr = pp.recurse().map_err(|e| Error::Decryption {
+                        reason: format!("decompress error: {e}"),
+                    })?.1;
+                }
+                #[allow(deprecated)]
+                Packet::MDC(_) => {
+                    ppr = pp.next().map_err(|e| Error::Decryption {
+                        reason: format!("parse error: {e}"),
+                    })?.1;
+                }
+                Packet::Literal(_) if inside_encrypted => {
+                    // Literal Data packet: extract just the body (cert bytes),
+                    // not the Literal wrapper (format/filename/date).
+                    pp.buffer_unread_content().map_err(|e| Error::Decryption {
+                        reason: format!("read error: {e}"),
+                    })?;
+                    let (pkt, next_ppr) = pp.next().map_err(|e| Error::Decryption {
+                        reason: format!("parse error: {e}"),
+                    })?;
+                    if let Packet::Literal(lit) = pkt {
+                        output.extend_from_slice(lit.body());
+                    }
+                    ppr = next_ppr;
+                }
+                _ if inside_encrypted => {
+                    // Other cert packets: buffer body and serialize as-is
+                    pp.buffer_unread_content().map_err(|e| Error::Decryption {
+                        reason: format!("read error: {e}"),
+                    })?;
+                    let (pkt, next_ppr) = pp.next().map_err(|e| Error::Decryption {
+                        reason: format!("parse error: {e}"),
+                    })?;
+                    pkt.serialize(&mut output).map_err(|e| Error::Decryption {
+                        reason: format!("serialize error: {e}"),
+                    })?;
+                    ppr = next_ppr;
+                }
+                _ => {
+                    ppr = pp.next().map_err(|e| Error::Decryption {
+                        reason: format!("parse error: {e}"),
+                    })?.1;
+                }
+            }
+        }
+
+        if !inside_encrypted {
+            return Err(Error::Decryption {
+                reason: "no encrypted data found".into(),
+            });
+        }
+
+        Ok(output)
+    }
 }
 
 impl Default for SequoiaEngine {
@@ -835,5 +1054,97 @@ mod tests {
 
         let info = engine.inspect_key(&key_pair.public_key).unwrap();
         assert_eq!(info.fingerprint.0, key_pair.fingerprint.0);
+    }
+
+    #[test]
+    fn test_decrypt_skesk_round_trip() {
+        use sequoia_openpgp::crypto::Password;
+        use sequoia_openpgp::serialize::stream::{Encryptor2, Message};
+
+        let engine = SequoiaEngine::new();
+        let password = "123456789012345678901234567890123456";
+
+        // Generate a test cert to use as backup payload
+        let options = KeyGenOptions::new(UserId::new("Backup Test", "backup@test.com"));
+        let key_pair = engine.generate_key_pair(options).unwrap();
+        let cert = Cert::from_bytes(&key_pair.public_key).unwrap();
+        let cert_binary = {
+            let mut buf = Vec::new();
+            cert.as_tsk().serialize(&mut buf).unwrap();
+            buf
+        };
+
+        // Create a SKESK-encrypted message with raw cert data (no LiteralWriter),
+        // mimicking OpenKeychain's backup format.
+        let mut ciphertext = Vec::new();
+        {
+            let message = Message::new(&mut ciphertext);
+            let mut encryptor = Encryptor2::with_passwords(
+                message,
+                Some(Password::from(password.as_bytes())),
+            )
+            .build()
+            .unwrap();
+            encryptor.write_all(&cert_binary).unwrap();
+            encryptor.finalize().unwrap();
+        }
+
+        // Decrypt and verify the cert data round-trips correctly
+        let decrypted = engine.decrypt_skesk(&ciphertext, password).unwrap();
+        let certs = engine.parse_backup_certs(&decrypted).unwrap();
+        assert_eq!(certs.len(), 1);
+        assert_eq!(certs[0].2.fingerprint.0, key_pair.fingerprint.0);
+    }
+
+    #[test]
+    fn test_decrypt_openkeychain_backup() {
+        let engine = SequoiaEngine::new();
+        let backup_data =
+            include_bytes!("../testdata/export_openkeychain.sec.pgp");
+        let transfer_code = "6306-7060-1630-4222-8547-1679-5977-5194-8485";
+
+        // Decrypt the SKESK-encrypted backup
+        let decrypted = engine
+            .decrypt_skesk(backup_data, transfer_code)
+            .expect("decryption should succeed with the correct transfer code");
+        assert!(!decrypted.is_empty(), "decrypted data should not be empty");
+
+        // Parse certs from decrypted data
+        let certs = engine
+            .parse_backup_certs(&decrypted)
+            .expect("should parse at least one cert from the backup");
+        assert!(!certs.is_empty(), "should find at least one key");
+
+        // Each cert should have a fingerprint
+        for (public_bytes, secret_bytes, info) in &certs {
+            assert!(!info.fingerprint.0.is_empty());
+            assert!(!public_bytes.is_empty());
+            assert!(!secret_bytes.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_decrypt_skesk_wrong_password() {
+        use sequoia_openpgp::crypto::Password;
+        use sequoia_openpgp::serialize::stream::{Encryptor2, LiteralWriter, Message};
+
+        let engine = SequoiaEngine::new();
+
+        let mut ciphertext = Vec::new();
+        {
+            let message = Message::new(&mut ciphertext);
+            let message = Encryptor2::with_passwords(
+                message,
+                Some(Password::from("correct-password".as_bytes())),
+            )
+            .build()
+            .unwrap();
+            let mut writer = LiteralWriter::new(message).build().unwrap();
+            writer.write_all(b"secret").unwrap();
+            writer.finalize().unwrap();
+        }
+
+        let result = engine.decrypt_skesk(&ciphertext, "wrong-password");
+        assert!(result.is_err());
     }
 }

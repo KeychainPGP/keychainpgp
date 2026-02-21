@@ -70,6 +70,7 @@ fn main() {
             commands::keys::wkd_lookup,
             commands::keys::keyserver_search,
             commands::keys::keyserver_upload,
+            commands::keys::import_backup,
             commands::clipboard::read_clipboard,
             commands::clipboard::write_clipboard,
             commands::clipboard::clear_clipboard,
