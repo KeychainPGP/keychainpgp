@@ -8,6 +8,7 @@
   import { registerHotkeys, unregisterHotkeys } from "$lib/hotkeys";
   import { initLocale, localeStore } from "$lib/stores/locale.svelte";
   import { initPlatform, isDesktop, isMobile } from "$lib/platform";
+  import { panicWipe } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
   import NavBar from "./components/layout/NavBar.svelte";
@@ -52,6 +53,11 @@
         onDecrypt: () => appStore.dispatchAction("decrypt"),
         onSign: () => appStore.dispatchAction("sign"),
         onVerify: () => appStore.dispatchAction("verify"),
+        onPanic: async () => {
+          if (settingsStore.settings.opsec_mode) {
+            await panicWipe();
+          }
+        },
       });
 
       // Listen for tray menu actions (desktop only)

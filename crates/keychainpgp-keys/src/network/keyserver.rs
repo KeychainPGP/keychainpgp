@@ -11,17 +11,29 @@ pub struct KeyserverResult {
     pub key_data: Vec<u8>,
 }
 
+/// Build a reqwest client with optional SOCKS5 proxy support.
+fn build_client(timeout_secs: u64, proxy_url: Option<&str>) -> Result<reqwest::Client, String> {
+    let mut builder = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(timeout_secs));
+
+    if let Some(proxy) = proxy_url {
+        let proxy = reqwest::Proxy::all(proxy)
+            .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+        builder = builder.proxy(proxy);
+    }
+
+    builder.build().map_err(|e| format!("HTTP client error: {e}"))
+}
+
 /// Search for keys on a keyserver by email or name.
 ///
 /// Uses the VKS API (keys.openpgp.org) by default.
 pub async fn keyserver_search(
     query: &str,
     keyserver_url: &str,
+    proxy_url: Option<&str>,
 ) -> Result<Vec<KeyserverResult>, String> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(10))
-        .build()
-        .map_err(|e| format!("HTTP client error: {e}"))?;
+    let client = build_client(10, proxy_url)?;
 
     // Use HKP lookup endpoint
     let url = format!(
@@ -64,11 +76,9 @@ pub async fn keyserver_search(
 pub async fn keyserver_upload(
     key_data: &[u8],
     keyserver_url: &str,
+    proxy_url: Option<&str>,
 ) -> Result<String, String> {
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(15))
-        .build()
-        .map_err(|e| format!("HTTP client error: {e}"))?;
+    let client = build_client(15, proxy_url)?;
 
     let key_text = String::from_utf8_lossy(key_data).into_owned();
 

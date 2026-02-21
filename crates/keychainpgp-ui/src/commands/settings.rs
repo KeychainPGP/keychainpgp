@@ -34,10 +34,32 @@ pub struct Settings {
     /// User's preferred display language. "auto" = detect from OS.
     #[serde(default = "default_locale")]
     pub locale: String,
+    /// SOCKS5 proxy URL for anonymous keyserver access (e.g., "socks5://127.0.0.1:9050").
+    #[serde(default = "default_proxy_url")]
+    pub proxy_url: String,
+    /// Whether the proxy is active for keyserver requests.
+    #[serde(default)]
+    pub proxy_enabled: bool,
+    /// Proxy preset: "tor", "lokinet", or "custom".
+    #[serde(default = "default_proxy_preset")]
+    pub proxy_preset: String,
+    /// OPSEC mode: hardened operation for high-risk users.
+    #[serde(default)]
+    pub opsec_mode: bool,
+    /// OPSEC: custom window title (empty = "Notes").
+    #[serde(default = "default_opsec_title")]
+    pub opsec_window_title: String,
+    /// OPSEC: view timeout in seconds for decrypted text (0 = no timeout).
+    #[serde(default = "default_opsec_view_timeout")]
+    pub opsec_view_timeout_secs: u64,
 }
 
 fn default_true() -> bool { true }
 fn default_locale() -> String { "auto".into() }
+fn default_proxy_url() -> String { "socks5://127.0.0.1:9050".into() }
+fn default_proxy_preset() -> String { "tor".into() }
+fn default_opsec_title() -> String { "Notes".into() }
+fn default_opsec_view_timeout() -> u64 { 30 }
 
 impl Default for Settings {
     fn default() -> Self {
@@ -53,6 +75,12 @@ impl Default for Settings {
             keyserver_url: "https://keys.openpgp.org".into(),
             include_armor_headers: true,
             locale: "auto".into(),
+            proxy_url: "socks5://127.0.0.1:9050".into(),
+            proxy_enabled: false,
+            proxy_preset: "tor".into(),
+            opsec_mode: false,
+            opsec_window_title: "Notes".into(),
+            opsec_view_timeout_secs: 30,
         }
     }
 }

@@ -13,6 +13,12 @@ const defaults: Settings = {
   keyserver_url: "https://keys.openpgp.org",
   include_armor_headers: true,
   locale: "auto",
+  proxy_url: "socks5://127.0.0.1:9050",
+  proxy_enabled: false,
+  proxy_preset: "tor",
+  opsec_mode: false,
+  opsec_window_title: "Notes",
+  opsec_view_timeout_secs: 30,
 };
 
 let settings: Settings = $state({ ...defaults });

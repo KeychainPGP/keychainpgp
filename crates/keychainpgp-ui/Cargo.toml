@@ -33,6 +33,7 @@ anyhow.workspace = true
 secrecy.workspace = true
 zeroize.workspace = true
 qrcode.workspace = true
+reqwest.workspace = true
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 keychainpgp-clipboard.workspace = true

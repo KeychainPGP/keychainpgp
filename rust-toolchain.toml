@@ -8,4 +8,5 @@ targets = [
   "x86_64-linux-android",
   "aarch64-apple-ios",
   "aarch64-apple-ios-sim",
+  "wasm32-unknown-unknown",
 ]

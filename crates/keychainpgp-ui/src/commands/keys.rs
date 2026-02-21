@@ -1,7 +1,10 @@
 //! Tauri commands for key management.
 
+use std::sync::atomic::Ordering;
+
 use serde::Serialize;
-use tauri::State;
+use tauri::{AppHandle, State};
+use tauri_plugin_store::StoreExt;
 
 use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
 use keychainpgp_core::CryptoEngine;
@@ -9,6 +12,22 @@ use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
+
+/// Read the proxy URL from settings if proxy is enabled.
+fn get_proxy_url(app: &AppHandle) -> Option<String> {
+    let store = app.store("settings.json").ok()?;
+    let val = store.get("settings")?;
+    let settings: super::settings::Settings = serde_json::from_value(val).ok()?;
+    if !settings.proxy_enabled {
+        return None;
+    }
+    let url = match settings.proxy_preset.as_str() {
+        "tor" => "socks5://127.0.0.1:9050".to_string(),
+        "lokinet" => "socks5://127.0.0.1:1080".to_string(),
+        _ => settings.proxy_url,
+    };
+    if url.is_empty() { None } else { Some(url) }
+}
 
 /// Key information returned to the frontend.
 #[derive(Debug, Clone, Serialize)]
@@ -76,9 +95,20 @@ pub fn generate_key_pair(
     };
 
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
-    keyring
-        .store_generated_key(record.clone(), key_pair.secret_key.expose_secret())
-        .map_err(|e| format!("Failed to store key: {e}"))?;
+
+    if state.opsec_mode.load(Ordering::Relaxed) {
+        // OPSEC mode: store secret key in RAM only, public key in DB
+        keyring
+            .import_public_key(record.clone())
+            .map_err(|e| format!("Failed to store key: {e}"))?;
+        let mut opsec_keys = state.opsec_secret_keys.lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        opsec_keys.insert(record.fingerprint.clone(), key_pair.secret_key.expose_secret().clone());
+    } else {
+        keyring
+            .store_generated_key(record.clone(), key_pair.secret_key.expose_secret())
+            .map_err(|e| format!("Failed to store key: {e}"))?;
+    }
 
     Ok(KeyInfo::from(record))
 }
@@ -121,7 +151,15 @@ pub fn import_key(
 
     let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
 
-    if cert_info.has_secret_key {
+    if cert_info.has_secret_key && state.opsec_mode.load(Ordering::Relaxed) {
+        // OPSEC mode: store secret key in RAM only, public key in DB
+        keyring
+            .import_public_key(record.clone())
+            .map_err(|e| format!("Failed to import key: {e}"))?;
+        let mut opsec_keys = state.opsec_secret_keys.lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        opsec_keys.insert(record.fingerprint.clone(), key_data.as_bytes().to_vec());
+    } else if cert_info.has_secret_key {
         keyring
             .store_generated_key(record.clone(), key_data.as_bytes())
             .map_err(|e| format!("Failed to import key: {e}"))?;
@@ -322,10 +360,12 @@ pub fn export_key_qr(
 /// Look up a key via WKD (Web Key Directory) by email address.
 #[tauri::command]
 pub async fn wkd_lookup(
+    app: AppHandle,
     state: State<'_, AppState>,
     email: String,
 ) -> Result<Option<KeyInfo>, String> {
-    let key_bytes = keychainpgp_keys::network::wkd::wkd_lookup(&email)
+    let proxy = get_proxy_url(&app);
+    let key_bytes = keychainpgp_keys::network::wkd::wkd_lookup(&email, proxy.as_deref())
         .await
         .map_err(|e| e.to_string())?;
 
@@ -353,13 +393,15 @@ pub async fn wkd_lookup(
 /// Search for keys on a keyserver.
 #[tauri::command]
 pub async fn keyserver_search(
+    app: AppHandle,
     state: State<'_, AppState>,
     query: String,
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    let proxy = get_proxy_url(&app);
 
-    let results = keychainpgp_keys::network::keyserver::keyserver_search(&query, &url)
+    let results = keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
         .await
         .map_err(|e| e.to_string())?;
 
@@ -391,11 +433,13 @@ pub async fn keyserver_search(
 /// Upload a public key to a keyserver.
 #[tauri::command]
 pub async fn keyserver_upload(
+    app: AppHandle,
     state: State<'_, AppState>,
     fingerprint: String,
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    let proxy = get_proxy_url(&app);
 
     let key_data = {
         let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
@@ -406,9 +450,29 @@ pub async fn keyserver_upload(
         record.pgp_data.clone()
     };
 
-    keychainpgp_keys::network::keyserver::keyserver_upload(&key_data, &url)
+    keychainpgp_keys::network::keyserver::keyserver_upload(&key_data, &url, proxy.as_deref())
         .await
         .map_err(|e| e.to_string())
+}
+
+/// Test a proxy connection by making a simple HTTPS request through it.
+#[tauri::command]
+pub async fn test_proxy_connection(proxy_url: String) -> Result<String, String> {
+    let proxy = reqwest::Proxy::all(&proxy_url)
+        .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+    let client = reqwest::Client::builder()
+        .proxy(proxy)
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .map_err(|e| format!("Failed to create client: {e}"))?;
+
+    client
+        .get("https://keys.openpgp.org")
+        .send()
+        .await
+        .map_err(|e| format!("Connection failed: {e}"))?;
+
+    Ok("Proxy connection successful.".into())
 }
 
 /// Result of importing an OpenKeychain backup.

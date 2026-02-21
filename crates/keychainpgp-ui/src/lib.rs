@@ -10,7 +10,10 @@ mod state;
 #[cfg(desktop)]
 mod tray;
 
+use std::sync::atomic::Ordering;
+
 use tauri::Manager;
+use zeroize::Zeroize;
 
 #[cfg(desktop)]
 fn create_builder() -> tauri::Builder<tauri::Wry> {
@@ -50,12 +53,18 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::keyserver_search,
             commands::keys::keyserver_upload,
             commands::keys::import_backup,
+            commands::keys::test_proxy_connection,
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,
             // Shared sync commands
             commands::sync::export_key_bundle,
             commands::sync::import_key_bundle,
+            // OPSEC commands
+            commands::opsec::enable_opsec_mode,
+            commands::opsec::disable_opsec_mode,
+            commands::opsec::panic_wipe,
+            commands::opsec::get_opsec_status,
         ])
 }
 
@@ -88,12 +97,18 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::keyserver_search,
             commands::keys::keyserver_upload,
             commands::keys::import_backup,
+            commands::keys::test_proxy_connection,
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,
             // Shared sync commands
             commands::sync::export_key_bundle,
             commands::sync::import_key_bundle,
+            // OPSEC commands
+            commands::opsec::enable_opsec_mode,
+            commands::opsec::disable_opsec_mode,
+            commands::opsec::panic_wipe,
+            commands::opsec::get_opsec_status,
         ])
 }
 
@@ -130,6 +145,8 @@ pub fn run() {
             // Load persisted settings and apply to engine
             #[cfg(desktop)]
             let mut locale = "auto".to_string();
+            #[cfg(desktop)]
+            let mut opsec_settings = None;
             if let Ok(store) = tauri_plugin_store::StoreExt::store(app, "settings.json") {
                 if let Some(val) = store.get("settings") {
                     if let Ok(settings) =
@@ -138,15 +155,34 @@ pub fn run() {
                         app_state
                             .engine
                             .set_include_armor_headers(settings.include_armor_headers);
+                        if settings.opsec_mode {
+                            app_state.opsec_mode.store(true, Ordering::Relaxed);
+                        }
                         #[cfg(desktop)]
                         {
-                            locale = settings.locale;
+                            locale = settings.locale.clone();
+                            if settings.opsec_mode {
+                                opsec_settings = Some(settings);
+                            }
                         }
                     }
                 }
             }
 
             app.manage(app_state);
+
+            // Apply OPSEC window title if active (desktop only)
+            #[cfg(desktop)]
+            if let Some(ref settings) = opsec_settings {
+                if let Some(window) = app.get_webview_window("main") {
+                    let title = if settings.opsec_window_title.is_empty() {
+                        "Notes"
+                    } else {
+                        &settings.opsec_window_title
+                    };
+                    let _ = window.set_title(title);
+                }
+            }
 
             // Set up system tray with locale-aware labels (desktop only)
             #[cfg(desktop)]
@@ -155,6 +191,31 @@ pub fn run() {
             tracing::info!("KeychainPGP initialized");
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running KeychainPGP");
+        .build(tauri::generate_context!())
+        .expect("error while building KeychainPGP")
+        .run(|app, event| {
+            if let tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit = event {
+                if let Some(app_state) = app.try_state::<state::AppState>() {
+                    if app_state.opsec_mode.load(Ordering::Relaxed) {
+                        // Zeroize all in-memory secret keys
+                        if let Ok(mut keys) = app_state.opsec_secret_keys.lock() {
+                            for value in keys.values_mut() {
+                                value.zeroize();
+                            }
+                            keys.clear();
+                        }
+                        // Clear passphrase cache
+                        if let Ok(mut cache) = app_state.passphrase_cache.lock() {
+                            cache.clear_all();
+                        }
+                        // Clear clipboard (desktop only)
+                        #[cfg(desktop)]
+                        {
+                            let _ = keychainpgp_clipboard::clear::clear_clipboard();
+                        }
+                        tracing::info!("OPSEC session cleanup completed");
+                    }
+                }
+            }
+        });
 }

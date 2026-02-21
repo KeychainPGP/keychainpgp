@@ -1,15 +1,19 @@
 <script lang="ts">
   import { settingsStore } from "$lib/stores/settings.svelte";
-  import { clearPassphraseCache } from "$lib/tauri";
+  import { clearPassphraseCache, enableOpsecMode, disableOpsecMode, testProxyConnection } from "$lib/tauri";
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { shortFingerprint } from "$lib/utils";
   import { isDesktop } from "$lib/platform";
   import { changeLocale, localeStore } from "$lib/stores/locale.svelte";
-  import { RefreshCw } from "lucide-svelte";
+  import { RefreshCw, Shield, Globe } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
 
   const desktop = isDesktop();
+
+  let proxyTesting = $state(false);
+  let proxyTestResult: string | null = $state(null);
+  let proxyTestSuccess = $state(false);
 
   /** Native labels for each locale (always displayed in the locale's own language). */
   const LOCALE_LABELS: Record<string, string> = {
@@ -80,6 +84,62 @@
     const tag = (e.currentTarget as HTMLSelectElement).value;
     settingsStore.save({ locale: tag });
     changeLocale(tag);
+  }
+
+  async function toggleOpsecMode() {
+    const newValue = !settingsStore.settings.opsec_mode;
+    await settingsStore.save({ opsec_mode: newValue });
+    if (newValue) {
+      await enableOpsecMode(settingsStore.settings.opsec_window_title || undefined);
+      appStore.setStatus(m.opsec_enabled());
+    } else {
+      await disableOpsecMode();
+      appStore.setStatus(m.opsec_disabled());
+    }
+  }
+
+  const PROXY_PRESETS: Record<string, string> = {
+    tor: "socks5://127.0.0.1:9050",
+    lokinet: "socks5://127.0.0.1:1080",
+  };
+
+  function toggleProxy() {
+    settingsStore.save({ proxy_enabled: !settingsStore.settings.proxy_enabled });
+    proxyTestResult = null;
+  }
+
+  function selectProxyPreset(preset: string) {
+    proxyTestResult = null;
+    if (preset === "custom") {
+      settingsStore.save({ proxy_preset: "custom" });
+    } else {
+      settingsStore.save({
+        proxy_preset: preset,
+        proxy_url: PROXY_PRESETS[preset] ?? PROXY_PRESETS.tor,
+      });
+    }
+  }
+
+  function effectiveProxyUrl(): string {
+    const s = settingsStore.settings;
+    if (s.proxy_preset === "custom") return s.proxy_url;
+    return PROXY_PRESETS[s.proxy_preset] ?? s.proxy_url;
+  }
+
+  async function handleProxyTest() {
+    proxyTesting = true;
+    proxyTestResult = null;
+    proxyTestSuccess = false;
+    try {
+      await testProxyConnection(effectiveProxyUrl());
+      proxyTestResult = m.settings_proxy_success();
+      proxyTestSuccess = true;
+    } catch (e) {
+      proxyTestResult = m.settings_proxy_failed({ error: String(e) });
+      proxyTestSuccess = false;
+    } finally {
+      proxyTesting = false;
+    }
   }
 
   const themeLabels: Record<string, () => string> = {
@@ -251,6 +311,59 @@
     </button>
   </section>
 
+  <!-- OPSEC Mode -->
+  {#if desktop}
+  <section class="space-y-3">
+    <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide flex items-center gap-1.5">
+      <Shield size={14} />
+      {m.settings_opsec()}
+    </h3>
+    <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_desc()}</p>
+
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium">{m.settings_opsec_enable()}</p>
+        <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_enable_desc()}</p>
+      </div>
+      <input type="checkbox" checked={settingsStore.settings.opsec_mode} onchange={toggleOpsecMode}
+        class="w-4 h-4 accent-[var(--color-primary)]" />
+    </label>
+
+    {#if settingsStore.settings.opsec_mode}
+      <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+        <div>
+          <p class="text-sm font-medium">{m.settings_opsec_title_label()}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_title_desc()}</p>
+        </div>
+        <input
+          type="text"
+          value={settingsStore.settings.opsec_window_title}
+          onchange={(e) => settingsStore.save({ opsec_window_title: e.currentTarget.value || "Notes" })}
+          placeholder="Notes"
+          class="w-32 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+                 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </label>
+
+      <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+        <div>
+          <p class="text-sm font-medium">{m.settings_opsec_timeout_label()}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_timeout_desc()}</p>
+        </div>
+        <input
+          type="number"
+          min="0"
+          max="300"
+          value={settingsStore.settings.opsec_view_timeout_secs}
+          onchange={(e) => settingsStore.save({ opsec_view_timeout_secs: parseInt(e.currentTarget.value) || 30 })}
+          class="w-20 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+                 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        />
+      </label>
+    {/if}
+  </section>
+  {/if}
+
   <!-- Key Discovery -->
   <section class="space-y-3">
     <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">{m.settings_key_discovery()}</h3>
@@ -268,6 +381,70 @@
                focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
       />
     </label>
+
+    <!-- Proxy (Tor/Lokinet) -->
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium flex items-center gap-1.5">
+          <Globe size={14} />
+          {m.settings_proxy()}
+        </p>
+        <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_proxy_desc()}</p>
+      </div>
+      <input type="checkbox" checked={settingsStore.settings.proxy_enabled} onchange={toggleProxy}
+        class="w-4 h-4 accent-[var(--color-primary)]" />
+    </label>
+
+    {#if settingsStore.settings.proxy_enabled}
+      <div class="p-3 rounded-lg border border-[var(--color-border)] space-y-3">
+        <div class="flex gap-2">
+          {#each ["tor", "lokinet", "custom"] as preset}
+            <button
+              class="px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors"
+              class:bg-[var(--color-primary)]={settingsStore.settings.proxy_preset === preset}
+              class:text-white={settingsStore.settings.proxy_preset === preset}
+              class:border-[var(--color-primary)]={settingsStore.settings.proxy_preset === preset}
+              class:border-[var(--color-border)]={settingsStore.settings.proxy_preset !== preset}
+              onclick={() => selectProxyPreset(preset)}
+            >
+              {preset === "tor" ? "Tor" : preset === "lokinet" ? "Lokinet" : m.settings_proxy_custom()}
+            </button>
+          {/each}
+        </div>
+
+        {#if settingsStore.settings.proxy_preset !== "custom"}
+          <p class="text-xs text-[var(--color-text-secondary)] font-mono">
+            {PROXY_PRESETS[settingsStore.settings.proxy_preset]}
+          </p>
+        {:else}
+          <input
+            type="text"
+            value={settingsStore.settings.proxy_url}
+            onchange={(e) => settingsStore.save({ proxy_url: e.currentTarget.value || "socks5://127.0.0.1:9050" })}
+            placeholder={m.settings_proxy_placeholder()}
+            class="w-full px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+                   focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-mono text-xs"
+          />
+        {/if}
+
+        <div class="flex items-center gap-2">
+          <button
+            class="px-3 py-1.5 text-xs rounded-lg border border-[var(--color-border)] font-medium
+                   hover:bg-[var(--color-bg-secondary)] transition-colors disabled:opacity-50"
+            onclick={handleProxyTest}
+            disabled={proxyTesting}
+          >
+            {proxyTesting ? m.settings_proxy_testing() : m.settings_proxy_test()}
+          </button>
+          {#if proxyTestResult}
+            <p class="text-xs" class:text-green-600={proxyTestSuccess}
+               class:text-red-600={!proxyTestSuccess}>
+              {proxyTestResult}
+            </p>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </section>
 
   <!-- Key Sync -->

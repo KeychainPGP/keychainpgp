@@ -49,16 +49,23 @@ fn wkd_hash(local_part: &str) -> String {
 ///
 /// Tries the "advanced" method first, then falls back to the "direct" method.
 /// Returns the raw key bytes if found.
-pub async fn wkd_lookup(email: &str) -> Result<Vec<u8>, String> {
+pub async fn wkd_lookup(email: &str, proxy_url: Option<&str>) -> Result<Vec<u8>, String> {
     let (local, domain) = email
         .split_once('@')
         .ok_or_else(|| format!("Invalid email address: {email}"))?;
 
     let hash = wkd_hash(local);
 
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(10))
-        .build()
+    let mut builder = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10));
+
+    if let Some(proxy) = proxy_url {
+        let proxy = reqwest::Proxy::all(proxy)
+            .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+        builder = builder.proxy(proxy);
+    }
+
+    let client = builder.build()
         .map_err(|e| format!("HTTP client error: {e}"))?;
 
     // Try advanced method first

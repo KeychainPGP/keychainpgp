@@ -80,6 +80,12 @@ export interface Settings {
   keyserver_url: string;
   include_armor_headers: boolean;
   locale: string;
+  proxy_url: string;
+  proxy_enabled: boolean;
+  proxy_preset: string; // "tor" | "lokinet" | "custom"
+  opsec_mode: boolean;
+  opsec_window_title: string;
+  opsec_view_timeout_secs: number;
 }
 
 // --- Crypto ---
@@ -243,6 +249,30 @@ export async function importKeyBundle(
   passphrase: string
 ): Promise<number> {
   return invoke("import_key_bundle", { encryptedData, passphrase });
+}
+
+// --- OPSEC ---
+
+export async function enableOpsecMode(): Promise<void> {
+  return invoke("enable_opsec_mode");
+}
+
+export async function disableOpsecMode(): Promise<void> {
+  return invoke("disable_opsec_mode");
+}
+
+export async function panicWipe(): Promise<void> {
+  return invoke("panic_wipe");
+}
+
+export async function getOpsecStatus(): Promise<boolean> {
+  return invoke("get_opsec_status");
+}
+
+// --- Proxy ---
+
+export async function testProxyConnection(proxyUrl: string): Promise<string> {
+  return invoke("test_proxy_connection", { proxyUrl });
 }
 
 // --- Settings ---

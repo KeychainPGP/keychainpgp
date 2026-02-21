@@ -77,6 +77,9 @@
           await writeClipboard(result.message);
           appStore.setStatus(m.recipient_encrypt_success());
           appStore.closeModal();
+          if (settingsStore.settings.auto_clear_after_encrypt || settingsStore.settings.opsec_mode) {
+            clipboardStore.scheduleAutoClear();
+          }
         } else {
           appStore.openModal("error", { error: result.message });
         }
@@ -86,6 +89,9 @@
           appStore.setStatus(result.message);
           appStore.closeModal();
           clipboardStore.refresh();
+          if (settingsStore.settings.auto_clear_after_encrypt || settingsStore.settings.opsec_mode) {
+            clipboardStore.scheduleAutoClear();
+          }
         } else {
           appStore.openModal("error", { error: result.message });
         }

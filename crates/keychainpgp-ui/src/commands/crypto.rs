@@ -1,10 +1,12 @@
 //! Tauri commands for encryption and decryption.
 
+use std::sync::atomic::Ordering;
+
 use serde::Serialize;
 use tauri::State;
 
 use keychainpgp_core::CryptoEngine;
-use secrecy::ExposeSecret;
+use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
 
@@ -121,10 +123,27 @@ fn decrypt_impl(
         );
     }
 
+    let is_opsec = state.opsec_mode.load(Ordering::Relaxed);
+
     for key_record in &own_keys {
-        let secret_key = match keyring.get_secret_key(&key_record.fingerprint) {
-            Ok(sk) => sk,
-            Err(_) => continue,
+        let secret_key: SecretBox<Vec<u8>> = if is_opsec {
+            let opsec_keys = state.opsec_secret_keys.lock()
+                .map_err(|e| format!("Internal error: {e}"))?;
+            match opsec_keys.get(&key_record.fingerprint) {
+                Some(k) => SecretBox::new(Box::new(k.clone())),
+                None => {
+                    // Also try the regular keyring (keys imported before OPSEC was enabled)
+                    match keyring.get_secret_key(&key_record.fingerprint) {
+                        Ok(sk) => sk,
+                        Err(_) => continue,
+                    }
+                }
+            }
+        } else {
+            match keyring.get_secret_key(&key_record.fingerprint) {
+                Ok(sk) => sk,
+                Err(_) => continue,
+            }
         };
 
         let cached = if passphrase.is_none() {
@@ -223,10 +242,26 @@ fn sign_impl(
         return Err("You don't have any private keys. Generate or import a key first.".into());
     }
 
+    let is_opsec = state.opsec_mode.load(Ordering::Relaxed);
+
     for key_record in &own_keys {
-        let secret_key = match keyring.get_secret_key(&key_record.fingerprint) {
-            Ok(sk) => sk,
-            Err(_) => continue,
+        let secret_key: SecretBox<Vec<u8>> = if is_opsec {
+            let opsec_keys = state.opsec_secret_keys.lock()
+                .map_err(|e| format!("Internal error: {e}"))?;
+            match opsec_keys.get(&key_record.fingerprint) {
+                Some(k) => SecretBox::new(Box::new(k.clone())),
+                None => {
+                    match keyring.get_secret_key(&key_record.fingerprint) {
+                        Ok(sk) => sk,
+                        Err(_) => continue,
+                    }
+                }
+            }
+        } else {
+            match keyring.get_secret_key(&key_record.fingerprint) {
+                Ok(sk) => sk,
+                Err(_) => continue,
+            }
         };
 
         let cached = if passphrase.is_none() {

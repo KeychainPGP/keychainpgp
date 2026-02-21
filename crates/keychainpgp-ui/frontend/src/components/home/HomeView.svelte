@@ -71,6 +71,7 @@
       if (result.success) {
         appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
         appStore.setStatus(m.decrypt_success());
+        clipboardStore.scheduleAutoClear();
       } else {
         appStore.setStatus(result.message);
       }
@@ -84,6 +85,7 @@
               if (result.success) {
                 appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
                 appStore.setStatus(m.decrypt_success());
+                clipboardStore.scheduleAutoClear();
               } else {
                 appStore.openModal("error", { error: result.message });
               }

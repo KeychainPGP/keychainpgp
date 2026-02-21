@@ -1,0 +1,21 @@
+{
+  "name": "keychainpgp-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "wasm": "wasm-pack build ../crates/keychainpgp-wasm --target web --out-dir ../../web/pkg"
+  },
+  "dependencies": {
+    "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "vite": "^6.0.0",
+    "vite-plugin-wasm": "^3.4.1",
+    "vite-plugin-top-level-await": "^1.5.0"
+  }
+}
