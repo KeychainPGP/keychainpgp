@@ -186,13 +186,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
-      - name: Build Android APK
+      - name: Build Android APKs
         working-directory: crates/keychainpgp-ui
         run: |
           export NDK_HOME="$ANDROID_HOME/ndk/27.0.12077973"
-          npx @tauri-apps/cli android build --debug
-      - name: Upload APK
+          npx @tauri-apps/cli android build --debug --split-per-abi
+      - name: Rename APKs
+        run: |
+          APK_DIR="crates/keychainpgp-ui/gen/android/app/build/outputs/apk"
+          VERSION="0.1.0"
+          for abi_dir in "$APK_DIR"/*/debug; do
+            abi=$(basename "$(dirname "$abi_dir")")
+            for apk in "$abi_dir"/*.apk; do
+              [ -f "$apk" ] && mv "$apk" "$abi_dir/keychainpgp-${VERSION}-${abi}-debug.apk"
+            done
+          done
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
-          path: crates/keychainpgp-ui/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
+          name: android-apks
+          path: crates/keychainpgp-ui/gen/android/app/build/outputs/apk/*/debug/keychainpgp-*.apk
