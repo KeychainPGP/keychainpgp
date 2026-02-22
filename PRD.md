@@ -951,25 +951,39 @@ No feature is degraded or unavailable when offline.
 - [ ] Static donation page on the project website with the same addresses and QR codes.
 - [ ] Optional "Supporters" section in About panel (opt-in, pseudonymous).
 
-### Phase 7: Landing Page & Web Presence (Weeks 53+)
+### Phase 7: Website & Web App (Weeks 53+)
 
-**Goal:** A public-facing website that presents KeychainPGP, drives downloads, and serves as the trust anchor for the project.
+**Goal:** Two separate web presences — a marketing website on `keychainpgp.org` that presents the project and drives adoption, and the existing WASM web app on `keychainpgp.github.io` polished to production quality.
 
-- [ ] Static landing page (Hugo, Astro, or plain HTML) hosted on `keychainpgp.org` (or equivalent).
-- [ ] Hero section: tagline, one-line value proposition, animated product screenshot/mockup, and prominent download buttons (Windows / macOS / Linux).
+#### 7a. Marketing website (`keychainpgp.org`)
+
+A lightweight static site (Astro, Hugo, or plain HTML) in a separate repo, deployed to GitHub Pages with a custom domain.
+
+- [ ] Hero section: tagline, one-line value proposition, animated product screenshot/mockup, and prominent download buttons (Windows / macOS / Linux / Android).
 - [ ] Features section: 3-4 key selling points with icons (clipboard-first, zero-config, cross-platform, open source).
 - [ ] "How it works" section: 3-step visual walkthrough (Copy → Encrypt → Paste).
+- [ ] "Try in browser" CTA linking to the web app at `keychainpgp.github.io`.
 - [ ] Download section: platform-detected auto-suggestion ("It looks like you're on Windows — [Download for Windows]") with manual override for all platforms.
 - [ ] Verification section: GPG signatures and SHA-256 checksums for every release binary.
 - [ ] Documentation hub: links to user guide, FAQ, security model, and contribution guide.
 - [ ] Donation section: BTC / ETH / XMR addresses with QR codes (mirrors in-app Phase 6).
 - [ ] Dark/light theme toggle, responsive design (mobile-friendly).
-- [ ] SEO: Open Graph tags, structured data, sitemap, meta descriptions in all supported languages.
-- [ ] i18n: landing page available in all Phase 3 languages (at minimum EN, FR, DE, ES, RU, ZH-CN, JA, AR).
+- [ ] SEO: Open Graph tags, structured data (JSON-LD SoftwareApplication), sitemap, meta descriptions.
+- [ ] i18n: site available in all Phase 3 languages (at minimum EN, FR, DE, ES, RU, ZH-CN, JA, AR).
 - [ ] Privacy-respecting analytics (Plausible, Umami, or self-hosted — no Google Analytics).
-- [ ] Deployment: CI/CD from a `website/` directory in the monorepo or a separate `keychainpgp.github.io` repo, auto-deployed on push.
+- [ ] Deployment: separate repo with CI/CD, custom domain `keychainpgp.org` via GitHub Pages CNAME.
 
-**Exit criteria:** Visiting `keychainpgp.org` presents a professional, multilingual landing page where any user can understand the product, download the correct installer for their OS, and verify its authenticity.
+#### 7b. Web app polish (`keychainpgp.github.io`)
+
+The WASM-based web app is already deployed from `web/` via `deploy-web.yml`. This sub-phase brings it to production quality.
+
+- [ ] Dark/light theme toggle (currently dark-only).
+- [ ] Responsive design audit (mobile-friendly layout).
+- [ ] i18n: web app available in Phase 3 languages.
+- [ ] Improved onboarding: first-visit guidance or help tooltips for new users.
+- [ ] Open Graph tags and favicon set for shared links.
+
+**Exit criteria:** Visiting `keychainpgp.org` presents a professional, multilingual landing page where any user can understand the product, download the correct installer, verify its authenticity, or try the app in their browser via `keychainpgp.github.io`. The web app supports multiple languages and both light/dark themes.
 
 ### Phase 8: iOS App (Weeks 55+)
 
