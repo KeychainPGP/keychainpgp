@@ -200,6 +200,8 @@
   "settings_theme_system": "Sistem",
   "settings_theme_light": "Açık",
   "settings_theme_dark": "Koyu",
+  "settings_close_to_tray_label": "Tepsi alanına küçült",
+  "settings_close_to_tray_desc": "Pencereyi kapattığınızda uygulamayı sistem tepsisinde çalışır durumda tut",
 
   "settings_clipboard": "Pano",
   "settings_auto_clear_label": "Panoyu otomatik temizle",

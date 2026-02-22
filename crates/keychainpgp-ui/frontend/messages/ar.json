@@ -200,6 +200,8 @@
   "settings_theme_system": "النظام",
   "settings_theme_light": "فاتح",
   "settings_theme_dark": "داكن",
+  "settings_close_to_tray_label": "إغلاق إلى علبة النظام",
+  "settings_close_to_tray_desc": "إبقاء التطبيق في علبة النظام عند إغلاق النافذة",
 
   "settings_clipboard": "الحافظة",
   "settings_auto_clear_label": "مسح الحافظة تلقائيًا",

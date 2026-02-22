@@ -200,6 +200,8 @@
   "settings_theme_system": "跟隨系統",
   "settings_theme_light": "淺色",
   "settings_theme_dark": "深色",
+  "settings_close_to_tray_label": "關閉至系統匣",
+  "settings_close_to_tray_desc": "關閉視窗時保持應用程式在系統匣中執行",
 
   "settings_clipboard": "剪貼簿",
   "settings_auto_clear_label": "自動清除剪貼簿",

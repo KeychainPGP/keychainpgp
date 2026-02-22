@@ -200,6 +200,8 @@
   "settings_theme_system": "System",
   "settings_theme_light": "Hell",
   "settings_theme_dark": "Dunkel",
+  "settings_close_to_tray_label": "In den Infobereich schließen",
+  "settings_close_to_tray_desc": "Die App im Infobereich weiterlaufen lassen, wenn Sie das Fenster schließen",
 
   "settings_clipboard": "Zwischenablage",
   "settings_auto_clear_label": "Zwischenablage automatisch leeren",

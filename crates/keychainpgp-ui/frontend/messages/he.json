@@ -200,6 +200,8 @@
   "settings_theme_system": "מערכת",
   "settings_theme_light": "בהיר",
   "settings_theme_dark": "כהה",
+  "settings_close_to_tray_label": "סגור למגש המערכת",
+  "settings_close_to_tray_desc": "השאר את האפליקציה פועלת במגש המערכת בעת סגירת החלון",
 
   "settings_clipboard": "לוח",
   "settings_auto_clear_label": "ניקוי לוח אוטומטי",

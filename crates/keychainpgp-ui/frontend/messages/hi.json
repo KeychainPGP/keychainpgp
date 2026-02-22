@@ -200,6 +200,8 @@
   "settings_theme_system": "सिस्टम",
   "settings_theme_light": "लाइट",
   "settings_theme_dark": "डार्क",
+  "settings_close_to_tray_label": "ट्रे में बंद करें",
+  "settings_close_to_tray_desc": "विंडो बंद करने पर ऐप को सिस्टम ट्रे में चालू रखें",
 
   "settings_clipboard": "क्लिपबोर्ड",
   "settings_auto_clear_label": "क्लिपबोर्ड स्वतः साफ़ करें",

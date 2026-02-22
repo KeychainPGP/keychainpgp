@@ -200,6 +200,8 @@
   "settings_theme_system": "Sistema",
   "settings_theme_light": "Chiaro",
   "settings_theme_dark": "Scuro",
+  "settings_close_to_tray_label": "Chiudi nell'area di notifica",
+  "settings_close_to_tray_desc": "Mantieni l'app nell'area di notifica quando chiudi la finestra",
 
   "settings_clipboard": "Appunti",
   "settings_auto_clear_label": "Svuota appunti automaticamente",

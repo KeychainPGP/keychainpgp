@@ -1,5 +1,7 @@
 //! Tauri commands for application settings.
 
+use std::sync::atomic::Ordering;
+
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 use tauri_plugin_store::StoreExt;
@@ -43,6 +45,9 @@ pub struct Settings {
     /// Proxy preset: "tor", "lokinet", or "custom".
     #[serde(default = "default_proxy_preset")]
     pub proxy_preset: String,
+    /// Close to system tray instead of quitting when the window is closed.
+    #[serde(default)]
+    pub close_to_tray: bool,
     /// OPSEC mode: hardened operation for high-risk users.
     #[serde(default)]
     pub opsec_mode: bool,
@@ -90,6 +95,7 @@ impl Default for Settings {
             proxy_url: "socks5://127.0.0.1:9050".into(),
             proxy_enabled: false,
             proxy_preset: "tor".into(),
+            close_to_tray: false,
             opsec_mode: false,
             opsec_window_title: "Notes".into(),
             opsec_view_timeout_secs: 30,
@@ -120,10 +126,13 @@ pub fn update_settings(
     state: State<'_, AppState>,
     settings: Settings,
 ) -> Result<(), String> {
-    // Sync armor header setting to the engine
+    // Sync settings to runtime state
     state
         .engine
         .set_include_armor_headers(settings.include_armor_headers);
+    state
+        .close_to_tray
+        .store(settings.close_to_tray, Ordering::Relaxed);
 
     let store = app
         .store("settings.json")

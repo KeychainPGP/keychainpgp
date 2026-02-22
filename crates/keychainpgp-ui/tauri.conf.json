@@ -22,11 +22,6 @@
         "center": true
       }
     ],
-    "trayIcon": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true,
-      "tooltip": "KeychainPGP"
-    },
     "security": {
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'"
     }

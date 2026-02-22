@@ -200,6 +200,8 @@
   "settings_theme_system": "Systemowy",
   "settings_theme_light": "Jasny",
   "settings_theme_dark": "Ciemny",
+  "settings_close_to_tray_label": "Zamknij do zasobnika",
+  "settings_close_to_tray_desc": "Pozostaw aplikację w zasobniku systemowym po zamknięciu okna",
 
   "settings_clipboard": "Schowek",
   "settings_auto_clear_label": "Automatyczne czyszczenie schowka",

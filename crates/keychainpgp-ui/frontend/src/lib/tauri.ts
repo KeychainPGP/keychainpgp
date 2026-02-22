@@ -83,6 +83,7 @@ export interface Settings {
   proxy_url: string;
   proxy_enabled: boolean;
   proxy_preset: string; // "tor" | "lokinet" | "custom"
+  close_to_tray: boolean;
   opsec_mode: boolean;
   opsec_window_title: string;
   opsec_view_timeout_secs: number;

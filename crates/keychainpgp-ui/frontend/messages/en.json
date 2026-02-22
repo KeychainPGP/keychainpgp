@@ -200,6 +200,8 @@
   "settings_theme_system": "System",
   "settings_theme_light": "Light",
   "settings_theme_dark": "Dark",
+  "settings_close_to_tray_label": "Close to tray",
+  "settings_close_to_tray_desc": "Keep the app running in the system tray when you close the window",
 
   "settings_clipboard": "Clipboard",
   "settings_auto_clear_label": "Auto-clear clipboard",

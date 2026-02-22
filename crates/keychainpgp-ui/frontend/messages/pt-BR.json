@@ -200,6 +200,8 @@
   "settings_theme_system": "Sistema",
   "settings_theme_light": "Claro",
   "settings_theme_dark": "Escuro",
+  "settings_close_to_tray_label": "Fechar para a bandeja",
+  "settings_close_to_tray_desc": "Manter o aplicativo na bandeja do sistema ao fechar a janela",
 
   "settings_clipboard": "Área de transferência",
   "settings_auto_clear_label": "Limpar área de transferência automaticamente",

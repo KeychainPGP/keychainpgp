@@ -200,6 +200,8 @@
   "settings_theme_system": "Systeem",
   "settings_theme_light": "Licht",
   "settings_theme_dark": "Donker",
+  "settings_close_to_tray_label": "Sluiten naar systeemvak",
+  "settings_close_to_tray_desc": "De app in het systeemvak laten draaien wanneer u het venster sluit",
 
   "settings_clipboard": "Klembord",
   "settings_auto_clear_label": "Klembord automatisch wissen",

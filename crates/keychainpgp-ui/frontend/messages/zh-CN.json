@@ -200,6 +200,8 @@
   "settings_theme_system": "跟随系统",
   "settings_theme_light": "浅色",
   "settings_theme_dark": "深色",
+  "settings_close_to_tray_label": "关闭到托盘",
+  "settings_close_to_tray_desc": "关闭窗口时保持应用在系统托盘中运行",
 
   "settings_clipboard": "剪贴板",
   "settings_auto_clear_label": "自动清除剪贴板",

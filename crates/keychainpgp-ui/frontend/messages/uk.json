@@ -200,6 +200,8 @@
   "settings_theme_system": "Системна",
   "settings_theme_light": "Світла",
   "settings_theme_dark": "Темна",
+  "settings_close_to_tray_label": "Згортати в трей",
+  "settings_close_to_tray_desc": "Залишати додаток в області сповіщень при закритті вікна",
 
   "settings_clipboard": "Буфер обміну",
   "settings_auto_clear_label": "Автоочищення буфера обміну",

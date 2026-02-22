@@ -200,6 +200,8 @@
   "settings_theme_system": "시스템",
   "settings_theme_light": "라이트",
   "settings_theme_dark": "다크",
+  "settings_close_to_tray_label": "트레이로 닫기",
+  "settings_close_to_tray_desc": "창을 닫아도 시스템 트레이에서 앱을 계속 실행",
 
   "settings_clipboard": "클립보드",
   "settings_auto_clear_label": "클립보드 자동 지우기",

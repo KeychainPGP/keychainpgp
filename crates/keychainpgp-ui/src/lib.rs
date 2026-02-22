@@ -23,6 +23,16 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if let Some(app_state) = window.try_state::<state::AppState>() {
+                    if app_state.close_to_tray.load(Ordering::Relaxed) {
+                        api.prevent_close();
+                        let _ = window.hide();
+                    }
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             // Shared crypto commands
             commands::crypto::encrypt_text,
@@ -162,6 +172,9 @@ pub fn run() {
                         }
                         #[cfg(desktop)]
                         {
+                            app_state
+                                .close_to_tray
+                                .store(settings.close_to_tray, Ordering::Relaxed);
                             locale = settings.locale.clone();
                             if settings.opsec_mode {
                                 opsec_settings = Some(settings);

@@ -200,6 +200,8 @@
   "settings_theme_system": "Sistema",
   "settings_theme_light": "Claro",
   "settings_theme_dark": "Oscuro",
+  "settings_close_to_tray_label": "Cerrar a la bandeja",
+  "settings_close_to_tray_desc": "Mantener la aplicación en la bandeja del sistema al cerrar la ventana",
 
   "settings_clipboard": "Portapapeles",
   "settings_auto_clear_label": "Vaciar portapapeles automáticamente",

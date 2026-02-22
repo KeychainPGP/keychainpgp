@@ -2,8 +2,8 @@
 
 use tauri::{
     App, Emitter, Manager,
-    menu::{Menu, MenuItem},
-    tray::TrayIconBuilder,
+    menu::{Menu, MenuItem, PredefinedMenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
 };
 
 /// Return localized tray menu labels based on the locale prefix.
@@ -151,28 +151,49 @@ fn tray_labels(
 pub fn setup_tray(app: &App, locale: &str) -> Result<(), Box<dyn std::error::Error>> {
     let (encrypt_label, decrypt_label, sign_label, open_label, quit_label) = tray_labels(locale);
 
+    let open_item = MenuItem::with_id(app, "open", open_label, true, None::<&str>)?;
     let encrypt_item = MenuItem::with_id(app, "encrypt", encrypt_label, true, None::<&str>)?;
     let decrypt_item = MenuItem::with_id(app, "decrypt", decrypt_label, true, None::<&str>)?;
     let sign_item = MenuItem::with_id(app, "sign", sign_label, true, None::<&str>)?;
-    let separator = MenuItem::with_id(app, "sep", "─────────────────", false, None::<&str>)?;
-    let open_item = MenuItem::with_id(app, "open", open_label, true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
     let quit_item = MenuItem::with_id(app, "quit", quit_label, true, None::<&str>)?;
 
     let menu = Menu::with_items(
         app,
         &[
+            &open_item,
+            &separator,
             &encrypt_item,
             &decrypt_item,
             &sign_item,
             &separator,
-            &open_item,
             &quit_item,
         ],
     )?;
 
+    let icon = app
+        .default_window_icon()
+        .cloned()
+        .expect("default window icon must be set");
+
     TrayIconBuilder::new()
+        .icon(icon)
         .menu(&menu)
         .tooltip("KeychainPGP")
+        .show_menu_on_left_click(false)
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                if let Some(window) = tray.app_handle().get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+        })
         .on_menu_event(|app, event| match event.id.as_ref() {
             "encrypt" | "decrypt" | "sign" => {
                 let action = event.id.as_ref().to_string();

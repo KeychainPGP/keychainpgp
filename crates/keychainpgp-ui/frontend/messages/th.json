@@ -200,6 +200,8 @@
   "settings_theme_system": "ระบบ",
   "settings_theme_light": "สว่าง",
   "settings_theme_dark": "มืด",
+  "settings_close_to_tray_label": "ปิดไปที่ถาดระบบ",
+  "settings_close_to_tray_desc": "เปิดแอปต่อในถาดระบบเมื่อปิดหน้าต่าง",
 
   "settings_clipboard": "คลิปบอร์ด",
   "settings_auto_clear_label": "ล้างคลิปบอร์ดอัตโนมัติ",

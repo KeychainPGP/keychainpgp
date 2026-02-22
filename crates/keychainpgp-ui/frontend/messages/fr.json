@@ -200,6 +200,8 @@
   "settings_theme_system": "Système",
   "settings_theme_light": "Clair",
   "settings_theme_dark": "Sombre",
+  "settings_close_to_tray_label": "Réduire dans la zone de notification",
+  "settings_close_to_tray_desc": "Garder l'application dans la zone de notification lorsque vous fermez la fenêtre",
 
   "settings_clipboard": "Presse-papiers",
   "settings_auto_clear_label": "Effacer automatiquement le presse-papiers",

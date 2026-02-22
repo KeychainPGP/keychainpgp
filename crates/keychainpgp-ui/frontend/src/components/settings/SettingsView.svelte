@@ -153,7 +153,7 @@
   <h2 class="text-xl font-bold">{m.settings_title()}</h2>
 
   <!-- Theme -->
-  <section class="space-y-2">
+  <section class="space-y-3">
     <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">{m.settings_appearance()}</h3>
     <div class="flex gap-2">
       {#each ["system", "light", "dark"] as theme}
@@ -169,6 +169,17 @@
         </button>
       {/each}
     </div>
+
+    {#if desktop}
+      <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+        <div>
+          <p class="text-sm font-medium">{m.settings_close_to_tray_label()}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_close_to_tray_desc()}</p>
+        </div>
+        <input type="checkbox" checked={settingsStore.settings.close_to_tray} onchange={() => settingsStore.save({ close_to_tray: !settingsStore.settings.close_to_tray })}
+          class="w-4 h-4 accent-[var(--color-primary)]" />
+      </label>
+    {/if}
   </section>
 
   <!-- Language -->

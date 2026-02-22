@@ -16,6 +16,7 @@ const defaults: Settings = {
   proxy_url: "socks5://127.0.0.1:9050",
   proxy_enabled: false,
   proxy_preset: "tor",
+  close_to_tray: false,
   opsec_mode: false,
   opsec_window_title: "Notes",
   opsec_view_timeout_secs: 30,

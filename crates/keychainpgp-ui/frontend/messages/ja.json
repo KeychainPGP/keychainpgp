@@ -200,6 +200,8 @@
   "settings_theme_system": "システムに従う",
   "settings_theme_light": "ライト",
   "settings_theme_dark": "ダーク",
+  "settings_close_to_tray_label": "トレイに格納",
+  "settings_close_to_tray_desc": "ウィンドウを閉じてもシステムトレイでアプリを実行し続ける",
 
   "settings_clipboard": "クリップボード",
   "settings_auto_clear_label": "クリップボードの自動クリア",

@@ -20,6 +20,8 @@ pub struct AppState {
     pub passphrase_cache: Mutex<PassphraseCache>,
     /// Whether OPSEC mode is currently active.
     pub opsec_mode: AtomicBool,
+    /// Whether closing the window hides to system tray instead of quitting.
+    pub close_to_tray: AtomicBool,
     /// In OPSEC mode, secret keys live here (RAM only), not in OS credential store.
     /// Maps fingerprint → secret key bytes.
     pub opsec_secret_keys: Mutex<HashMap<String, Vec<u8>>>,
@@ -40,6 +42,7 @@ impl AppState {
             keyring: Mutex::new(keyring),
             passphrase_cache: Mutex::new(PassphraseCache::new(DEFAULT_CACHE_TTL)),
             opsec_mode: AtomicBool::new(false),
+            close_to_tray: AtomicBool::new(false),
             opsec_secret_keys: Mutex::new(HashMap::new()),
         })
     }
@@ -61,6 +64,7 @@ impl AppState {
             keyring: Mutex::new(keyring),
             passphrase_cache: Mutex::new(PassphraseCache::new(DEFAULT_CACHE_TTL)),
             opsec_mode: AtomicBool::new(false),
+            close_to_tray: AtomicBool::new(false),
             opsec_secret_keys: Mutex::new(HashMap::new()),
         })
     }
