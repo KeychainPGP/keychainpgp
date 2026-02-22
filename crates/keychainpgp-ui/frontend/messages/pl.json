@@ -279,7 +279,7 @@
   "settings_proxy_failed": "Połączenie nieudane: {error}",
   "settings_proxy_custom": "Niestandardowy",
 
-  "settings_about": "KeychainPGP v0.1.1 — Szyfrowanie PGP przez schowek dla komputerów stacjonarnych.",
+  "settings_about": "KeychainPGP {version} — Szyfrowanie PGP przez schowek dla komputerów stacjonarnych.",
   "settings_about_title": "O programie",
   "donate_button": "Wesprzyj ten projekt",
   "donate_title": "Wesprzyj KeychainPGP",

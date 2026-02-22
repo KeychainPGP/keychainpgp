@@ -279,7 +279,7 @@
   "settings_proxy_failed": "連線失敗：{error}",
   "settings_proxy_custom": "自訂",
 
-  "settings_about": "KeychainPGP v0.1.1 — 桌面端剪貼簿優先的 PGP 加密工具。",
+  "settings_about": "KeychainPGP {version} — 桌面端剪貼簿優先的 PGP 加密工具。",
   "settings_about_title": "關於",
   "donate_button": "支持此專案",
   "donate_title": "支持 KeychainPGP",

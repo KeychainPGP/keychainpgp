@@ -279,7 +279,7 @@
   "settings_proxy_failed": "Verbinding mislukt: {error}",
   "settings_proxy_custom": "Aangepast",
 
-  "settings_about": "KeychainPGP v0.1.1 — Klembordgerichte PGP-versleuteling voor desktop.",
+  "settings_about": "KeychainPGP {version} — Klembordgerichte PGP-versleuteling voor desktop.",
   "settings_about_title": "Over",
   "donate_button": "Steun dit project",
   "donate_title": "Steun KeychainPGP",

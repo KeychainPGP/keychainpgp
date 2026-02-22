@@ -279,7 +279,7 @@
   "settings_proxy_failed": "החיבור נכשל: {error}",
   "settings_proxy_custom": "מותאם אישית",
 
-  "settings_about": "KeychainPGP v0.1.1 — הצפנת PGP מבוססת לוח לשולחן העבודה.",
+  "settings_about": "KeychainPGP {version} — הצפנת PGP מבוססת לוח לשולחן העבודה.",
   "settings_about_title": "אודות",
   "donate_button": "תמכו בפרויקט",
   "donate_title": "תמכו ב-KeychainPGP",

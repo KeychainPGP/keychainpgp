@@ -279,7 +279,7 @@
   "settings_proxy_failed": "เชื่อมต่อล้มเหลว: {error}",
   "settings_proxy_custom": "กำหนดเอง",
 
-  "settings_about": "KeychainPGP v0.1.1 — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
+  "settings_about": "KeychainPGP {version} — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
   "settings_about_title": "เกี่ยวกับ",
   "donate_button": "สนับสนุนโครงการนี้",
   "donate_title": "สนับสนุน KeychainPGP",

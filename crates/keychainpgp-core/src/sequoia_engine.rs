@@ -59,7 +59,10 @@ impl SequoiaEngine {
     ) -> std::result::Result<sequoia_openpgp::armor::Writer<&'a mut W>, std::io::Error> {
         if self.include_armor_headers.load(Ordering::Relaxed) {
             let mut headers = vec![
-                ("Version", "KeychainPGP 0.1.1"),
+                (
+                    "Version",
+                    concat!("KeychainPGP ", env!("CARGO_PKG_VERSION")),
+                ),
                 ("Comment", "https://keychainpgp.org"),
             ];
             headers.extend_from_slice(extra);

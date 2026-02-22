@@ -479,7 +479,7 @@
       {m.settings_about_title()}
     </h3>
     <p class="text-sm text-[var(--color-text-secondary)]">
-      {m.settings_about()}
+      {m.settings_about({ version: `v${__APP_VERSION__}` })}
     </p>
     <button
       class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg

@@ -279,7 +279,7 @@
   "settings_proxy_failed": "Ошибка соединения: {error}",
   "settings_proxy_custom": "Другой",
 
-  "settings_about": "KeychainPGP v0.1.1 — PGP-шифрование через буфер обмена для настольных систем.",
+  "settings_about": "KeychainPGP {version} — PGP-шифрование через буфер обмена для настольных систем.",
   "settings_about_title": "О программе",
   "donate_button": "Поддержать проект",
   "donate_title": "Поддержите KeychainPGP",

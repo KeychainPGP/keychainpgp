@@ -279,7 +279,7 @@
   "settings_proxy_failed": "Falha na ligação: {error}",
   "settings_proxy_custom": "Personalizado",
 
-  "settings_about": "KeychainPGP v0.1.1 — Encriptação PGP para ambiente de trabalho centrada na área de transferência.",
+  "settings_about": "KeychainPGP {version} — Encriptação PGP para ambiente de trabalho centrada na área de transferência.",
   "settings_about_title": "Sobre",
   "donate_button": "Apoie este projeto",
   "donate_title": "Apoie o KeychainPGP",
