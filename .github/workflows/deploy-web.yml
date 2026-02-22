@@ -11,16 +11,14 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: deploy-web
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build WASM + Web
+  build-and-deploy:
+    name: Build WASM + Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,17 +55,11 @@ jobs:
       - run: npm run build
         working-directory: web
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy to keychainpgp.github.io
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: web/dist
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          personal_token: ${{ secrets.DEPLOY_TOKEN }}
+          external_repository: KeychainPGP/keychainpgp.github.io
+          publish_branch: main
+          publish_dir: web/dist
+          commit_message: "deploy: update from keychainpgp@${{ github.sha }}"
