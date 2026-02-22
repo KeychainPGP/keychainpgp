@@ -971,6 +971,24 @@ No feature is degraded or unavailable when offline.
 
 **Exit criteria:** Visiting `keychainpgp.org` presents a professional, multilingual landing page where any user can understand the product, download the correct installer for their OS, and verify its authenticity.
 
+### Phase 8: iOS App (Weeks 55+)
+
+**Goal:** Native iOS companion app with feature parity to the Android version.
+
+- [ ] Tauri Mobile iOS target configuration and build pipeline.
+- [ ] Xcode project setup, provisioning profiles, and code signing.
+- [ ] Adapt UI for iOS design conventions (safe areas, haptics, swipe gestures).
+- [ ] iOS Keychain Services integration for private key storage.
+- [ ] Share Extension: encrypt/decrypt text from any iOS app via the share sheet.
+- [ ] Key sync with desktop (same mechanism as Android: manual export/import or encrypted sync).
+- [ ] QR code key exchange (camera-based scan + generation).
+- [ ] i18n: all Phase 3 locales available on iOS.
+- [ ] TestFlight beta distribution for testing.
+- [ ] App Store submission (review guidelines compliance, export compliance for encryption — ECCN 5D002).
+- [ ] CI/CD: GitHub Actions with macOS runner for iOS builds.
+
+**Exit criteria:** iOS users can install KeychainPGP from TestFlight or the App Store and perform all core operations (generate keys, import/export, encrypt, decrypt) with the same experience as Android.
+
 ---
 
 ## 11. Success Metrics
