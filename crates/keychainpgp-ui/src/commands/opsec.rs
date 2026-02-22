@@ -20,6 +20,7 @@ pub fn enable_opsec_mode(
         .filter(|t| !t.is_empty())
         .unwrap_or_else(|| "Notes".into());
 
+    #[cfg(desktop)]
     if let Some(window) = app.get_webview_window("main") {
         window
             .set_title(&title)
@@ -43,6 +44,7 @@ pub fn disable_opsec_mode(app: AppHandle, state: State<'_, AppState>) -> Result<
         keys.clear();
     }
 
+    #[cfg(desktop)]
     if let Some(window) = app.get_webview_window("main") {
         window
             .set_title("KeychainPGP")

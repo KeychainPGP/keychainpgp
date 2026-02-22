@@ -205,7 +205,7 @@ impl SequoiaEngine {
                         })?
                         .1;
                 }
-                Packet::SEIP(_) | Packet::AED(_) => {
+                Packet::SEIP(_) => {
                     if let Some((algo, ref sk)) = session_key {
                         pp.decrypt(algo, sk).map_err(|e| Error::Decryption {
                             reason: format!("wrong key: {e}"),
@@ -479,7 +479,7 @@ impl CryptoEngine for SequoiaEngine {
                 })?;
 
             let message = Message::new(&mut armored_writer);
-            let message = Encryptor2::for_recipients(message, recipients)
+            let message = Encryptor::for_recipients(message, recipients)
                 .build()
                 .map_err(|e| Error::Encryption {
                     reason: format!("encryptor error: {e}"),
@@ -611,12 +611,14 @@ impl CryptoEngine for SequoiaEngine {
                 })?;
 
             let message = Message::new(&mut armored_writer);
-            let message =
-                Signer::new(message, signer_keypair)
-                    .build()
-                    .map_err(|e| Error::Signing {
-                        reason: format!("signer error: {e}"),
-                    })?;
+            let message = Signer::new(message, signer_keypair)
+                .map_err(|e| Error::Signing {
+                    reason: format!("signer error: {e}"),
+                })?
+                .build()
+                .map_err(|e| Error::Signing {
+                    reason: format!("signer error: {e}"),
+                })?;
             let mut message = LiteralWriter::new(message)
                 .build()
                 .map_err(|e| Error::Signing {
@@ -688,13 +690,14 @@ impl CryptoEngine for SequoiaEngine {
             .collect();
 
         // Determine algorithm from primary key
-        let pk_algo = cert.primary_key().pk_algo();
-        let key_size = cert.primary_key().mpis().bits();
+        let pk = cert.primary_key().key();
+        let pk_algo = pk.pk_algo();
+        let key_size = pk.mpis().bits();
         let algorithm = map_algorithm(pk_algo, key_size);
 
         // Creation time
         let created_at = {
-            let ct = cert.primary_key().creation_time();
+            let ct = pk.creation_time();
             chrono::DateTime::<chrono::Utc>::from(ct).to_rfc3339()
         };
 
@@ -717,12 +720,13 @@ impl CryptoEngine for SequoiaEngine {
                     .keys()
                     .subkeys()
                     .map(|ka| {
-                        let sk_fp = ka.fingerprint().to_hex();
-                        let sk_algo = ka.pk_algo();
-                        let sk_size = ka.mpis().bits();
+                        let key = ka.key();
+                        let sk_fp = key.fingerprint().to_hex();
+                        let sk_algo = key.pk_algo();
+                        let sk_size = key.mpis().bits();
                         let sk_algorithm = map_algorithm(sk_algo, sk_size);
                         let sk_created = {
-                            let ct = ka.creation_time();
+                            let ct = key.creation_time();
                             chrono::DateTime::<chrono::Utc>::from(ct).to_rfc3339()
                         };
                         let sk_expires = ka
@@ -776,7 +780,7 @@ impl CryptoEngine for SequoiaEngine {
         let mut output = Vec::new();
         {
             let message = Message::new(&mut output);
-            let encryptor = Encryptor2::with_passwords(message, Some(Password::from(passphrase)))
+            let encryptor = Encryptor::with_passwords(message, Some(Password::from(passphrase)))
                 .build()
                 .map_err(|e| Error::Encryption {
                     reason: e.to_string(),
@@ -823,16 +827,16 @@ impl VerificationHelper for DecryptHelper<'_> {
 }
 
 impl DecryptionHelper for DecryptHelper<'_> {
-    fn decrypt<D>(
+    fn decrypt(
         &mut self,
         pkesks: &[sequoia_openpgp::packet::PKESK],
         _skesks: &[sequoia_openpgp::packet::SKESK],
         sym_algo: Option<sequoia_openpgp::types::SymmetricAlgorithm>,
-        mut decrypt: D,
-    ) -> sequoia_openpgp::Result<Option<sequoia_openpgp::Fingerprint>>
-    where
-        D: FnMut(sequoia_openpgp::types::SymmetricAlgorithm, &SessionKey) -> bool,
-    {
+        decrypt: &mut dyn FnMut(
+            Option<sequoia_openpgp::types::SymmetricAlgorithm>,
+            &SessionKey,
+        ) -> bool,
+    ) -> sequoia_openpgp::Result<Option<Cert>> {
         let valid_cert = self.cert.with_policy(self.policy, None)?;
 
         // Try unencrypted secret keys first
@@ -1137,7 +1141,7 @@ mod tests {
     #[test]
     fn test_decrypt_skesk_round_trip() {
         use sequoia_openpgp::crypto::Password;
-        use sequoia_openpgp::serialize::stream::{Encryptor2, Message};
+        use sequoia_openpgp::serialize::stream::{Encryptor, Message};
 
         let engine = SequoiaEngine::new();
         let password = "123456789012345678901234567890123456";
@@ -1158,7 +1162,7 @@ mod tests {
         {
             let message = Message::new(&mut ciphertext);
             let mut encryptor =
-                Encryptor2::with_passwords(message, Some(Password::from(password.as_bytes())))
+                Encryptor::with_passwords(message, Some(Password::from(password.as_bytes())))
                     .build()
                     .unwrap();
             encryptor.write_all(&cert_binary).unwrap();
@@ -1201,14 +1205,14 @@ mod tests {
     #[test]
     fn test_decrypt_skesk_wrong_password() {
         use sequoia_openpgp::crypto::Password;
-        use sequoia_openpgp::serialize::stream::{Encryptor2, LiteralWriter, Message};
+        use sequoia_openpgp::serialize::stream::{Encryptor, LiteralWriter, Message};
 
         let engine = SequoiaEngine::new();
 
         let mut ciphertext = Vec::new();
         {
             let message = Message::new(&mut ciphertext);
-            let message = Encryptor2::with_passwords(
+            let message = Encryptor::with_passwords(
                 message,
                 Some(Password::from("correct-password".as_bytes())),
             )

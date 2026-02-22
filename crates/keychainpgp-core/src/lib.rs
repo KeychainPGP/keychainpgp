@@ -27,6 +27,9 @@ pub use sequoia_engine::SequoiaEngine;
 /// Fill a buffer with cryptographically secure random bytes.
 ///
 /// Wraps the Sequoia-PGP random number generator.
+///
+/// # Panics
+/// Panics if the underlying RNG fails (should never happen in practice).
 pub fn crypto_random(buf: &mut [u8]) {
-    sequoia_openpgp::crypto::random(buf);
+    sequoia_openpgp::crypto::random(buf).expect("RNG failure");
 }

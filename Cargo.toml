@@ -25,7 +25,7 @@ keychainpgp-keys = { path = "crates/keychainpgp-keys" }
 keychainpgp-clipboard = { path = "crates/keychainpgp-clipboard" }
 
 # Crypto
-sequoia-openpgp = { version = "1", default-features = false, features = ["crypto-rust", "allow-experimental-crypto", "allow-variable-time-crypto", "compression-deflate"] }
+sequoia-openpgp = { version = "2", default-features = false, features = ["crypto-rust", "allow-experimental-crypto", "allow-variable-time-crypto", "compression-deflate"] }
 zeroize = { version = "1", features = ["derive"] }
 subtle = "2"
 secrecy = { version = "0.10", features = ["serde"] }

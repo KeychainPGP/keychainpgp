@@ -1,0 +1,8 @@
+# cargo-audit configuration
+
+[advisories]
+ignore = [
+    # rsa 0.9.10 — Marvin Attack timing sidechannel
+    # No fix available; transitive dependency via sequoia-openpgp
+    "RUSTSEC-2023-0071",
+]
