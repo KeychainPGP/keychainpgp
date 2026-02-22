@@ -9,6 +9,7 @@
   let error: string | null = $state(null);
   let loading = $state(true);
   let currentQrIndex = $state(0);
+  let qrFixedSize = $state(0);
   let passphraseCopied = $state(false);
   let autoPlay = $state(true);
   let intervalId: ReturnType<typeof setInterval> | null = $state(null);
@@ -19,6 +20,13 @@
     exportKeyBundle()
       .then((b) => {
         bundle = b;
+        // Compute the largest SVG width across all QR parts to lock the container size
+        let maxSize = 0;
+        for (const svg of b.qr_parts) {
+          const match = svg.match(/width="(\d+)"/);
+          if (match) maxSize = Math.max(maxSize, Number(match[1]));
+        }
+        qrFixedSize = maxSize;
         loading = false;
         if (b.qr_parts.length > 1) startAutoPlay();
       })
@@ -121,7 +129,10 @@
       <!-- QR code carousel with auto-play -->
       {#if bundle.qr_parts.length > 0}
         <div class="space-y-2">
-          <div class="flex justify-center p-4 bg-white rounded-lg">
+          <div
+            class="flex justify-center items-center p-4 bg-white rounded-lg"
+            style={qrFixedSize ? `min-width:${qrFixedSize + 32}px;min-height:${qrFixedSize + 32}px` : ''}
+          >
             {@html bundle.qr_parts[currentQrIndex]}
           </div>
           {#if bundle.qr_parts.length > 1}
