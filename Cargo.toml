@@ -16,7 +16,7 @@ authors = ["KeychainPGP Contributors"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/keychainpgp/keychainpgp"
 homepage = "https://github.com/keychainpgp/keychainpgp"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [workspace.dependencies]
 # Internal crates
