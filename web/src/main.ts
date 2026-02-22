@@ -1,7 +1,11 @@
 import "./app.css";
+import { initI18n } from "./lib/i18n.svelte";
 import App from "./App.svelte";
 import { mount } from "svelte";
 
-const app = mount(App, { target: document.getElementById("app")! });
+async function boot() {
+  await initI18n();
+  mount(App, { target: document.getElementById("app")! });
+}
 
-export default app;
+boot();

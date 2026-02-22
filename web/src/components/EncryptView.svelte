@@ -1,6 +1,7 @@
 <script lang="ts">
   import { encrypt } from "../lib/wasm";
   import { listKeys, type StoredKey } from "../lib/keystore";
+  import { t } from "../lib/i18n.svelte";
 
   let plaintext = $state("");
   let output = $state("");
@@ -27,11 +28,11 @@
     error = "";
     output = "";
     if (!plaintext.trim()) {
-      error = "Enter a message to encrypt.";
+      error = t("encrypt_error_empty");
       return;
     }
     if (selected.size === 0) {
-      error = "Select at least one recipient key.";
+      error = t("encrypt_error_no_recipient");
       return;
     }
 
@@ -51,23 +52,23 @@
 </script>
 
 <div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
-  <h2 style="font-size: 1rem; font-weight: 600;">Encrypt Message</h2>
+  <h2 style="font-size: 1rem; font-weight: 600;">{t("encrypt_title")}</h2>
 
   <textarea
     class="textarea"
-    placeholder="Type your message here..."
+    placeholder={t("encrypt_placeholder")}
     bind:value={plaintext}
     rows="5"
   ></textarea>
 
   <div>
-    <p style="font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Recipients</p>
+    <p style="font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">{t("encrypt_recipients")}</p>
     {#if keys.length === 0}
-      <p style="font-size: 0.875rem; color: var(--text-secondary);">No keys available. Add keys in the Keys tab.</p>
+      <p style="font-size: 0.875rem; color: var(--color-text-secondary);">{t("encrypt_no_keys")}</p>
     {:else}
       <div style="display: flex; flex-direction: column; gap: 0.375rem; max-height: 200px; overflow-y: auto;">
         {#each keys as key (key.fingerprint)}
-          <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid var(--border); cursor: pointer; font-size: 0.875rem;"
+          <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid var(--color-border); cursor: pointer; font-size: 0.875rem;"
             class:selected={selected.has(key.fingerprint)}
           >
             <input
@@ -77,7 +78,7 @@
             />
             <span>{key.name ?? key.email ?? key.fingerprint.slice(-16)}</span>
             {#if key.isOwn}
-              <span style="font-size: 0.75rem; color: var(--primary);">(own)</span>
+              <span style="font-size: 0.75rem; color: var(--color-primary);">{t("encrypt_own_label")}</span>
             {/if}
           </label>
         {/each}
@@ -86,7 +87,7 @@
   </div>
 
   <button class="btn btn-primary" onclick={handleEncrypt} disabled={!plaintext.trim() || selected.size === 0}>
-    Encrypt
+    {t("encrypt_btn")}
   </button>
 
   {#if error}
@@ -100,14 +101,14 @@
         class="btn"
         style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;"
         onclick={copyOutput}
-      >Copy</button>
+      >{t("copy_btn")}</button>
     </div>
   {/if}
 </div>
 
 <style>
   .selected {
-    border-color: var(--primary) !important;
+    border-color: var(--color-primary) !important;
     background: rgba(59, 130, 246, 0.1);
   }
 </style>

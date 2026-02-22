@@ -1,6 +1,7 @@
 <script lang="ts">
   import { decrypt } from "../lib/wasm";
   import { listKeys, getSecretKey, type StoredKey } from "../lib/keystore";
+  import { t } from "../lib/i18n.svelte";
 
   let ciphertext = $state("");
   let passphrase = $state("");
@@ -11,7 +12,7 @@
     error = "";
     output = "";
     if (!ciphertext.trim()) {
-      error = "Paste an encrypted PGP message.";
+      error = t("decrypt_error_empty");
       return;
     }
 
@@ -19,7 +20,7 @@
     const ownKeys = keys.filter((k) => k.isOwn);
 
     if (ownKeys.length === 0) {
-      error = "No private keys available. Generate or import a key in the Keys tab.";
+      error = t("decrypt_error_no_key");
       return;
     }
 
@@ -35,7 +36,7 @@
       }
     }
 
-    error = "Decryption failed. You may not have the correct private key, or the passphrase is wrong.";
+    error = t("decrypt_error_failed");
   }
 
   async function copyOutput() {
@@ -44,11 +45,11 @@
 </script>
 
 <div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
-  <h2 style="font-size: 1rem; font-weight: 600;">Decrypt Message</h2>
+  <h2 style="font-size: 1rem; font-weight: 600;">{t("decrypt_title")}</h2>
 
   <textarea
     class="textarea"
-    placeholder="Paste encrypted PGP message here..."
+    placeholder={t("decrypt_placeholder")}
     bind:value={ciphertext}
     rows="8"
   ></textarea>
@@ -56,12 +57,12 @@
   <input
     type="password"
     class="input"
-    placeholder="Passphrase (if key is protected)"
+    placeholder={t("decrypt_passphrase")}
     bind:value={passphrase}
   />
 
   <button class="btn btn-primary" onclick={handleDecrypt} disabled={!ciphertext.trim()}>
-    Decrypt
+    {t("decrypt_btn")}
   </button>
 
   {#if error}
@@ -75,7 +76,7 @@
         class="btn"
         style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.75rem; padding: 0.25rem 0.5rem;"
         onclick={copyOutput}
-      >Copy</button>
+      >{t("copy_btn")}</button>
     </div>
   {/if}
 </div>

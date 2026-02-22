@@ -1,14 +1,24 @@
+/* ── Dark theme (default) ── */
 :root {
-  --bg: #0f172a;
-  --bg-secondary: #1e293b;
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --border: #334155;
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --success: #22c55e;
-  --danger: #ef4444;
-  --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-bg: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-text: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-border: #334155;
+  --color-font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* ── Light theme ── */
+:root[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
 }
 
 * {
@@ -19,8 +29,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.5;
   min-height: 100vh;
 }
@@ -52,29 +62,29 @@ textarea {
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
   transition: background 0.15s;
 }
 
 .btn:hover {
-  background: var(--border);
+  background: var(--color-border);
 }
 
 .btn-primary {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--color-primary-hover);
 }
 
 .btn-danger {
-  background: var(--danger);
-  border-color: var(--danger);
+  background: var(--color-danger);
+  border-color: var(--color-danger);
   color: white;
 }
 
@@ -88,14 +98,14 @@ textarea {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
   outline: none;
 }
 
 .input:focus {
-  border-color: var(--primary);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
@@ -103,23 +113,23 @@ textarea {
   width: 100%;
   padding: 0.75rem;
   font-size: 0.875rem;
-  font-family: var(--font-mono);
+  font-family: var(--color-font-mono);
   border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
   outline: none;
   min-height: 120px;
 }
 
 .textarea:focus {
-  border-color: var(--primary);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
 .card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 0.75rem;
   padding: 1.5rem;
 }
@@ -127,8 +137,15 @@ textarea {
 .tabs {
   display: flex;
   gap: 0.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -138,25 +155,47 @@ textarea {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .tab:hover {
-  color: var(--text);
+  color: var(--color-text);
 }
 
 .tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .error {
-  color: var(--danger);
+  color: var(--color-danger);
   font-size: 0.875rem;
 }
 
 .success {
-  color: var(--success);
+  color: var(--color-success);
   font-size: 0.875rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  #app {
+    padding: 1rem 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .tab {
+    padding: 0.75rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ── RTL support ── */
+[dir="rtl"] .tabs {
+  direction: rtl;
 }
