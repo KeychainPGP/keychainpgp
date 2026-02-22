@@ -24,7 +24,7 @@
 
 <header style="text-align: center; margin-bottom: 2rem;">
   <h1 style="font-size: 1.5rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center;">
-    <img src="/icon.png" alt="KeychainPGP" style="width: 32px; height: 32px; border-radius: 6px;" />
+    <img src="./icon.png" alt="" style="width: 32px; height: 32px; border-radius: 6px;" />
     KeychainPGP <span style="color: var(--text-secondary); font-weight: 400; font-size: 0.875rem;">Web</span>
   </h1>
   <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
