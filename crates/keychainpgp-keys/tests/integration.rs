@@ -161,9 +161,8 @@ fn test_verify_wrong_key_fails() {
 
     // Verify with the WRONG key should fail
     let result = engine.verify(&signed, &other_record.pgp_data);
-    match result {
-        Ok(r) => assert!(!r.valid),
-        Err(_) => {} // verification error is also acceptable
+    if let Ok(r) = result {
+        assert!(!r.valid);
     }
 }
 

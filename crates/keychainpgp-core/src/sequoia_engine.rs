@@ -1081,9 +1081,8 @@ mod tests {
         // Verify with the wrong key should show invalid
         let result = engine.verify(&signed, &wrong.public_key);
         // This either errors out or returns valid=false
-        match result {
-            Ok(r) => assert!(!r.valid),
-            Err(_) => {} // verification failure is also acceptable
+        if let Ok(r) = result {
+            assert!(!r.valid);
         }
     }
 
