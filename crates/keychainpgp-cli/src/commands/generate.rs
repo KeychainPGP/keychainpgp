@@ -1,8 +1,8 @@
 use anyhow::Result;
 use keychainpgp_core::types::{KeyGenOptions, UserId};
 use keychainpgp_core::{CryptoEngine, SequoiaEngine};
-use keychainpgp_keys::storage::KeyRecord;
 use keychainpgp_keys::Keyring;
+use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
 
 pub fn run(name: &str, email: &str, passphrase: Option<&str>) -> Result<()> {

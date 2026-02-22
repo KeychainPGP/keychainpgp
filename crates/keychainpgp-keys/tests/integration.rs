@@ -5,8 +5,8 @@
 
 use keychainpgp_core::types::{KeyGenOptions, UserId};
 use keychainpgp_core::{CryptoEngine, SequoiaEngine};
-use keychainpgp_keys::storage::KeyRecord;
 use keychainpgp_keys::Keyring;
+use keychainpgp_keys::storage::KeyRecord;
 use secrecy::ExposeSecret;
 
 fn setup() -> (SequoiaEngine, Keyring, tempfile::TempDir) {
@@ -137,9 +137,7 @@ fn test_sign_verify_roundtrip() {
     let secret_key = keyring.get_secret_key(&fp).unwrap();
 
     let data = b"This document is authentic.";
-    let signed = engine
-        .sign(data, secret_key.expose_secret(), None)
-        .unwrap();
+    let signed = engine.sign(data, secret_key.expose_secret(), None).unwrap();
 
     // Verify with the signer's public key
     let result = engine.verify(&signed, &record.pgp_data).unwrap();
@@ -249,7 +247,9 @@ fn test_inspect_key_metadata() {
     assert!(!info.created_at.is_empty());
 
     // Secret key inspection
-    let secret_info = engine.inspect_key(key_pair.secret_key.expose_secret()).unwrap();
+    let secret_info = engine
+        .inspect_key(key_pair.secret_key.expose_secret())
+        .unwrap();
     assert!(secret_info.has_secret_key);
     assert_eq!(secret_info.fingerprint.0, key_pair.fingerprint.0);
 }
@@ -258,9 +258,7 @@ fn test_inspect_key_metadata() {
 fn test_passphrase_protected_key() {
     let engine = SequoiaEngine::new();
     let options = KeyGenOptions::new(UserId::new("Protected", "protected@test.com"))
-        .with_passphrase(secrecy::SecretBox::new(Box::new(
-            b"hunter2".to_vec(),
-        )));
+        .with_passphrase(secrecy::SecretBox::new(Box::new(b"hunter2".to_vec())));
 
     let key_pair = engine.generate_key_pair(options).unwrap();
 
@@ -298,9 +296,7 @@ fn test_passphrase_protected_key() {
 fn test_sign_with_passphrase() {
     let engine = SequoiaEngine::new();
     let options = KeyGenOptions::new(UserId::new("ProtSigner", "protsigner@test.com"))
-        .with_passphrase(secrecy::SecretBox::new(Box::new(
-            b"signpass".to_vec(),
-        )));
+        .with_passphrase(secrecy::SecretBox::new(Box::new(b"signpass".to_vec())));
 
     let key_pair = engine.generate_key_pair(options).unwrap();
 

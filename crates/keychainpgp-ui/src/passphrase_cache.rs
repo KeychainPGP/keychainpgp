@@ -58,7 +58,6 @@ impl PassphraseCache {
     pub fn clear_all(&mut self) {
         self.entries.clear();
     }
-
 }
 
 impl Drop for PassphraseCache {

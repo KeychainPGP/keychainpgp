@@ -17,15 +17,9 @@ use crate::error::{Error, Result};
 #[derive(Debug, Clone)]
 pub enum ClipboardEvent {
     /// A PGP block was detected in the clipboard.
-    PgpDetected {
-        kind: PgpBlockKind,
-        content: String,
-    },
+    PgpDetected { kind: PgpBlockKind, content: String },
     /// The clipboard content changed to non-PGP text.
-    TextChanged {
-        preview: String,
-        length: usize,
-    },
+    TextChanged { preview: String, length: usize },
     /// The clipboard was cleared or is empty.
     Empty,
 }
@@ -50,9 +44,7 @@ impl Default for MonitorConfig {
 
 /// Start the clipboard monitor. Returns a receiver for clipboard events
 /// and a handle to stop the monitor.
-pub fn start_monitor(
-    config: MonitorConfig,
-) -> (mpsc::Receiver<ClipboardEvent>, MonitorHandle) {
+pub fn start_monitor(config: MonitorConfig) -> (mpsc::Receiver<ClipboardEvent>, MonitorHandle) {
     let (tx, rx) = mpsc::channel(32);
     let (stop_tx, mut stop_rx) = mpsc::channel::<()>(1);
 

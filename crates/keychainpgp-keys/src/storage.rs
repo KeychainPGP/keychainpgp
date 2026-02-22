@@ -1,4 +1,4 @@
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::{Connection, OptionalExtension, params};
 use std::path::Path;
 
 use keychainpgp_core::types::TrustLevel;
@@ -171,9 +171,10 @@ impl KeyStorage {
 
     /// Delete a key by fingerprint.
     pub fn delete(&self, fingerprint: &str) -> Result<bool> {
-        let rows = self
-            .conn
-            .execute("DELETE FROM keys WHERE fingerprint = ?1", params![fingerprint])?;
+        let rows = self.conn.execute(
+            "DELETE FROM keys WHERE fingerprint = ?1",
+            params![fingerprint],
+        )?;
         Ok(rows > 0)
     }
 
@@ -224,8 +225,12 @@ mod tests {
     #[test]
     fn test_search_by_email() {
         let storage = KeyStorage::open_in_memory().unwrap();
-        storage.insert(&make_record("AAAA", "Alice", "alice@example.com")).unwrap();
-        storage.insert(&make_record("BBBB", "Bob", "bob@example.com")).unwrap();
+        storage
+            .insert(&make_record("AAAA", "Alice", "alice@example.com"))
+            .unwrap();
+        storage
+            .insert(&make_record("BBBB", "Bob", "bob@example.com"))
+            .unwrap();
 
         let results = storage.search("alice").unwrap();
         assert_eq!(results.len(), 1);
@@ -235,7 +240,9 @@ mod tests {
     #[test]
     fn test_delete() {
         let storage = KeyStorage::open_in_memory().unwrap();
-        storage.insert(&make_record("AAAA", "Alice", "alice@example.com")).unwrap();
+        storage
+            .insert(&make_record("AAAA", "Alice", "alice@example.com"))
+            .unwrap();
         assert!(storage.delete("AAAA").unwrap());
         assert!(storage.get("AAAA").unwrap().is_none());
     }

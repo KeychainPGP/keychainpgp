@@ -29,7 +29,10 @@ pub fn is_cleartext_signed(data: &[u8]) -> bool {
 /// Checks whether the given bytes contain any recognized PGP ASCII armor.
 #[must_use]
 pub fn is_pgp_armored(data: &[u8]) -> bool {
-    is_pgp_message(data) || is_pgp_public_key(data) || is_pgp_private_key(data) || is_cleartext_signed(data)
+    is_pgp_message(data)
+        || is_pgp_public_key(data)
+        || is_pgp_private_key(data)
+        || is_cleartext_signed(data)
 }
 
 /// The type of PGP block detected in the data.
@@ -75,7 +78,8 @@ mod tests {
 
     #[test]
     fn test_detect_pgp_public_key() {
-        let data = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ndata\n-----END PGP PUBLIC KEY BLOCK-----";
+        let data =
+            b"-----BEGIN PGP PUBLIC KEY BLOCK-----\ndata\n-----END PGP PUBLIC KEY BLOCK-----";
         assert!(is_pgp_public_key(data));
         assert_eq!(detect_pgp_block(data), Some(PgpBlockKind::PublicKey));
     }

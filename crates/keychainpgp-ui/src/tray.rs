@@ -1,33 +1,149 @@
 //! System tray setup and event handling.
 
 use tauri::{
+    App, Emitter, Manager,
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    App, Emitter, Manager,
 };
 
 /// Return localized tray menu labels based on the locale prefix.
-fn tray_labels(locale: &str) -> (&'static str, &'static str, &'static str, &'static str, &'static str) {
+fn tray_labels(
+    locale: &str,
+) -> (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+) {
     let base = locale.split('-').next().unwrap_or(locale);
     match base {
-        "fr" => ("Chiffrer le presse-papiers", "Déchiffrer le presse-papiers", "Signer le presse-papiers", "Ouvrir KeychainPGP", "Quitter"),
-        "de" => ("Zwischenablage verschlüsseln", "Zwischenablage entschlüsseln", "Zwischenablage signieren", "KeychainPGP öffnen", "Beenden"),
-        "es" => ("Cifrar portapapeles", "Descifrar portapapeles", "Firmar portapapeles", "Abrir KeychainPGP", "Salir"),
-        "it" => ("Cifra appunti", "Decifra appunti", "Firma appunti", "Apri KeychainPGP", "Esci"),
-        "pt" => ("Criptografar área de transferência", "Descriptografar área de transferência", "Assinar área de transferência", "Abrir KeychainPGP", "Sair"),
-        "ru" => ("Зашифровать буфер", "Расшифровать буфер", "Подписать буфер", "Открыть KeychainPGP", "Выход"),
-        "uk" => ("Зашифрувати буфер", "Розшифрувати буфер", "Підписати буфер", "Відкрити KeychainPGP", "Вихід"),
-        "ja" => ("クリップボードを暗号化", "クリップボードを復号", "クリップボードに署名", "KeychainPGPを開く", "終了"),
-        "ko" => ("클립보드 암호화", "클립보드 복호화", "클립보드 서명", "KeychainPGP 열기", "종료"),
-        "zh" => ("加密剪贴板", "解密剪贴板", "签名剪贴板", "打开 KeychainPGP", "退出"),
-        "ar" => ("تشفير الحافظة", "فك تشفير الحافظة", "توقيع الحافظة", "فتح KeychainPGP", "خروج"),
-        "he" => ("הצפן לוח", "פענח לוח", "חתום לוח", "פתח KeychainPGP", "יציאה"),
-        "tr" => ("Panoyu şifrele", "Pano şifresini çöz", "Panoyu imzala", "KeychainPGP'yi aç", "Çıkış"),
-        "pl" => ("Zaszyfruj schowek", "Odszyfruj schowek", "Podpisz schowek", "Otwórz KeychainPGP", "Wyjdź"),
-        "nl" => ("Klembord versleutelen", "Klembord ontsleutelen", "Klembord ondertekenen", "KeychainPGP openen", "Afsluiten"),
-        "hi" => ("क्लिपबोर्ड एन्क्रिप्ट करें", "क्लिपबोर्ड डिक्रिप्ट करें", "क्लिपबोर्ड पर हस्ताक्षर करें", "KeychainPGP खोलें", "बाहर निकलें"),
-        "th" => ("เข้ารหัสคลิปบอร์ด", "ถอดรหัสคลิปบอร์ด", "ลงนามคลิปบอร์ด", "เปิด KeychainPGP", "ออก"),
-        _ => ("Encrypt Clipboard", "Decrypt Clipboard", "Sign Clipboard", "Open KeychainPGP", "Quit"),
+        "fr" => (
+            "Chiffrer le presse-papiers",
+            "Déchiffrer le presse-papiers",
+            "Signer le presse-papiers",
+            "Ouvrir KeychainPGP",
+            "Quitter",
+        ),
+        "de" => (
+            "Zwischenablage verschlüsseln",
+            "Zwischenablage entschlüsseln",
+            "Zwischenablage signieren",
+            "KeychainPGP öffnen",
+            "Beenden",
+        ),
+        "es" => (
+            "Cifrar portapapeles",
+            "Descifrar portapapeles",
+            "Firmar portapapeles",
+            "Abrir KeychainPGP",
+            "Salir",
+        ),
+        "it" => (
+            "Cifra appunti",
+            "Decifra appunti",
+            "Firma appunti",
+            "Apri KeychainPGP",
+            "Esci",
+        ),
+        "pt" => (
+            "Criptografar área de transferência",
+            "Descriptografar área de transferência",
+            "Assinar área de transferência",
+            "Abrir KeychainPGP",
+            "Sair",
+        ),
+        "ru" => (
+            "Зашифровать буфер",
+            "Расшифровать буфер",
+            "Подписать буфер",
+            "Открыть KeychainPGP",
+            "Выход",
+        ),
+        "uk" => (
+            "Зашифрувати буфер",
+            "Розшифрувати буфер",
+            "Підписати буфер",
+            "Відкрити KeychainPGP",
+            "Вихід",
+        ),
+        "ja" => (
+            "クリップボードを暗号化",
+            "クリップボードを復号",
+            "クリップボードに署名",
+            "KeychainPGPを開く",
+            "終了",
+        ),
+        "ko" => (
+            "클립보드 암호화",
+            "클립보드 복호화",
+            "클립보드 서명",
+            "KeychainPGP 열기",
+            "종료",
+        ),
+        "zh" => (
+            "加密剪贴板",
+            "解密剪贴板",
+            "签名剪贴板",
+            "打开 KeychainPGP",
+            "退出",
+        ),
+        "ar" => (
+            "تشفير الحافظة",
+            "فك تشفير الحافظة",
+            "توقيع الحافظة",
+            "فتح KeychainPGP",
+            "خروج",
+        ),
+        "he" => (
+            "הצפן לוח",
+            "פענח לוח",
+            "חתום לוח",
+            "פתח KeychainPGP",
+            "יציאה",
+        ),
+        "tr" => (
+            "Panoyu şifrele",
+            "Pano şifresini çöz",
+            "Panoyu imzala",
+            "KeychainPGP'yi aç",
+            "Çıkış",
+        ),
+        "pl" => (
+            "Zaszyfruj schowek",
+            "Odszyfruj schowek",
+            "Podpisz schowek",
+            "Otwórz KeychainPGP",
+            "Wyjdź",
+        ),
+        "nl" => (
+            "Klembord versleutelen",
+            "Klembord ontsleutelen",
+            "Klembord ondertekenen",
+            "KeychainPGP openen",
+            "Afsluiten",
+        ),
+        "hi" => (
+            "क्लिपबोर्ड एन्क्रिप्ट करें",
+            "क्लिपबोर्ड डिक्रिप्ट करें",
+            "क्लिपबोर्ड पर हस्ताक्षर करें",
+            "KeychainPGP खोलें",
+            "बाहर निकलें",
+        ),
+        "th" => (
+            "เข้ารหัสคลิปบอร์ด",
+            "ถอดรหัสคลิปบอร์ด",
+            "ลงนามคลิปบอร์ด",
+            "เปิด KeychainPGP",
+            "ออก",
+        ),
+        _ => (
+            "Encrypt Clipboard",
+            "Decrypt Clipboard",
+            "Sign Clipboard",
+            "Open KeychainPGP",
+            "Quit",
+        ),
     }
 }
 
@@ -44,7 +160,14 @@ pub fn setup_tray(app: &App, locale: &str) -> Result<(), Box<dyn std::error::Err
 
     let menu = Menu::with_items(
         app,
-        &[&encrypt_item, &decrypt_item, &sign_item, &separator, &open_item, &quit_item],
+        &[
+            &encrypt_item,
+            &decrypt_item,
+            &sign_item,
+            &separator,
+            &open_item,
+            &quit_item,
+        ],
     )?;
 
     TrayIconBuilder::new()

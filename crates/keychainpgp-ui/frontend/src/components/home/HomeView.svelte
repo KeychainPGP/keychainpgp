@@ -114,7 +114,7 @@
 
     async function doSign(passphrase?: string) {
       if (isCompose) {
-        const result = await signText(content, passphrase);
+        const result = await signText(content!, passphrase);
         if (result.success) {
           appStore.composeText = result.message;
           appStore.setStatus(m.sign_success_compose());

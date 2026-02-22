@@ -34,7 +34,10 @@ fn encrypt_impl(
     plaintext: &str,
     recipient_fingerprints: &[String],
 ) -> Result<String, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
 
     let mut recipient_keys = Vec::new();
     for fp in recipient_fingerprints {
@@ -64,8 +67,12 @@ pub fn encrypt_clipboard(
     recipient_fingerprints: Vec<String>,
 ) -> Result<EncryptResult, String> {
     let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
-        .map_err(|e| format!("Your clipboard is empty. Copy some text first, then try again. ({e})"))?
-        .ok_or_else(|| "Your clipboard is empty. Copy some text first, then try again.".to_string())?;
+        .map_err(|e| {
+            format!("Your clipboard is empty. Copy some text first, then try again. ({e})")
+        })?
+        .ok_or_else(|| {
+            "Your clipboard is empty. Copy some text first, then try again.".to_string()
+        })?;
 
     let armored = encrypt_impl(&state, &clipboard_text, &recipient_fingerprints)?;
 
@@ -102,14 +109,15 @@ fn decrypt_impl(
     if keychainpgp_core::armor::detect_pgp_block(ciphertext.as_bytes())
         != Some(keychainpgp_core::armor::PgpBlockKind::Message)
     {
-        return Err(
-            "The text doesn't contain a valid encrypted message. \
+        return Err("The text doesn't contain a valid encrypted message. \
              Make sure you have the entire message, including the BEGIN and END lines."
-                .into(),
-        );
+            .into());
     }
 
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let own_keys = keyring
         .list_keys()
         .map_err(|e| format!("Failed to list keys: {e}"))?
@@ -118,16 +126,16 @@ fn decrypt_impl(
         .collect::<Vec<_>>();
 
     if own_keys.is_empty() {
-        return Err(
-            "You don't have any private keys. Generate or import a key first.".into(),
-        );
+        return Err("You don't have any private keys. Generate or import a key first.".into());
     }
 
     let is_opsec = state.opsec_mode.load(Ordering::Relaxed);
 
     for key_record in &own_keys {
         let secret_key: SecretBox<Vec<u8>> = if is_opsec {
-            let opsec_keys = state.opsec_secret_keys.lock()
+            let opsec_keys = state
+                .opsec_secret_keys
+                .lock()
                 .map_err(|e| format!("Internal error: {e}"))?;
             match opsec_keys.get(&key_record.fingerprint) {
                 Some(k) => SecretBox::new(Box::new(k.clone())),
@@ -147,19 +155,20 @@ fn decrypt_impl(
         };
 
         let cached = if passphrase.is_none() {
-            state.passphrase_cache.lock().ok()
+            state
+                .passphrase_cache
+                .lock()
+                .ok()
                 .and_then(|c| c.get(&key_record.fingerprint).map(|b| b.to_vec()))
         } else {
             None
         };
-        let pp = passphrase.map(|p| p.as_bytes())
-            .or(cached.as_deref());
+        let pp = passphrase.map(|p| p.as_bytes()).or(cached.as_deref());
 
-        match state.engine.decrypt(
-            ciphertext.as_bytes(),
-            secret_key.expose_secret(),
-            pp,
-        ) {
+        match state
+            .engine
+            .decrypt(ciphertext.as_bytes(), secret_key.expose_secret(), pp)
+        {
             Ok(plaintext) => {
                 if let Some(p) = passphrase {
                     if let Ok(mut cache) = state.passphrase_cache.lock() {
@@ -230,7 +239,10 @@ fn sign_impl(
     plaintext: &str,
     passphrase: Option<&str>,
 ) -> Result<String, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let own_keys = keyring
         .list_keys()
         .map_err(|e| format!("Failed to list keys: {e}"))?
@@ -246,16 +258,16 @@ fn sign_impl(
 
     for key_record in &own_keys {
         let secret_key: SecretBox<Vec<u8>> = if is_opsec {
-            let opsec_keys = state.opsec_secret_keys.lock()
+            let opsec_keys = state
+                .opsec_secret_keys
+                .lock()
                 .map_err(|e| format!("Internal error: {e}"))?;
             match opsec_keys.get(&key_record.fingerprint) {
                 Some(k) => SecretBox::new(Box::new(k.clone())),
-                None => {
-                    match keyring.get_secret_key(&key_record.fingerprint) {
-                        Ok(sk) => sk,
-                        Err(_) => continue,
-                    }
-                }
+                None => match keyring.get_secret_key(&key_record.fingerprint) {
+                    Ok(sk) => sk,
+                    Err(_) => continue,
+                },
             }
         } else {
             match keyring.get_secret_key(&key_record.fingerprint) {
@@ -265,19 +277,20 @@ fn sign_impl(
         };
 
         let cached = if passphrase.is_none() {
-            state.passphrase_cache.lock().ok()
+            state
+                .passphrase_cache
+                .lock()
+                .ok()
                 .and_then(|c| c.get(&key_record.fingerprint).map(|b| b.to_vec()))
         } else {
             None
         };
-        let pp = passphrase.map(|p| p.as_bytes())
-            .or(cached.as_deref());
+        let pp = passphrase.map(|p| p.as_bytes()).or(cached.as_deref());
 
-        match state.engine.sign(
-            plaintext.as_bytes(),
-            secret_key.expose_secret(),
-            pp,
-        ) {
+        match state
+            .engine
+            .sign(plaintext.as_bytes(), secret_key.expose_secret(), pp)
+        {
             Ok(signed_data) => {
                 if let Some(p) = passphrase {
                     if let Ok(mut cache) = state.passphrase_cache.lock() {
@@ -296,11 +309,11 @@ fn sign_impl(
 }
 
 /// Shared verify logic: verify signed text against all keys in keyring.
-fn verify_impl(
-    state: &AppState,
-    signed_text: &str,
-) -> Result<VerifyResultInfo, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+fn verify_impl(state: &AppState, signed_text: &str) -> Result<VerifyResultInfo, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let all_keys = keyring
         .list_keys()
         .map_err(|e| format!("Failed to list keys: {e}"))?;
@@ -317,7 +330,10 @@ fn verify_impl(
     }
 
     for key_record in &all_keys {
-        match state.engine.verify(signed_text.as_bytes(), &key_record.pgp_data) {
+        match state
+            .engine
+            .verify(signed_text.as_bytes(), &key_record.pgp_data)
+        {
             Ok(result) if result.valid => {
                 return Ok(VerifyResultInfo {
                     valid: true,
@@ -341,7 +357,8 @@ fn verify_impl(
         signer_email: None,
         signer_fingerprint: None,
         trust_level: 0,
-        message: "Signature could not be verified. The signer's key may not be in your keyring.".into(),
+        message: "Signature could not be verified. The signer's key may not be in your keyring."
+            .into(),
     })
 }
 
@@ -385,9 +402,7 @@ pub fn sign_text(
 /// Verify a signed message on the clipboard.
 #[cfg(desktop)]
 #[tauri::command]
-pub fn verify_clipboard(
-    state: State<'_, AppState>,
-) -> Result<VerifyResultInfo, String> {
+pub fn verify_clipboard(state: State<'_, AppState>) -> Result<VerifyResultInfo, String> {
     let clipboard_text = keychainpgp_clipboard::monitor::read_clipboard_text()
         .map_err(|e| format!("Could not read clipboard: {e}"))?
         .ok_or_else(|| "Your clipboard is empty. Copy a signed message first.".to_string())?;
@@ -397,19 +412,17 @@ pub fn verify_clipboard(
 
 /// Verify a signed message from text (does not touch clipboard).
 #[tauri::command]
-pub fn verify_text(
-    state: State<'_, AppState>,
-    text: String,
-) -> Result<VerifyResultInfo, String> {
+pub fn verify_text(state: State<'_, AppState>, text: String) -> Result<VerifyResultInfo, String> {
     verify_impl(&state, &text)
 }
 
 /// Clear all cached passphrases.
 #[tauri::command]
-pub fn clear_passphrase_cache(
-    state: State<'_, AppState>,
-) -> Result<(), String> {
-    let mut cache = state.passphrase_cache.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn clear_passphrase_cache(state: State<'_, AppState>) -> Result<(), String> {
+    let mut cache = state
+        .passphrase_cache
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     cache.clear_all();
     Ok(())
 }

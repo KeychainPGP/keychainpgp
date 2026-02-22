@@ -2,8 +2,8 @@
 
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
 
 use keychainpgp_core::SequoiaEngine;
 use keychainpgp_keys::Keyring;
@@ -48,6 +48,7 @@ impl AppState {
     ///
     /// On mobile, `directories::ProjectDirs` does not work, so we use
     /// the app data dir provided by Tauri.
+    #[allow(dead_code)] // Used on mobile via cfg(mobile)
     pub fn initialize_with_dir(data_dir: &Path) -> Result<Self, Box<dyn std::error::Error>> {
         let engine = SequoiaEngine::new();
         let keyring = Keyring::open_at(data_dir).map_err(|e| {

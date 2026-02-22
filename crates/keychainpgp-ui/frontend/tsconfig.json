@@ -6,7 +6,7 @@
     "module": "ESNext",
     "resolveJsonModule": true,
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "isolatedModules": true,
     "moduleDetection": "force",
     "baseUrl": ".",
@@ -14,5 +14,6 @@
       "$lib/*": ["src/lib/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte"]
+  "include": ["src/**/*.ts", "src/**/*.svelte"],
+  "exclude": ["src/lib/paraglide/**"]
 }

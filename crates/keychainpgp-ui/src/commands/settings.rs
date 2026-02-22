@@ -54,12 +54,24 @@ pub struct Settings {
     pub opsec_view_timeout_secs: u64,
 }
 
-fn default_true() -> bool { true }
-fn default_locale() -> String { "auto".into() }
-fn default_proxy_url() -> String { "socks5://127.0.0.1:9050".into() }
-fn default_proxy_preset() -> String { "tor".into() }
-fn default_opsec_title() -> String { "Notes".into() }
-fn default_opsec_view_timeout() -> u64 { 30 }
+fn default_true() -> bool {
+    true
+}
+fn default_locale() -> String {
+    "auto".into()
+}
+fn default_proxy_url() -> String {
+    "socks5://127.0.0.1:9050".into()
+}
+fn default_proxy_preset() -> String {
+    "tor".into()
+}
+fn default_opsec_title() -> String {
+    "Notes".into()
+}
+fn default_opsec_view_timeout() -> u64 {
+    30
+}
 
 impl Default for Settings {
     fn default() -> Self {
@@ -109,7 +121,9 @@ pub fn update_settings(
     settings: Settings,
 ) -> Result<(), String> {
     // Sync armor header setting to the engine
-    state.engine.set_include_armor_headers(settings.include_armor_headers);
+    state
+        .engine
+        .set_include_armor_headers(settings.include_armor_headers);
 
     let store = app
         .store("settings.json")

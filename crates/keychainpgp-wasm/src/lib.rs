@@ -135,11 +135,7 @@ pub fn decrypt(
 ///
 /// Returns the ASCII-armored signed message.
 #[wasm_bindgen(js_name = sign)]
-pub fn sign(
-    data: &str,
-    secret_key: &str,
-    passphrase: Option<String>,
-) -> Result<String, JsError> {
+pub fn sign(data: &str, secret_key: &str, passphrase: Option<String>) -> Result<String, JsError> {
     let engine = SequoiaEngine::new();
 
     let pp_bytes = passphrase.as_ref().map(|p| p.as_bytes());

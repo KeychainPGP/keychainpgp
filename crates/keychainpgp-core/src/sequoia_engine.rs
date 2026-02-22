@@ -1,15 +1,15 @@
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use sequoia_openpgp::Cert;
 use sequoia_openpgp::cert::prelude::*;
 use sequoia_openpgp::crypto::SessionKey;
-use sequoia_openpgp::parse::stream::*;
 use sequoia_openpgp::parse::Parse;
+use sequoia_openpgp::parse::stream::*;
 use sequoia_openpgp::policy::StandardPolicy;
-use sequoia_openpgp::serialize::stream::*;
 use sequoia_openpgp::serialize::Marshal;
+use sequoia_openpgp::serialize::stream::*;
 use sequoia_openpgp::types::{KeyFlags, PublicKeyAlgorithm};
-use sequoia_openpgp::Cert;
 
 use secrecy::ExposeSecret;
 
@@ -62,10 +62,8 @@ impl SequoiaEngine {
     ///
     /// Returns a list of `(public_key_armored, secret_key_armored, CertInfo)` for
     /// each certificate found in the data.
-    pub fn parse_backup_certs(
-        &self,
-        data: &[u8],
-    ) -> Result<Vec<(Vec<u8>, Vec<u8>, CertInfo)>> {
+    #[allow(clippy::type_complexity)]
+    pub fn parse_backup_certs(&self, data: &[u8]) -> Result<Vec<(Vec<u8>, Vec<u8>, CertInfo)>> {
         use sequoia_openpgp::cert::CertParser;
 
         let certs: Vec<Cert> = CertParser::from_bytes(data)
@@ -86,16 +84,15 @@ impl SequoiaEngine {
             // Serialize public key
             let mut public_bytes = Vec::new();
             {
-                let mut writer = self.armor_writer(
-                    &mut public_bytes,
-                    sequoia_openpgp::armor::Kind::PublicKey,
-                )
-                .map_err(|e| Error::InvalidArmor {
-                    reason: format!("serialization error: {e}"),
-                })?;
-                cert.serialize(&mut writer).map_err(|e| Error::InvalidArmor {
-                    reason: format!("serialization error: {e}"),
-                })?;
+                let mut writer = self
+                    .armor_writer(&mut public_bytes, sequoia_openpgp::armor::Kind::PublicKey)
+                    .map_err(|e| Error::InvalidArmor {
+                        reason: format!("serialization error: {e}"),
+                    })?;
+                cert.serialize(&mut writer)
+                    .map_err(|e| Error::InvalidArmor {
+                        reason: format!("serialization error: {e}"),
+                    })?;
                 writer.finalize().map_err(|e| Error::InvalidArmor {
                     reason: format!("serialization error: {e}"),
                 })?;
@@ -104,16 +101,16 @@ impl SequoiaEngine {
             // Serialize secret key (TSK)
             let mut secret_bytes = Vec::new();
             {
-                let mut writer = self.armor_writer(
-                    &mut secret_bytes,
-                    sequoia_openpgp::armor::Kind::SecretKey,
-                )
-                .map_err(|e| Error::InvalidArmor {
-                    reason: format!("serialization error: {e}"),
-                })?;
-                cert.as_tsk().serialize(&mut writer).map_err(|e| Error::InvalidArmor {
-                    reason: format!("serialization error: {e}"),
-                })?;
+                let mut writer = self
+                    .armor_writer(&mut secret_bytes, sequoia_openpgp::armor::Kind::SecretKey)
+                    .map_err(|e| Error::InvalidArmor {
+                        reason: format!("serialization error: {e}"),
+                    })?;
+                cert.as_tsk()
+                    .serialize(&mut writer)
+                    .map_err(|e| Error::InvalidArmor {
+                        reason: format!("serialization error: {e}"),
+                    })?;
                 writer.finalize().map_err(|e| Error::InvalidArmor {
                     reason: format!("serialization error: {e}"),
                 })?;
@@ -185,8 +182,8 @@ impl SequoiaEngine {
         ciphertext: &[u8],
         password: &sequoia_openpgp::crypto::Password,
     ) -> Result<Vec<u8>> {
-        use sequoia_openpgp::parse::{PacketParser, PacketParserResult};
         use sequoia_openpgp::Packet;
+        use sequoia_openpgp::parse::{PacketParser, PacketParserResult};
 
         let mut ppr = PacketParser::from_bytes(ciphertext).map_err(|e| Error::Decryption {
             reason: format!("invalid data: {e}"),
@@ -201,9 +198,12 @@ impl SequoiaEngine {
                     if let Ok((algo, sk)) = skesk.decrypt(password) {
                         session_key = Some((algo, sk));
                     }
-                    ppr = pp.next().map_err(|e| Error::Decryption {
-                        reason: format!("parse error: {e}"),
-                    })?.1;
+                    ppr = pp
+                        .next()
+                        .map_err(|e| Error::Decryption {
+                            reason: format!("parse error: {e}"),
+                        })?
+                        .1;
                 }
                 Packet::SEIP(_) | Packet::AED(_) => {
                     if let Some((algo, ref sk)) = session_key {
@@ -212,9 +212,12 @@ impl SequoiaEngine {
                         })?;
                         inside_encrypted = true;
                         // Recurse INTO the decrypted container
-                        ppr = pp.recurse().map_err(|e| Error::Decryption {
-                            reason: format!("parse error: {e}"),
-                        })?.1;
+                        ppr = pp
+                            .recurse()
+                            .map_err(|e| Error::Decryption {
+                                reason: format!("parse error: {e}"),
+                            })?
+                            .1;
                     } else {
                         return Err(Error::Decryption {
                             reason: "no SKESK packet found".into(),
@@ -223,15 +226,21 @@ impl SequoiaEngine {
                 }
                 Packet::CompressedData(_) if inside_encrypted => {
                     // Recurse INTO the compressed container (Sequoia decompresses)
-                    ppr = pp.recurse().map_err(|e| Error::Decryption {
-                        reason: format!("decompress error: {e}"),
-                    })?.1;
+                    ppr = pp
+                        .recurse()
+                        .map_err(|e| Error::Decryption {
+                            reason: format!("decompress error: {e}"),
+                        })?
+                        .1;
                 }
                 #[allow(deprecated)]
                 Packet::MDC(_) => {
-                    ppr = pp.next().map_err(|e| Error::Decryption {
-                        reason: format!("parse error: {e}"),
-                    })?.1;
+                    ppr = pp
+                        .next()
+                        .map_err(|e| Error::Decryption {
+                            reason: format!("parse error: {e}"),
+                        })?
+                        .1;
                 }
                 Packet::Literal(_) if inside_encrypted => {
                     // Literal Data packet: extract just the body (cert bytes),
@@ -261,9 +270,12 @@ impl SequoiaEngine {
                     ppr = next_ppr;
                 }
                 _ => {
-                    ppr = pp.next().map_err(|e| Error::Decryption {
-                        reason: format!("parse error: {e}"),
-                    })?.1;
+                    ppr = pp
+                        .next()
+                        .map_err(|e| Error::Decryption {
+                            reason: format!("parse error: {e}"),
+                        })?
+                        .1;
                 }
             }
         }
@@ -319,9 +331,7 @@ fn parse_user_id(uid: &sequoia_openpgp::packet::UserID) -> UserId {
 fn map_algorithm(algo: PublicKeyAlgorithm, key_size: Option<usize>) -> KeyAlgorithm {
     match algo {
         PublicKeyAlgorithm::EdDSA => KeyAlgorithm::Ed25519,
-        PublicKeyAlgorithm::RSAEncryptSign => {
-            KeyAlgorithm::Rsa(key_size.unwrap_or(4096) as u32)
-        }
+        PublicKeyAlgorithm::RSAEncryptSign => KeyAlgorithm::Rsa(key_size.unwrap_or(4096) as u32),
         // ECDH/ECDSA with Curve25519 are part of the Ed25519 suite
         PublicKeyAlgorithm::ECDH | PublicKeyAlgorithm::ECDSA => KeyAlgorithm::Ed25519,
         _ => KeyAlgorithm::Ed25519,
@@ -364,9 +374,9 @@ impl CryptoEngine for SequoiaEngine {
         }
 
         if let Some(ref passphrase) = options.passphrase {
-            builder = builder.set_password(Some(
-                sequoia_openpgp::crypto::Password::from(passphrase.expose_secret().as_slice()),
-            ));
+            builder = builder.set_password(Some(sequoia_openpgp::crypto::Password::from(
+                passphrase.expose_secret().as_slice(),
+            )));
         }
 
         let (cert, _revocation) = builder.generate().map_err(|e| Error::KeyGeneration {
@@ -378,14 +388,15 @@ impl CryptoEngine for SequoiaEngine {
         // Serialize public key (certificate)
         let mut public_key = Vec::new();
         {
-            let mut writer =
-                self.armor_writer(&mut public_key, sequoia_openpgp::armor::Kind::PublicKey)
-                    .map_err(|e| Error::KeyGeneration {
-                        reason: format!("armor error: {e}"),
-                    })?;
-            cert.serialize(&mut writer).map_err(|e| Error::KeyGeneration {
-                reason: format!("serialize error: {e}"),
-            })?;
+            let mut writer = self
+                .armor_writer(&mut public_key, sequoia_openpgp::armor::Kind::PublicKey)
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("armor error: {e}"),
+                })?;
+            cert.serialize(&mut writer)
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("serialize error: {e}"),
+                })?;
             writer.finalize().map_err(|e| Error::KeyGeneration {
                 reason: format!("finalize error: {e}"),
             })?;
@@ -394,16 +405,19 @@ impl CryptoEngine for SequoiaEngine {
         // Serialize secret key
         let mut secret_key_bytes = Vec::new();
         {
-            let mut writer = self.armor_writer(
-                &mut secret_key_bytes,
-                sequoia_openpgp::armor::Kind::SecretKey,
-            )
-            .map_err(|e| Error::KeyGeneration {
-                reason: format!("armor error: {e}"),
-            })?;
-            cert.as_tsk().serialize(&mut writer).map_err(|e| Error::KeyGeneration {
-                reason: format!("serialize error: {e}"),
-            })?;
+            let mut writer = self
+                .armor_writer(
+                    &mut secret_key_bytes,
+                    sequoia_openpgp::armor::Kind::SecretKey,
+                )
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("armor error: {e}"),
+                })?;
+            cert.as_tsk()
+                .serialize(&mut writer)
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("serialize error: {e}"),
+                })?;
             writer.finalize().map_err(|e| Error::KeyGeneration {
                 reason: format!("finalize error: {e}"),
             })?;
@@ -416,11 +430,7 @@ impl CryptoEngine for SequoiaEngine {
         })
     }
 
-    fn encrypt(
-        &self,
-        plaintext: &[u8],
-        recipient_keys: &[Vec<u8>],
-    ) -> Result<Vec<u8>> {
+    fn encrypt(&self, plaintext: &[u8], recipient_keys: &[Vec<u8>]) -> Result<Vec<u8>> {
         if recipient_keys.is_empty() {
             return Err(Error::NoRecipients);
         }
@@ -436,11 +446,11 @@ impl CryptoEngine for SequoiaEngine {
 
         let mut recipients: Vec<Recipient> = Vec::new();
         for cert in &certs {
-            let valid_cert = cert
-                .with_policy(&self.policy, None)
-                .map_err(|e| Error::Encryption {
-                    reason: format!("key policy check failed: {e}"),
-                })?;
+            let valid_cert =
+                cert.with_policy(&self.policy, None)
+                    .map_err(|e| Error::Encryption {
+                        reason: format!("key policy check failed: {e}"),
+                    })?;
 
             for key in valid_cert
                 .keys()
@@ -462,11 +472,11 @@ impl CryptoEngine for SequoiaEngine {
 
         let mut output = Vec::new();
         {
-            let mut armored_writer =
-                self.armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
-                    .map_err(|e| Error::Encryption {
-                        reason: format!("armor error: {e}"),
-                    })?;
+            let mut armored_writer = self
+                .armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
+                .map_err(|e| Error::Encryption {
+                    reason: format!("armor error: {e}"),
+                })?;
 
             let message = Message::new(&mut armored_writer);
             let message = Encryptor2::for_recipients(message, recipients)
@@ -474,15 +484,18 @@ impl CryptoEngine for SequoiaEngine {
                 .map_err(|e| Error::Encryption {
                     reason: format!("encryptor error: {e}"),
                 })?;
-            let mut message = LiteralWriter::new(message)
-                .build()
-                .map_err(|e| Error::Encryption {
-                    reason: format!("literal writer error: {e}"),
-                })?;
+            let mut message =
+                LiteralWriter::new(message)
+                    .build()
+                    .map_err(|e| Error::Encryption {
+                        reason: format!("literal writer error: {e}"),
+                    })?;
 
-            message.write_all(plaintext).map_err(|e| Error::Encryption {
-                reason: format!("write error: {e}"),
-            })?;
+            message
+                .write_all(plaintext)
+                .map_err(|e| Error::Encryption {
+                    reason: format!("write error: {e}"),
+                })?;
             message.finalize().map_err(|e| Error::Encryption {
                 reason: format!("finalize error: {e}"),
             })?;
@@ -528,36 +541,52 @@ impl CryptoEngine for SequoiaEngine {
         Ok(plaintext)
     }
 
-    fn sign(
-        &self,
-        data: &[u8],
-        secret_key: &[u8],
-        passphrase: Option<&[u8]>,
-    ) -> Result<Vec<u8>> {
+    fn sign(&self, data: &[u8], secret_key: &[u8], passphrase: Option<&[u8]>) -> Result<Vec<u8>> {
         let cert = Cert::from_bytes(secret_key).map_err(|e| Error::Signing {
             reason: format!("invalid secret key: {e}"),
         })?;
 
-        let valid_cert = cert.with_policy(&self.policy, None).map_err(|e| Error::Signing {
-            reason: format!("key policy check failed: {e}"),
-        })?;
+        let valid_cert = cert
+            .with_policy(&self.policy, None)
+            .map_err(|e| Error::Signing {
+                reason: format!("key policy check failed: {e}"),
+            })?;
 
         // Find a signing-capable secret key
         let mut keypair = None;
 
         // Try unencrypted secret keys first
-        for ka in valid_cert.keys().supported().alive().revoked(false).for_signing().unencrypted_secret() {
-            keypair = Some(ka.key().clone().into_keypair().map_err(|e| Error::Signing {
-                reason: format!("keypair conversion failed: {e}"),
-            })?);
-            break;
+        if let Some(ka) = valid_cert
+            .keys()
+            .supported()
+            .alive()
+            .revoked(false)
+            .for_signing()
+            .unencrypted_secret()
+            .next()
+        {
+            keypair = Some(
+                ka.key()
+                    .clone()
+                    .into_keypair()
+                    .map_err(|e| Error::Signing {
+                        reason: format!("keypair conversion failed: {e}"),
+                    })?,
+            );
         }
 
         // Try with passphrase
         if keypair.is_none() {
             if let Some(passphrase) = passphrase {
                 let password = sequoia_openpgp::crypto::Password::from(passphrase);
-                for ka in valid_cert.keys().supported().alive().revoked(false).for_signing().secret() {
+                for ka in valid_cert
+                    .keys()
+                    .supported()
+                    .alive()
+                    .revoked(false)
+                    .for_signing()
+                    .secret()
+                {
                     let key = ka.key().clone();
                     if let Ok(decrypted) = key.decrypt_secret(&password) {
                         if let Ok(kp) = decrypted.into_keypair() {
@@ -575,18 +604,19 @@ impl CryptoEngine for SequoiaEngine {
 
         let mut output = Vec::new();
         {
-            let mut armored_writer =
-                self.armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
-                    .map_err(|e| Error::Signing {
-                        reason: format!("armor error: {e}"),
-                    })?;
+            let mut armored_writer = self
+                .armor_writer(&mut output, sequoia_openpgp::armor::Kind::Message)
+                .map_err(|e| Error::Signing {
+                    reason: format!("armor error: {e}"),
+                })?;
 
             let message = Message::new(&mut armored_writer);
-            let message = Signer::new(message, signer_keypair)
-                .build()
-                .map_err(|e| Error::Signing {
-                    reason: format!("signer error: {e}"),
-                })?;
+            let message =
+                Signer::new(message, signer_keypair)
+                    .build()
+                    .map_err(|e| Error::Signing {
+                        reason: format!("signer error: {e}"),
+                    })?;
             let mut message = LiteralWriter::new(message)
                 .build()
                 .map_err(|e| Error::Signing {
@@ -608,11 +638,7 @@ impl CryptoEngine for SequoiaEngine {
         Ok(output)
     }
 
-    fn verify(
-        &self,
-        signed_data: &[u8],
-        signer_key: &[u8],
-    ) -> Result<VerifyResult> {
+    fn verify(&self, signed_data: &[u8], signer_key: &[u8]) -> Result<VerifyResult> {
         let signer_cert = Cert::from_bytes(signer_key).map_err(|e| Error::VerificationFailed {
             reason: format!("invalid signer key: {e}"),
         })?;
@@ -656,7 +682,10 @@ impl CryptoEngine for SequoiaEngine {
         let fingerprint = Fingerprint::new(cert.fingerprint().to_hex());
 
         // Extract User IDs
-        let user_ids: Vec<UserId> = cert.userids().map(|uid| parse_user_id(uid.userid())).collect();
+        let user_ids: Vec<UserId> = cert
+            .userids()
+            .map(|uid| parse_user_id(uid.userid()))
+            .collect();
 
         // Determine algorithm from primary key
         let pk_algo = cert.primary_key().pk_algo();
@@ -696,7 +725,8 @@ impl CryptoEngine for SequoiaEngine {
                             let ct = ka.creation_time();
                             chrono::DateTime::<chrono::Utc>::from(ct).to_rfc3339()
                         };
-                        let sk_expires = ka.key_expiration_time()
+                        let sk_expires = ka
+                            .key_expiration_time()
                             .map(|et| chrono::DateTime::<chrono::Utc>::from(et).to_rfc3339());
 
                         let mut capabilities = Vec::new();
@@ -713,7 +743,8 @@ impl CryptoEngine for SequoiaEngine {
                             capabilities.push(KeyCapability::Authenticate);
                         }
 
-                        let is_revoked = ka.revocation_status() != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow;
+                        let is_revoked = ka.revocation_status()
+                            != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow;
 
                         SubkeyInfo {
                             fingerprint: sk_fp,
@@ -745,23 +776,23 @@ impl CryptoEngine for SequoiaEngine {
         let mut output = Vec::new();
         {
             let message = Message::new(&mut output);
-            let encryptor = Encryptor2::with_passwords(
-                message,
-                Some(Password::from(passphrase)),
-            )
-            .build()
-            .map_err(|e| Error::Encryption {
-                reason: e.to_string(),
-            })?;
-
-            let mut literal = LiteralWriter::new(encryptor)
+            let encryptor = Encryptor2::with_passwords(message, Some(Password::from(passphrase)))
                 .build()
                 .map_err(|e| Error::Encryption {
                     reason: e.to_string(),
                 })?;
-            literal.write_all(plaintext).map_err(|e| Error::Encryption {
-                reason: e.to_string(),
-            })?;
+
+            let mut literal =
+                LiteralWriter::new(encryptor)
+                    .build()
+                    .map_err(|e| Error::Encryption {
+                        reason: e.to_string(),
+                    })?;
+            literal
+                .write_all(plaintext)
+                .map_err(|e| Error::Encryption {
+                    reason: e.to_string(),
+                })?;
             literal.finalize().map_err(|e| Error::Encryption {
                 reason: e.to_string(),
             })?;
@@ -852,10 +883,10 @@ impl DecryptionHelper for DecryptHelper<'_> {
             }
         }
 
-        Err(sequoia_openpgp::Error::MissingSessionKey(
-            "no suitable decryption key found".into(),
+        Err(
+            sequoia_openpgp::Error::MissingSessionKey("no suitable decryption key found".into())
+                .into(),
         )
-        .into())
     }
 }
 
@@ -877,27 +908,19 @@ impl VerificationHelper for VerifyHelper<'_> {
 
     fn check(&mut self, structure: MessageStructure) -> sequoia_openpgp::Result<()> {
         for layer in structure {
-            match layer {
-                MessageLayer::SignatureGroup { results } => {
-                    for result in &results {
-                        match result {
-                            Ok(GoodChecksum { ka, .. }) => {
-                                self.result = Some(VerifyResult {
-                                    valid: true,
-                                    signer_fingerprint: Some(ka.cert().fingerprint().to_hex()),
-                                });
-                                return Ok(());
-                            }
-                            Err(_) => {}
-                        }
-                    }
-                    // No good signature found
+            if let MessageLayer::SignatureGroup { results } = layer {
+                if let Some(GoodChecksum { ka, .. }) = results.iter().flatten().next() {
                     self.result = Some(VerifyResult {
-                        valid: false,
-                        signer_fingerprint: Some(self.cert.fingerprint().to_hex()),
+                        valid: true,
+                        signer_fingerprint: Some(ka.cert().fingerprint().to_hex()),
                     });
+                    return Ok(());
                 }
-                _ => {}
+                // No good signature found
+                self.result = Some(VerifyResult {
+                    valid: false,
+                    signer_fingerprint: Some(self.cert.fingerprint().to_hex()),
+                });
             }
         }
         Ok(())
@@ -937,11 +960,7 @@ mod tests {
         assert!(String::from_utf8_lossy(&ciphertext).contains("BEGIN PGP MESSAGE"));
 
         let decrypted = engine
-            .decrypt(
-                &ciphertext,
-                key_pair.secret_key.expose_secret(),
-                None,
-            )
+            .decrypt(&ciphertext, key_pair.secret_key.expose_secret(), None)
             .unwrap();
 
         assert_eq!(decrypted, plaintext);
@@ -952,7 +971,10 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let kp1 = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Alice", "alice@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Alice",
+                "alice@example.com",
+            )))
             .unwrap();
         let kp2 = engine
             .generate_key_pair(KeyGenOptions::new(UserId::new("Bob", "bob@example.com")))
@@ -987,10 +1009,16 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let sender = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Sender", "sender@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Sender",
+                "sender@example.com",
+            )))
             .unwrap();
         let wrong = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Wrong", "wrong@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Wrong",
+                "wrong@example.com",
+            )))
             .unwrap();
 
         let ciphertext = engine
@@ -1006,11 +1034,16 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let kp = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Signer", "signer@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Signer",
+                "signer@example.com",
+            )))
             .unwrap();
 
         let data = b"This message is signed by me.";
-        let signed = engine.sign(data, kp.secret_key.expose_secret(), None).unwrap();
+        let signed = engine
+            .sign(data, kp.secret_key.expose_secret(), None)
+            .unwrap();
 
         assert!(!signed.is_empty());
         assert!(String::from_utf8_lossy(&signed).contains("BEGIN PGP MESSAGE"));
@@ -1025,13 +1058,21 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let kp = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Signer", "signer@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Signer",
+                "signer@example.com",
+            )))
             .unwrap();
         let wrong = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Other", "other@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Other",
+                "other@example.com",
+            )))
             .unwrap();
 
-        let signed = engine.sign(b"authentic", kp.secret_key.expose_secret(), None).unwrap();
+        let signed = engine
+            .sign(b"authentic", kp.secret_key.expose_secret(), None)
+            .unwrap();
 
         // Verify with the wrong key should show invalid
         let result = engine.verify(&signed, &wrong.public_key);
@@ -1047,7 +1088,10 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let kp = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Alice Johnson", "alice@example.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Alice Johnson",
+                "alice@example.com",
+            )))
             .unwrap();
 
         // Inspect public key
@@ -1069,7 +1113,10 @@ mod tests {
         let engine = SequoiaEngine::new();
 
         let kp = engine
-            .generate_key_pair(KeyGenOptions::new(UserId::new("Expiry Test", "exp@test.com")))
+            .generate_key_pair(KeyGenOptions::new(UserId::new(
+                "Expiry Test",
+                "exp@test.com",
+            )))
             .unwrap();
 
         let info = engine.inspect_key(&kp.public_key).unwrap();
@@ -1110,12 +1157,10 @@ mod tests {
         let mut ciphertext = Vec::new();
         {
             let message = Message::new(&mut ciphertext);
-            let mut encryptor = Encryptor2::with_passwords(
-                message,
-                Some(Password::from(password.as_bytes())),
-            )
-            .build()
-            .unwrap();
+            let mut encryptor =
+                Encryptor2::with_passwords(message, Some(Password::from(password.as_bytes())))
+                    .build()
+                    .unwrap();
             encryptor.write_all(&cert_binary).unwrap();
             encryptor.finalize().unwrap();
         }
@@ -1130,8 +1175,7 @@ mod tests {
     #[test]
     fn test_decrypt_openkeychain_backup() {
         let engine = SequoiaEngine::new();
-        let backup_data =
-            include_bytes!("../testdata/export_openkeychain.sec.pgp");
+        let backup_data = include_bytes!("../testdata/export_openkeychain.sec.pgp");
         let transfer_code = "6306-7060-1630-4222-8547-1679-5977-5194-8485";
 
         // Decrypt the SKESK-encrypted backup

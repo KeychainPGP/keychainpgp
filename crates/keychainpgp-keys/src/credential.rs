@@ -156,7 +156,11 @@ fn base64_decode(data: &[u8]) -> std::result::Result<Vec<u8>, String> {
         }
     }
 
-    let data: Vec<u8> = data.iter().copied().filter(|b| !b.is_ascii_whitespace()).collect();
+    let data: Vec<u8> = data
+        .iter()
+        .copied()
+        .filter(|b| !b.is_ascii_whitespace())
+        .collect();
     if data.len() % 4 != 0 {
         return Err("invalid base64 length".into());
     }

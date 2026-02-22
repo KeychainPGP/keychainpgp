@@ -21,7 +21,9 @@ pub fn enable_opsec_mode(
         .unwrap_or_else(|| "Notes".into());
 
     if let Some(window) = app.get_webview_window("main") {
-        window.set_title(&title).map_err(|e| format!("Failed to set title: {e}"))?;
+        window
+            .set_title(&title)
+            .map_err(|e| format!("Failed to set title: {e}"))?;
     }
 
     tracing::info!("OPSEC mode enabled");
@@ -30,10 +32,7 @@ pub fn enable_opsec_mode(
 
 /// Disable OPSEC mode: restore window title, clear RAM keys.
 #[tauri::command]
-pub fn disable_opsec_mode(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
+pub fn disable_opsec_mode(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     state.opsec_mode.store(false, Ordering::Relaxed);
 
     // Zeroize and clear any RAM-only keys
@@ -45,7 +44,9 @@ pub fn disable_opsec_mode(
     }
 
     if let Some(window) = app.get_webview_window("main") {
-        window.set_title("KeychainPGP").map_err(|e| format!("Failed to set title: {e}"))?;
+        window
+            .set_title("KeychainPGP")
+            .map_err(|e| format!("Failed to set title: {e}"))?;
     }
 
     tracing::info!("OPSEC mode disabled");
@@ -54,10 +55,7 @@ pub fn disable_opsec_mode(
 
 /// Panic wipe: immediately zeroize all secrets and close the app.
 #[tauri::command]
-pub fn panic_wipe(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
+pub fn panic_wipe(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     tracing::warn!("OPSEC panic wipe triggered");
 
     // Zeroize all in-memory secret keys

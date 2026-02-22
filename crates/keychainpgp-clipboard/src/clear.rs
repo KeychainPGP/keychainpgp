@@ -52,9 +52,11 @@ pub fn clear_clipboard() -> Result<()> {
 
     // Overwrite with empty string rather than just clearing,
     // to defeat clipboard history tools.
-    clipboard.set_text(String::new()).map_err(|e| Error::Clipboard {
-        reason: e.to_string(),
-    })?;
+    clipboard
+        .set_text(String::new())
+        .map_err(|e| Error::Clipboard {
+            reason: e.to_string(),
+        })?;
 
     Ok(())
 }

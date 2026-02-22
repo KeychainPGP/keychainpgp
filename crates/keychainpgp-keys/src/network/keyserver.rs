@@ -13,16 +13,17 @@ pub struct KeyserverResult {
 
 /// Build a reqwest client with optional SOCKS5 proxy support.
 fn build_client(timeout_secs: u64, proxy_url: Option<&str>) -> Result<reqwest::Client, String> {
-    let mut builder = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(timeout_secs));
+    let mut builder =
+        reqwest::Client::builder().timeout(std::time::Duration::from_secs(timeout_secs));
 
     if let Some(proxy) = proxy_url {
-        let proxy = reqwest::Proxy::all(proxy)
-            .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+        let proxy = reqwest::Proxy::all(proxy).map_err(|e| format!("Invalid proxy URL: {e}"))?;
         builder = builder.proxy(proxy);
     }
 
-    builder.build().map_err(|e| format!("HTTP client error: {e}"))
+    builder
+        .build()
+        .map_err(|e| format!("HTTP client error: {e}"))
 }
 
 /// Search for keys on a keyserver by email or name.
@@ -83,10 +84,7 @@ pub async fn keyserver_upload(
     let key_text = String::from_utf8_lossy(key_data).into_owned();
 
     // Try VKS API first (keys.openpgp.org)
-    let vks_url = format!(
-        "{}/vks/v1/upload",
-        keyserver_url.trim_end_matches('/')
-    );
+    let vks_url = format!("{}/vks/v1/upload", keyserver_url.trim_end_matches('/'));
 
     let response = client
         .post(&vks_url)
@@ -102,10 +100,7 @@ pub async fn keyserver_upload(
     }
 
     // Fall back to HKP upload
-    let hkp_url = format!(
-        "{}/pks/add",
-        keyserver_url.trim_end_matches('/')
-    );
+    let hkp_url = format!("{}/pks/add", keyserver_url.trim_end_matches('/'));
 
     let form_body = format!("keytext={}", urlencoding(&key_text));
 
@@ -120,10 +115,7 @@ pub async fn keyserver_upload(
     if response.status().is_success() {
         Ok("Key uploaded successfully.".into())
     } else {
-        Err(format!(
-            "Upload failed with status: {}",
-            response.status()
-        ))
+        Err(format!("Upload failed with status: {}", response.status()))
     }
 }
 

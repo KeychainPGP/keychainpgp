@@ -43,7 +43,7 @@ const QR_PREFIX: &str = "KCPGP";
 /// Each part has the format `KCPGP:<part>/<total>:<base64_chunk>`.
 pub fn split_for_qr(encrypted: &[u8]) -> Vec<String> {
     let encoded = base64_encode(encrypted);
-    let total = (encoded.len() + QR_PART_SIZE - 1) / QR_PART_SIZE;
+    let total = encoded.len().div_ceil(QR_PART_SIZE);
 
     if total == 0 {
         return vec![format!("{QR_PREFIX}:1/1:")];
@@ -248,7 +248,10 @@ mod tests {
         assert_eq!(groups.len(), 6, "should have 6 groups");
         for group in &groups {
             assert_eq!(group.len(), 4, "each group should be 4 digits");
-            assert!(group.chars().all(|c| c.is_ascii_digit()), "should be all digits");
+            assert!(
+                group.chars().all(|c| c.is_ascii_digit()),
+                "should be all digits"
+            );
         }
     }
 

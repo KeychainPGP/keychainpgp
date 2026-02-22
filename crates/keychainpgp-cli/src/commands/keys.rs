@@ -2,8 +2,8 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use keychainpgp_core::{CryptoEngine, SequoiaEngine};
-use keychainpgp_keys::storage::KeyRecord;
 use keychainpgp_keys::Keyring;
+use keychainpgp_keys::storage::KeyRecord;
 
 pub fn list() -> Result<()> {
     let keyring = Keyring::open_default()?;
@@ -27,7 +27,8 @@ pub fn import(file: &Path) -> Result<()> {
     let data = std::fs::read(file).with_context(|| format!("failed to read {}", file.display()))?;
 
     let engine = SequoiaEngine::new();
-    let info = engine.inspect_key(&data)
+    let info = engine
+        .inspect_key(&data)
         .with_context(|| format!("failed to parse key from {}", file.display()))?;
 
     let name = info.name().map(String::from);

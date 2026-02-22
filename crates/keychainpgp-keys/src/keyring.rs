@@ -21,10 +21,11 @@ pub struct Keyring {
 impl Keyring {
     /// Open the keyring using the default platform data directory.
     pub fn open_default() -> Result<Self> {
-        let dirs = ProjectDirs::from("com", "keychainpgp", "KeychainPGP")
-            .ok_or_else(|| Error::CredentialStore {
+        let dirs = ProjectDirs::from("com", "keychainpgp", "KeychainPGP").ok_or_else(|| {
+            Error::CredentialStore {
                 reason: "could not determine application data directory".into(),
-            })?;
+            }
+        })?;
 
         let data_dir = dirs.data_dir().to_path_buf();
         std::fs::create_dir_all(&data_dir)?;
@@ -33,7 +34,11 @@ impl Keyring {
         let storage = KeyStorage::open(&db_path)?;
         let credentials = CredentialStore::new(&data_dir)?;
 
-        Ok(Self { storage, credentials, data_dir })
+        Ok(Self {
+            storage,
+            credentials,
+            data_dir,
+        })
     }
 
     /// Open the keyring at a specific directory (for testing).
@@ -56,13 +61,10 @@ impl Keyring {
     }
 
     /// Store a generated key pair (public key in DB, private key in credential store).
-    pub fn store_generated_key(
-        &self,
-        record: KeyRecord,
-        secret_key: &[u8],
-    ) -> Result<()> {
+    pub fn store_generated_key(&self, record: KeyRecord, secret_key: &[u8]) -> Result<()> {
         // Store private key
-        self.credentials.store_secret_key(&record.fingerprint, secret_key)?;
+        self.credentials
+            .store_secret_key(&record.fingerprint, secret_key)?;
 
         // Store public key in SQLite
         self.storage.insert(&record)?;

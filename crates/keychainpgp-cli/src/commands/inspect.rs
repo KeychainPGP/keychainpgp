@@ -42,7 +42,11 @@ pub fn run(file: &str) -> Result<()> {
         println!("User IDs:    (none)");
     } else {
         for (i, uid) in info.user_ids.iter().enumerate() {
-            let prefix = if i == 0 { "User ID:    " } else { "            " };
+            let prefix = if i == 0 {
+                "User ID:    "
+            } else {
+                "            "
+            };
             println!("{prefix} {uid}");
         }
     }

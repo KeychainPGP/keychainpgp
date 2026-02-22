@@ -26,7 +26,11 @@ pub fn run(recipient_fingerprints: &[String]) -> Result<()> {
                 eprintln!("Ambiguous recipient '{query}' matched {n} keys:");
                 for r in &results {
                     let name = r.name.as_deref().unwrap_or("(no name)");
-                    let email = r.email.as_deref().map(|e| format!(" <{e}>")).unwrap_or_default();
+                    let email = r
+                        .email
+                        .as_deref()
+                        .map(|e| format!(" <{e}>"))
+                        .unwrap_or_default();
                     eprintln!("  {} {name}{email}", &r.fingerprint[..16]);
                 }
                 anyhow::bail!("specify a more precise recipient (use full fingerprint)");

@@ -23,10 +23,7 @@ pub fn run(signer: &str) -> Result<()> {
     match engine.verify(&signed_data, &signer_record.pgp_data) {
         Ok(result) => {
             if result.valid {
-                let name = signer_record
-                    .name
-                    .as_deref()
-                    .unwrap_or("(unknown)");
+                let name = signer_record.name.as_deref().unwrap_or("(unknown)");
                 eprintln!("Good signature from {name}");
                 if let Some(fp) = &result.signer_fingerprint {
                     eprintln!("Fingerprint: {fp}");

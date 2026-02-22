@@ -42,5 +42,5 @@ pub fn parse_import(data: &[u8]) -> Result<Vec<ImportedKey>> {
 
 /// Read key data from a file path.
 pub fn read_key_file(path: &std::path::Path) -> Result<Vec<u8>> {
-    std::fs::read(path).map_err(|e| Error::Io(e))
+    std::fs::read(path).map_err(Error::Io)
 }

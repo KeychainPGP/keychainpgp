@@ -56,22 +56,20 @@ pub async fn wkd_lookup(email: &str, proxy_url: Option<&str>) -> Result<Vec<u8>,
 
     let hash = wkd_hash(local);
 
-    let mut builder = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(10));
+    let mut builder = reqwest::Client::builder().timeout(std::time::Duration::from_secs(10));
 
     if let Some(proxy) = proxy_url {
-        let proxy = reqwest::Proxy::all(proxy)
-            .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+        let proxy = reqwest::Proxy::all(proxy).map_err(|e| format!("Invalid proxy URL: {e}"))?;
         builder = builder.proxy(proxy);
     }
 
-    let client = builder.build()
+    let client = builder
+        .build()
         .map_err(|e| format!("HTTP client error: {e}"))?;
 
     // Try advanced method first
-    let advanced_url = format!(
-        "https://openpgpkey.{domain}/.well-known/openpgpkey/{domain}/hu/{hash}?l={local}"
-    );
+    let advanced_url =
+        format!("https://openpgpkey.{domain}/.well-known/openpgpkey/{domain}/hu/{hash}?l={local}");
 
     if let Ok(response) = client.get(&advanced_url).send().await {
         if response.status().is_success() {
@@ -84,9 +82,7 @@ pub async fn wkd_lookup(email: &str, proxy_url: Option<&str>) -> Result<Vec<u8>,
     }
 
     // Fall back to direct method
-    let direct_url = format!(
-        "https://{domain}/.well-known/openpgpkey/hu/{hash}?l={local}"
-    );
+    let direct_url = format!("https://{domain}/.well-known/openpgpkey/hu/{hash}?l={local}");
 
     let response = client
         .get(&direct_url)

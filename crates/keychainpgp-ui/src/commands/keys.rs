@@ -6,8 +6,8 @@ use serde::Serialize;
 use tauri::{AppHandle, State};
 use tauri_plugin_store::StoreExt;
 
-use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
 use keychainpgp_core::CryptoEngine;
+use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
 use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
 
@@ -94,16 +94,24 @@ pub fn generate_key_pair(
         pgp_data: key_pair.public_key.clone(),
     };
 
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
 
     if state.opsec_mode.load(Ordering::Relaxed) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
             .map_err(|e| format!("Failed to store key: {e}"))?;
-        let mut opsec_keys = state.opsec_secret_keys.lock()
+        let mut opsec_keys = state
+            .opsec_secret_keys
+            .lock()
             .map_err(|e| format!("Internal error: {e}"))?;
-        opsec_keys.insert(record.fingerprint.clone(), key_pair.secret_key.expose_secret().clone());
+        opsec_keys.insert(
+            record.fingerprint.clone(),
+            key_pair.secret_key.expose_secret().clone(),
+        );
     } else {
         keyring
             .store_generated_key(record.clone(), key_pair.secret_key.expose_secret())
@@ -116,7 +124,10 @@ pub fn generate_key_pair(
 /// List all keys in the keyring.
 #[tauri::command]
 pub fn list_keys(state: State<'_, AppState>) -> Result<Vec<KeyInfo>, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let keys = keyring
         .list_keys()
         .map_err(|e| format!("Failed to list keys: {e}"))?;
@@ -125,10 +136,7 @@ pub fn list_keys(state: State<'_, AppState>) -> Result<Vec<KeyInfo>, String> {
 
 /// Import a key from ASCII-armored text.
 #[tauri::command]
-pub fn import_key(
-    state: State<'_, AppState>,
-    key_data: String,
-) -> Result<KeyInfo, String> {
+pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInfo, String> {
     let cert_info = state
         .engine
         .inspect_key(key_data.as_bytes())
@@ -149,14 +157,19 @@ pub fn import_key(
         pgp_data: key_data.as_bytes().to_vec(),
     };
 
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
 
     if cert_info.has_secret_key && state.opsec_mode.load(Ordering::Relaxed) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
             .map_err(|e| format!("Failed to import key: {e}"))?;
-        let mut opsec_keys = state.opsec_secret_keys.lock()
+        let mut opsec_keys = state
+            .opsec_secret_keys
+            .lock()
             .map_err(|e| format!("Internal error: {e}"))?;
         opsec_keys.insert(record.fingerprint.clone(), key_data.as_bytes().to_vec());
     } else if cert_info.has_secret_key {
@@ -174,11 +187,11 @@ pub fn import_key(
 
 /// Export a public key as ASCII-armored text.
 #[tauri::command]
-pub fn export_key(
-    state: State<'_, AppState>,
-    fingerprint: String,
-) -> Result<String, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn export_key(state: State<'_, AppState>, fingerprint: String) -> Result<String, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let record = keyring
         .get_key(&fingerprint)
         .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -189,11 +202,11 @@ pub fn export_key(
 
 /// Delete a key from the keyring.
 #[tauri::command]
-pub fn delete_key(
-    state: State<'_, AppState>,
-    fingerprint: String,
-) -> Result<bool, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn delete_key(state: State<'_, AppState>, fingerprint: String) -> Result<bool, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     keyring
         .delete_key(&fingerprint)
         .map_err(|e| format!("Failed to delete key: {e}"))
@@ -201,11 +214,11 @@ pub fn delete_key(
 
 /// Search keys by name, email, or fingerprint.
 #[tauri::command]
-pub fn search_keys(
-    state: State<'_, AppState>,
-    query: String,
-) -> Result<Vec<KeyInfo>, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn search_keys(state: State<'_, AppState>, query: String) -> Result<Vec<KeyInfo>, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let keys = keyring
         .search_keys(&query)
         .map_err(|e| format!("Search failed: {e}"))?;
@@ -225,7 +238,10 @@ pub fn set_key_trust(
         2 => TrustLevel::Verified,
         _ => return Err(format!("Invalid trust level: {trust_level}")),
     };
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     keyring
         .set_trust(&fingerprint, trust)
         .map_err(|e| format!("Failed to set trust: {e}"))
@@ -233,11 +249,11 @@ pub fn set_key_trust(
 
 /// Inspect a key and return detailed metadata.
 #[tauri::command]
-pub fn inspect_key(
-    state: State<'_, AppState>,
-    fingerprint: String,
-) -> Result<KeyInfo, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn inspect_key(state: State<'_, AppState>, fingerprint: String) -> Result<KeyInfo, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let record = keyring
         .get_key(&fingerprint)
         .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -285,7 +301,10 @@ pub fn inspect_key_detailed(
     state: State<'_, AppState>,
     fingerprint: String,
 ) -> Result<KeyDetailedInfo, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let record = keyring
         .get_key(&fingerprint)
         .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -334,11 +353,11 @@ pub fn inspect_key_detailed(
 
 /// Export a public key as a QR code SVG.
 #[tauri::command]
-pub fn export_key_qr(
-    state: State<'_, AppState>,
-    fingerprint: String,
-) -> Result<String, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn export_key_qr(state: State<'_, AppState>, fingerprint: String) -> Result<String, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
     let record = keyring
         .get_key(&fingerprint)
         .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -401,9 +420,10 @@ pub async fn keyserver_search(
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
     let proxy = get_proxy_url(&app);
 
-    let results = keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
-        .await
-        .map_err(|e| e.to_string())?;
+    let results =
+        keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
+            .await
+            .map_err(|e| e.to_string())?;
 
     let mut keys = Vec::new();
     for result in results {
@@ -442,7 +462,10 @@ pub async fn keyserver_upload(
     let proxy = get_proxy_url(&app);
 
     let key_data = {
-        let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+        let keyring = state
+            .keyring
+            .lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
         let record = keyring
             .get_key(&fingerprint)
             .map_err(|e| format!("Failed to look up key: {e}"))?
@@ -458,8 +481,7 @@ pub async fn keyserver_upload(
 /// Test a proxy connection by making a simple HTTPS request through it.
 #[tauri::command]
 pub async fn test_proxy_connection(proxy_url: String) -> Result<String, String> {
-    let proxy = reqwest::Proxy::all(&proxy_url)
-        .map_err(|e| format!("Invalid proxy URL: {e}"))?;
+    let proxy = reqwest::Proxy::all(&proxy_url).map_err(|e| format!("Invalid proxy URL: {e}"))?;
     let client = reqwest::Client::builder()
         .proxy(proxy)
         .timeout(std::time::Duration::from_secs(10))
@@ -541,7 +563,10 @@ pub fn import_backup(
                     .store_generated_key(record.clone(), &secret_bytes)
                     .map_err(|e| format!("Failed to upgrade key: {e}"))?;
                 // Update the previously-added KeyInfo in imported_keys
-                if let Some(prev) = imported_keys.iter_mut().find(|k: &&mut KeyInfo| k.fingerprint == record.fingerprint) {
+                if let Some(prev) = imported_keys
+                    .iter_mut()
+                    .find(|k: &&mut KeyInfo| k.fingerprint == record.fingerprint)
+                {
                     *prev = KeyInfo::from(record);
                 }
             } else {

@@ -20,10 +20,11 @@ pub struct SyncBundle {
 
 /// Export all own keys as an encrypted bundle for sync.
 #[tauri::command]
-pub fn export_key_bundle(
-    state: State<'_, AppState>,
-) -> Result<SyncBundle, String> {
-    let keyring = state.keyring.lock().map_err(|e| format!("Internal error: {e}"))?;
+pub fn export_key_bundle(state: State<'_, AppState>) -> Result<SyncBundle, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
 
     let all_keys = keyring
         .list_keys()
@@ -145,9 +146,7 @@ pub fn import_key_bundle(
     for entry in &bundle.keys {
         // Check if key already exists
         let existing = keyring.get_key(&entry.fingerprint).ok().flatten();
-        let already_has_secret = existing
-            .as_ref()
-            .is_some_and(|k| k.is_own_key);
+        let already_has_secret = existing.as_ref().is_some_and(|k| k.is_own_key);
 
         if already_has_secret {
             // Skip keys we already have with secret material
@@ -162,8 +161,8 @@ pub fn import_key_bundle(
 
         let record = keychainpgp_keys::KeyRecord {
             fingerprint: cert_info.fingerprint.0,
-            name: cert_info.user_ids.first().map(|u| u.name.clone()).flatten(),
-            email: cert_info.user_ids.first().map(|u| u.email.clone()).flatten(),
+            name: cert_info.user_ids.first().and_then(|u| u.name.clone()),
+            email: cert_info.user_ids.first().and_then(|u| u.email.clone()),
             algorithm: format!("{}", cert_info.algorithm),
             created_at: cert_info.created_at,
             expires_at: cert_info.expires_at,

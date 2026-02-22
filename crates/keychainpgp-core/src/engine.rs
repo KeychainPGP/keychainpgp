@@ -18,11 +18,7 @@ pub trait CryptoEngine: Send + Sync {
     /// - `recipient_keys`: ASCII-armored public keys of the recipients.
     ///
     /// Returns the ASCII-armored OpenPGP encrypted message.
-    fn encrypt(
-        &self,
-        plaintext: &[u8],
-        recipient_keys: &[Vec<u8>],
-    ) -> Result<Vec<u8>>;
+    fn encrypt(&self, plaintext: &[u8], recipient_keys: &[Vec<u8>]) -> Result<Vec<u8>>;
 
     /// Decrypt an OpenPGP message using the provided secret key.
     ///
@@ -45,12 +41,7 @@ pub trait CryptoEngine: Send + Sync {
     /// - `passphrase`: Optional passphrase if the secret key is protected.
     ///
     /// Returns the ASCII-armored cleartext signed message.
-    fn sign(
-        &self,
-        data: &[u8],
-        secret_key: &[u8],
-        passphrase: Option<&[u8]>,
-    ) -> Result<Vec<u8>>;
+    fn sign(&self, data: &[u8], secret_key: &[u8], passphrase: Option<&[u8]>) -> Result<Vec<u8>>;
 
     /// Verify a cleartext-signed or inline-signed OpenPGP message.
     ///
@@ -58,11 +49,7 @@ pub trait CryptoEngine: Send + Sync {
     /// - `signer_key`: ASCII-armored public key of the expected signer.
     ///
     /// Returns verification result including validity and signer fingerprint.
-    fn verify(
-        &self,
-        signed_data: &[u8],
-        signer_key: &[u8],
-    ) -> Result<VerifyResult>;
+    fn verify(&self, signed_data: &[u8], signer_key: &[u8]) -> Result<VerifyResult>;
 
     /// Parse a key (public or secret) and extract metadata.
     fn inspect_key(&self, key_data: &[u8]) -> Result<CertInfo>;
