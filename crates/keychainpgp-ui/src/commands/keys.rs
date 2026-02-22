@@ -379,8 +379,8 @@ pub fn export_key_qr(state: State<'_, AppState>, fingerprint: String) -> Result<
 /// Generate a QR code SVG from arbitrary text data.
 #[tauri::command]
 pub fn generate_qr_svg(data: String) -> Result<String, String> {
-    let qr = qrcode::QrCode::new(data.as_bytes())
-        .map_err(|e| format!("QR generation failed: {e}"))?;
+    let qr =
+        qrcode::QrCode::new(data.as_bytes()).map_err(|e| format!("QR generation failed: {e}"))?;
     let svg = qr
         .render::<qrcode::render::svg::Color>()
         .min_dimensions(200, 200)
