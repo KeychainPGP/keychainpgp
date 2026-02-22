@@ -2,7 +2,9 @@
 
 use std::sync::atomic::Ordering;
 
-use tauri::{AppHandle, Manager, State};
+#[cfg(desktop)]
+use tauri::Manager;
+use tauri::{AppHandle, State};
 use zeroize::Zeroize;
 
 use crate::state::AppState;
@@ -10,21 +12,23 @@ use crate::state::AppState;
 /// Enable OPSEC mode: change window title, set flag.
 #[tauri::command]
 pub fn enable_opsec_mode(
-    app: AppHandle,
+    #[allow(unused_variables)] app: AppHandle,
     state: State<'_, AppState>,
-    title: Option<String>,
+    #[allow(unused_variables)] title: Option<String>,
 ) -> Result<(), String> {
     state.opsec_mode.store(true, Ordering::Relaxed);
 
-    let title = title
-        .filter(|t| !t.is_empty())
-        .unwrap_or_else(|| "Notes".into());
-
     #[cfg(desktop)]
-    if let Some(window) = app.get_webview_window("main") {
-        window
-            .set_title(&title)
-            .map_err(|e| format!("Failed to set title: {e}"))?;
+    {
+        let title = title
+            .filter(|t| !t.is_empty())
+            .unwrap_or_else(|| "Notes".into());
+
+        if let Some(window) = app.get_webview_window("main") {
+            window
+                .set_title(&title)
+                .map_err(|e| format!("Failed to set title: {e}"))?;
+        }
     }
 
     tracing::info!("OPSEC mode enabled");
@@ -33,7 +37,10 @@ pub fn enable_opsec_mode(
 
 /// Disable OPSEC mode: restore window title, clear RAM keys.
 #[tauri::command]
-pub fn disable_opsec_mode(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+pub fn disable_opsec_mode(
+    #[allow(unused_variables)] app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
     state.opsec_mode.store(false, Ordering::Relaxed);
 
     // Zeroize and clear any RAM-only keys
