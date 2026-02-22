@@ -47,11 +47,22 @@ impl SequoiaEngine {
         output: &'a mut W,
         kind: sequoia_openpgp::armor::Kind,
     ) -> std::result::Result<sequoia_openpgp::armor::Writer<&'a mut W>, std::io::Error> {
+        self.armor_writer_with_extra(output, kind, &[])
+    }
+
+    /// Create an armor writer with additional headers (e.g. key name, fingerprint).
+    fn armor_writer_with_extra<'a, W: Write + Send + Sync + 'a>(
+        &self,
+        output: &'a mut W,
+        kind: sequoia_openpgp::armor::Kind,
+        extra: &[(&str, &str)],
+    ) -> std::result::Result<sequoia_openpgp::armor::Writer<&'a mut W>, std::io::Error> {
         if self.include_armor_headers.load(Ordering::Relaxed) {
-            let headers = vec![
-                ("Version", "KeychainPGP 0.1.0"),
-                ("Comment", "https://keychainpgp.com"),
+            let mut headers = vec![
+                ("Version", "KeychainPGP 0.1.1"),
+                ("Comment", "https://keychainpgp.org"),
             ];
+            headers.extend_from_slice(extra);
             sequoia_openpgp::armor::Writer::with_headers(output, kind, headers)
         } else {
             sequoia_openpgp::armor::Writer::new(output, kind)
@@ -84,8 +95,20 @@ impl SequoiaEngine {
             // Serialize public key
             let mut public_bytes = Vec::new();
             {
+                let uid_str = cert
+                    .userids()
+                    .next()
+                    .map(|u| u.userid().to_string())
+                    .unwrap_or_default();
+                let fp_hex = cert.fingerprint().to_hex();
+                let extra: Vec<(&str, &str)> =
+                    vec![("Comment", &uid_str), ("Fingerprint", &fp_hex)];
                 let mut writer = self
-                    .armor_writer(&mut public_bytes, sequoia_openpgp::armor::Kind::PublicKey)
+                    .armor_writer_with_extra(
+                        &mut public_bytes,
+                        sequoia_openpgp::armor::Kind::PublicKey,
+                        &extra,
+                    )
                     .map_err(|e| Error::InvalidArmor {
                         reason: format!("serialization error: {e}"),
                     })?;
@@ -388,8 +411,19 @@ impl CryptoEngine for SequoiaEngine {
         // Serialize public key (certificate)
         let mut public_key = Vec::new();
         {
+            let uid_str = cert
+                .userids()
+                .next()
+                .map(|u| u.userid().to_string())
+                .unwrap_or_default();
+            let fp_hex = cert.fingerprint().to_hex();
+            let extra: Vec<(&str, &str)> = vec![("Comment", &uid_str), ("Fingerprint", &fp_hex)];
             let mut writer = self
-                .armor_writer(&mut public_key, sequoia_openpgp::armor::Kind::PublicKey)
+                .armor_writer_with_extra(
+                    &mut public_key,
+                    sequoia_openpgp::armor::Kind::PublicKey,
+                    &extra,
+                )
                 .map_err(|e| Error::KeyGeneration {
                     reason: format!("armor error: {e}"),
                 })?;

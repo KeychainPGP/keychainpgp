@@ -279,7 +279,7 @@
   "settings_proxy_failed": "कनेक्शन विफल: {error}",
   "settings_proxy_custom": "कस्टम",
 
-  "settings_about": "KeychainPGP v0.1.0 — डेस्कटॉप के लिए क्लिपबोर्ड-प्रथम PGP एन्क्रिप्शन।",
+  "settings_about": "KeychainPGP v0.1.1 — डेस्कटॉप के लिए क्लिपबोर्ड-प्रथम PGP एन्क्रिप्शन।",
   "settings_about_title": "परिचय",
   "donate_button": "इस परियोजना का समर्थन करें",
   "donate_title": "KeychainPGP का समर्थन करें",

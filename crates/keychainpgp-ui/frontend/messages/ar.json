@@ -279,7 +279,7 @@
   "settings_proxy_failed": "فشل الاتصال: {error}",
   "settings_proxy_custom": "مخصص",
 
-  "settings_about": "KeychainPGP v0.1.0 — تشفير PGP عبر الحافظة لسطح المكتب.",
+  "settings_about": "KeychainPGP v0.1.1 — تشفير PGP عبر الحافظة لسطح المكتب.",
   "settings_about_title": "حول",
   "donate_button": "ادعم هذا المشروع",
   "donate_title": "ادعم KeychainPGP",

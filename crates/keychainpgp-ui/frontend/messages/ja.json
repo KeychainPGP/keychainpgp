@@ -279,7 +279,7 @@
   "settings_proxy_failed": "接続に失敗しました：{error}",
   "settings_proxy_custom": "カスタム",
 
-  "settings_about": "KeychainPGP v0.1.0 — デスクトップ向けクリップボード優先の PGP 暗号化ツール。",
+  "settings_about": "KeychainPGP v0.1.1 — デスクトップ向けクリップボード優先の PGP 暗号化ツール。",
   "settings_about_title": "概要",
   "donate_button": "このプロジェクトを支援",
   "donate_title": "KeychainPGP を支援",

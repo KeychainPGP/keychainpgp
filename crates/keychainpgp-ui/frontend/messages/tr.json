@@ -279,7 +279,7 @@
   "settings_proxy_failed": "Bağlantı başarısız: {error}",
   "settings_proxy_custom": "Özel",
 
-  "settings_about": "KeychainPGP v0.1.0 — Masaüstü için pano odaklı PGP şifreleme.",
+  "settings_about": "KeychainPGP v0.1.1 — Masaüstü için pano odaklı PGP şifreleme.",
   "settings_about_title": "Hakkında",
   "donate_button": "Bu projeyi destekle",
   "donate_title": "KeychainPGP'yi Destekle",

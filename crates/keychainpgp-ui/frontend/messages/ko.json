@@ -279,7 +279,7 @@
   "settings_proxy_failed": "연결 실패: {error}",
   "settings_proxy_custom": "사용자 지정",
 
-  "settings_about": "KeychainPGP v0.1.0 — 데스크톱용 클립보드 중심 PGP 암호화.",
+  "settings_about": "KeychainPGP v0.1.1 — 데스크톱용 클립보드 중심 PGP 암호화.",
   "settings_about_title": "정보",
   "donate_button": "이 프로젝트 지원하기",
   "donate_title": "KeychainPGP 지원",
