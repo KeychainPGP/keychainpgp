@@ -127,7 +127,7 @@
   }
 
   .locale-select {
-    background: none;
+    background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     padding: 0.3rem 0.5rem;
@@ -135,6 +135,10 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     outline: none;
+  }
+  .locale-select option {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
   }
   .locale-select:focus {
     border-color: var(--color-primary);
