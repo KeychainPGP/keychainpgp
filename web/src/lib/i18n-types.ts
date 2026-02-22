@@ -39,8 +39,15 @@ export type MessageKey =
   | "copy_btn"
   /* Theme */
   | "theme_light" | "theme_dark"
-  /* Onboarding */
-  | "onboarding_title" | "onboarding_desc" | "onboarding_dismiss"
+  /* Onboarding wizard */
+  | "onboarding_skip" | "onboarding_step" | "onboarding_next" | "onboarding_prev" | "onboarding_finish"
+  | "onboarding_welcome_title" | "onboarding_welcome_desc"
+  | "onboarding_gen_title" | "onboarding_gen_desc" | "onboarding_gen_btn"
+  | "onboarding_gen_generating" | "onboarding_gen_done"
+  | "onboarding_msg_title" | "onboarding_msg_desc" | "onboarding_msg_decrypt_btn"
+  | "onboarding_msg_decrypted" | "onboarding_msg_tip"
+  | "onboarding_done_title" | "onboarding_done_desc"
+  | "onboarding_secret_message"
   /* Language */
   | "language_label";
 

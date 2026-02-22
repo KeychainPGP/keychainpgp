@@ -81,9 +81,31 @@
   "theme_light": "Light",
   "theme_dark": "Dark",
 
-  "onboarding_title": "Welcome to KeychainPGP Web",
-  "onboarding_desc": "This tool runs entirely in your browser. No data leaves your device. Start by importing or generating a PGP key pair in the Keys tab.",
-  "onboarding_dismiss": "Got it",
+  "onboarding_skip": "Skip tutorial",
+  "onboarding_step": "Step {current} of {total}",
+  "onboarding_next": "Next",
+  "onboarding_prev": "Back",
+  "onboarding_finish": "Get Started",
+
+  "onboarding_welcome_title": "Welcome to KeychainPGP",
+  "onboarding_welcome_desc": "This quick tutorial will walk you through PGP encryption. You'll create your key pair and decrypt your first secret message.",
+
+  "onboarding_gen_title": "Create Your Key Pair",
+  "onboarding_gen_desc": "A PGP key pair has two parts: a public key you share with others so they can send you encrypted messages, and a private key you keep secret to decrypt them.",
+  "onboarding_gen_btn": "Generate My Key",
+  "onboarding_gen_generating": "Generating...",
+  "onboarding_gen_done": "Key pair created and saved!",
+
+  "onboarding_msg_title": "Decrypt Your First Message",
+  "onboarding_msg_desc": "We just encrypted a welcome message using your public key. Only your private key can unlock it. Give it a try!",
+  "onboarding_msg_decrypt_btn": "Decrypt Message",
+  "onboarding_msg_decrypted": "Message decrypted!",
+  "onboarding_msg_tip": "To exchange encrypted messages with someone, import their public key in the Keys tab. They'll need your public key too.",
+
+  "onboarding_done_title": "You're Ready!",
+  "onboarding_done_desc": "You've mastered the basics of PGP encryption. Use the tabs above to encrypt, decrypt, sign, and verify messages. Import contacts' public keys in the Keys tab to communicate securely.",
+
+  "onboarding_secret_message": "Hello World!\n\nCongratulations! You have successfully decrypted your first PGP message.\n\nThis message was encrypted with your public key and could only be decrypted with your private key. This is the foundation of PGP: only the intended recipient can read the message.\n\nEnjoy using KeychainPGP!",
 
   "language_label": "Language"
 }
