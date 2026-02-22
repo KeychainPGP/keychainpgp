@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Другой",
 
   "settings_about": "KeychainPGP v0.1.0 — PGP-шифрование через буфер обмена для настольных систем.",
+  "settings_about_title": "О программе",
+  "donate_button": "Поддержать проект",
+  "donate_title": "Поддержите KeychainPGP",
+  "donate_desc": "KeychainPGP — бесплатное программное обеспечение с открытым исходным кодом. Если оно вам полезно, рассмотрите возможность пожертвования напрямую — без посредников, без отслеживания.",
+  "donate_copy": "Копировать адрес",
+  "donate_copied": "Скопировано!",
+  "donate_qr_loading": "Создание QR-кода...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Спасибо за вашу поддержку!",
 
   "unnamed": "(без имени)",
   "none_value": "(нет)",

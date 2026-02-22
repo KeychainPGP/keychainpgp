@@ -280,6 +280,17 @@
   "settings_proxy_custom": "사용자 지정",
 
   "settings_about": "KeychainPGP v0.1.0 — 데스크톱용 클립보드 중심 PGP 암호화.",
+  "settings_about_title": "정보",
+  "donate_button": "이 프로젝트 지원하기",
+  "donate_title": "KeychainPGP 지원",
+  "donate_desc": "KeychainPGP는 무료 오픈 소스 소프트웨어입니다. 유용하다고 느끼신다면 직접 기부를 고려해 주세요. 중개자 없이, 추적 없이.",
+  "donate_copy": "주소 복사",
+  "donate_copied": "복사됨!",
+  "donate_qr_loading": "QR 코드 생성 중...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "후원해 주셔서 감사합니다!",
 
   "unnamed": "(이름 없음)",
   "none_value": "(없음)",

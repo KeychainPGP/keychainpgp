@@ -280,6 +280,17 @@
   "settings_proxy_custom": "カスタム",
 
   "settings_about": "KeychainPGP v0.1.0 — デスクトップ向けクリップボード優先の PGP 暗号化ツール。",
+  "settings_about_title": "概要",
+  "donate_button": "このプロジェクトを支援",
+  "donate_title": "KeychainPGP を支援",
+  "donate_desc": "KeychainPGP は無料のオープンソースソフトウェアです。便利だと感じたら、直接寄付をご検討ください。仲介者なし、トラッキングなし。",
+  "donate_copy": "アドレスをコピー",
+  "donate_copied": "コピーしました！",
+  "donate_qr_loading": "QR コードを生成中...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "ご支援ありがとうございます！",
 
   "unnamed": "（名前なし）",
   "none_value": "（なし）",

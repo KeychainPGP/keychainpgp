@@ -280,6 +280,17 @@
   "settings_proxy_custom": "مخصص",
 
   "settings_about": "KeychainPGP v0.1.0 — تشفير PGP عبر الحافظة لسطح المكتب.",
+  "settings_about_title": "حول",
+  "donate_button": "ادعم هذا المشروع",
+  "donate_title": "ادعم KeychainPGP",
+  "donate_desc": "KeychainPGP مجاني ومفتوح المصدر. إذا وجدته مفيدًا، فكّر في التبرّع مباشرة — بدون وسطاء، بدون تتبّع.",
+  "donate_copy": "نسخ العنوان",
+  "donate_copied": "تم النسخ!",
+  "donate_qr_loading": "جارٍ إنشاء رمز QR...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "شكرًا لدعمك!",
 
   "unnamed": "(بدون اسم)",
   "none_value": "(لا شيء)",

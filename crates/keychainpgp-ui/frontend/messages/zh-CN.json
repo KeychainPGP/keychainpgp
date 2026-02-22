@@ -280,6 +280,17 @@
   "settings_proxy_custom": "自定义",
 
   "settings_about": "KeychainPGP v0.1.0 — 桌面端剪贴板优先的 PGP 加密工具。",
+  "settings_about_title": "关于",
+  "donate_button": "支持此项目",
+  "donate_title": "支持 KeychainPGP",
+  "donate_desc": "KeychainPGP 是免费的开源软件。如果您觉得它有用，请考虑直接捐赠——没有中间商，没有追踪。",
+  "donate_copy": "复制地址",
+  "donate_copied": "已复制！",
+  "donate_qr_loading": "正在生成二维码...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "感谢您的支持！",
 
   "unnamed": "（未命名）",
   "none_value": "（无）",

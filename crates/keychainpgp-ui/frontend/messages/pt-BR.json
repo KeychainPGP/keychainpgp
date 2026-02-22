@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Personalizado",
 
   "settings_about": "KeychainPGP v0.1.0 — Criptografia PGP para desktop focada na area de transferência.",
+  "settings_about_title": "Sobre",
+  "donate_button": "Apoie este projeto",
+  "donate_title": "Apoie o KeychainPGP",
+  "donate_desc": "O KeychainPGP é gratuito e de código aberto. Se você o considera útil, considere doar diretamente — sem intermediários, sem rastreamento.",
+  "donate_copy": "Copiar endereço",
+  "donate_copied": "Copiado!",
+  "donate_qr_loading": "Gerando código QR...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Obrigado pelo seu apoio!",
 
   "unnamed": "(sem nome)",
   "none_value": "(nenhum)",

@@ -280,6 +280,17 @@
   "settings_proxy_custom": "กำหนดเอง",
 
   "settings_about": "KeychainPGP v0.1.0 — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
+  "settings_about_title": "เกี่ยวกับ",
+  "donate_button": "สนับสนุนโครงการนี้",
+  "donate_title": "สนับสนุน KeychainPGP",
+  "donate_desc": "KeychainPGP เป็นซอฟต์แวร์ฟรีและโอเพนซอร์ส หากคุณพบว่ามีประโยชน์ โปรดพิจารณาบริจาคโดยตรง — ไม่มีตัวกลาง ไม่มีการติดตาม",
+  "donate_copy": "คัดลอกที่อยู่",
+  "donate_copied": "คัดลอกแล้ว!",
+  "donate_qr_loading": "กำลังสร้าง QR Code...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "ขอบคุณสำหรับการสนับสนุนของคุณ!",
 
   "unnamed": "(ไม่มีชื่อ)",
   "none_value": "(ไม่มี)",

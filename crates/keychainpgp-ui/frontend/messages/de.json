@@ -279,7 +279,18 @@
   "settings_proxy_failed": "Verbindung fehlgeschlagen: {error}",
   "settings_proxy_custom": "Benutzerdefiniert",
 
+  "settings_about_title": "Über",
   "settings_about": "KeychainPGP v0.1.0 — Zwischenablage-basierte PGP-Verschlüsselung für den Desktop.",
+  "donate_button": "Dieses Projekt unterstützen",
+  "donate_title": "KeychainPGP unterstützen",
+  "donate_desc": "KeychainPGP ist kostenlos und quelloffen. Wenn Sie es nützlich finden, erwägen Sie eine direkte Spende — ohne Zwischenhändler, ohne Tracking.",
+  "donate_copy": "Adresse kopieren",
+  "donate_copied": "Kopiert!",
+  "donate_qr_loading": "QR-Code wird erzeugt...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Vielen Dank für Ihre Unterstützung!",
 
   "unnamed": "(unbenannt)",
   "none_value": "(keine)",

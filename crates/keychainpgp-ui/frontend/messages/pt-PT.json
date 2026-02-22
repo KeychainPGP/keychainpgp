@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Personalizado",
 
   "settings_about": "KeychainPGP v0.1.0 — Encriptação PGP para ambiente de trabalho centrada na área de transferência.",
+  "settings_about_title": "Sobre",
+  "donate_button": "Apoie este projeto",
+  "donate_title": "Apoie o KeychainPGP",
+  "donate_desc": "O KeychainPGP e gratuito e de codigo aberto. Se o considera util, considere fazer um donativo diretamente — sem intermediarios, sem rastreamento.",
+  "donate_copy": "Copiar endereço",
+  "donate_copied": "Copiado!",
+  "donate_qr_loading": "A gerar código QR...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Obrigado pelo seu apoio!",
 
   "unnamed": "(sem nome)",
   "none_value": "(nenhum)",

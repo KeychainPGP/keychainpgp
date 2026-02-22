@@ -31,6 +31,7 @@
   import KeyDiscoveryModal from "./components/modals/KeyDiscoveryModal.svelte";
   import KeySyncExportModal from "./components/modals/KeySyncExportModal.svelte";
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
+  import DonateModal from "./components/modals/DonateModal.svelte";
 
   let initialized = $state(false);
   let unlistenTray: UnlistenFn | null = null;
@@ -135,5 +136,7 @@
     <KeySyncExportModal />
   {:else if appStore.activeModal === "key-sync-import"}
     <KeySyncImportModal />
+  {:else if appStore.activeModal === "donate"}
+    <DonateModal />
   {/if}
 </main>

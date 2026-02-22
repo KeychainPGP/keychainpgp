@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Özel",
 
   "settings_about": "KeychainPGP v0.1.0 — Masaüstü için pano odaklı PGP şifreleme.",
+  "settings_about_title": "Hakkında",
+  "donate_button": "Bu projeyi destekle",
+  "donate_title": "KeychainPGP'yi Destekle",
+  "donate_desc": "KeychainPGP ücretsiz ve açık kaynaklıdır. Faydalı buluyorsanız, doğrudan bağış yapmayı düşünün — aracı yok, izleme yok.",
+  "donate_copy": "Adresi kopyala",
+  "donate_copied": "Kopyalandı!",
+  "donate_qr_loading": "QR kodu oluşturuluyor...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Desteğiniz için teşekkürler!",
 
   "unnamed": "(isimsiz)",
   "none_value": "(yok)",

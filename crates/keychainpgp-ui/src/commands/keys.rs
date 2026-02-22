@@ -376,6 +376,18 @@ pub fn export_key_qr(state: State<'_, AppState>, fingerprint: String) -> Result<
     Ok(svg)
 }
 
+/// Generate a QR code SVG from arbitrary text data.
+#[tauri::command]
+pub fn generate_qr_svg(data: String) -> Result<String, String> {
+    let qr = qrcode::QrCode::new(data.as_bytes())
+        .map_err(|e| format!("QR generation failed: {e}"))?;
+    let svg = qr
+        .render::<qrcode::render::svg::Color>()
+        .min_dimensions(200, 200)
+        .build();
+    Ok(svg)
+}
+
 /// Look up a key via WKD (Web Key Directory) by email address.
 #[tauri::command]
 pub async fn wkd_lookup(

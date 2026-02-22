@@ -269,6 +269,12 @@ export async function getOpsecStatus(): Promise<boolean> {
   return invoke("get_opsec_status");
 }
 
+// --- QR ---
+
+export async function generateQrSvg(data: string): Promise<string> {
+  return invoke("generate_qr_svg", { data });
+}
+
 // --- Proxy ---
 
 export async function testProxyConnection(proxyUrl: string): Promise<string> {

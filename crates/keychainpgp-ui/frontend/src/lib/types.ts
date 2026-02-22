@@ -13,7 +13,8 @@ export type ModalType =
   | "qr-export"
   | "key-discovery"
   | "key-sync-export"
-  | "key-sync-import";
+  | "key-sync-import"
+  | "donate";
 
 export interface ModalProps {
   /** For decrypted-viewer */

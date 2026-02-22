@@ -279,7 +279,18 @@
   "settings_proxy_failed": "Error de conexión: {error}",
   "settings_proxy_custom": "Personalizado",
 
+  "settings_about_title": "Acerca de",
   "settings_about": "KeychainPGP v0.1.0 — Cifrado PGP desde el portapapeles para escritorio.",
+  "donate_button": "Apoyar este proyecto",
+  "donate_title": "Apoyar KeychainPGP",
+  "donate_desc": "KeychainPGP es gratuito y de código abierto. Si te resulta útil, considera hacer una donación directa — sin intermediarios, sin rastreo.",
+  "donate_copy": "Copiar dirección",
+  "donate_copied": "¡Copiado!",
+  "donate_qr_loading": "Generando código QR...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "¡Gracias por tu apoyo!",
 
   "unnamed": "(sin nombre)",
   "none_value": "(ninguno)",

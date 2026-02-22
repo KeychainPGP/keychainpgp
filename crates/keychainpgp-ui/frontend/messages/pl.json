@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Niestandardowy",
 
   "settings_about": "KeychainPGP v0.1.0 — Szyfrowanie PGP przez schowek dla komputerów stacjonarnych.",
+  "settings_about_title": "O programie",
+  "donate_button": "Wesprzyj ten projekt",
+  "donate_title": "Wesprzyj KeychainPGP",
+  "donate_desc": "KeychainPGP jest darmowy i otwartoźródłowy. Jeśli uważasz go za przydatny, rozważ bezpośrednią darowiznę — bez pośredników, bez śledzenia.",
+  "donate_copy": "Kopiuj adres",
+  "donate_copied": "Skopiowano!",
+  "donate_qr_loading": "Generowanie kodu QR...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Dziękujemy za wsparcie!",
 
   "unnamed": "(bez nazwy)",
   "none_value": "(brak)",

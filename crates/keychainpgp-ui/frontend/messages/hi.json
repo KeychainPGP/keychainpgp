@@ -280,6 +280,17 @@
   "settings_proxy_custom": "कस्टम",
 
   "settings_about": "KeychainPGP v0.1.0 — डेस्कटॉप के लिए क्लिपबोर्ड-प्रथम PGP एन्क्रिप्शन।",
+  "settings_about_title": "परिचय",
+  "donate_button": "इस परियोजना का समर्थन करें",
+  "donate_title": "KeychainPGP का समर्थन करें",
+  "donate_desc": "KeychainPGP मुफ़्त और ओपन सोर्स है। अगर आपको यह उपयोगी लगा, तो सीधे दान करने पर विचार करें — कोई बिचौलिया नहीं, कोई ट्रैकिंग नहीं।",
+  "donate_copy": "पता कॉपी करें",
+  "donate_copied": "कॉपी किया गया!",
+  "donate_qr_loading": "QR कोड बनाया जा रहा है...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "आपके समर्थन के लिए धन्यवाद!",
 
   "unnamed": "(अनामित)",
   "none_value": "(कोई नहीं)",

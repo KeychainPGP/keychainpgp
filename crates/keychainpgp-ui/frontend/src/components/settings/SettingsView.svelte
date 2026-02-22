@@ -6,7 +6,7 @@
   import { shortFingerprint } from "$lib/utils";
   import { isDesktop } from "$lib/platform";
   import { changeLocale, localeStore } from "$lib/stores/locale.svelte";
-  import { RefreshCw, Shield, Globe } from "lucide-svelte";
+  import { RefreshCw, Shield, Globe, Heart } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
 
   const desktop = isDesktop();
@@ -474,9 +474,21 @@
   </section>
 
   <!-- About -->
-  <section class="space-y-2 pt-4 border-t border-[var(--color-border)]">
+  <section class="space-y-3 pt-4 border-t border-[var(--color-border)]">
+    <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">
+      {m.settings_about_title()}
+    </h3>
     <p class="text-sm text-[var(--color-text-secondary)]">
       {m.settings_about()}
     </p>
+    <button
+      class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg
+             bg-[var(--color-primary)] text-white font-medium
+             hover:bg-[var(--color-primary-hover)] transition-colors"
+      onclick={() => appStore.openModal("donate")}
+    >
+      <Heart size={16} />
+      {m.donate_button()}
+    </button>
   </section>
 </div>

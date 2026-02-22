@@ -281,7 +281,19 @@
   "settings_proxy_failed": "Connection failed: {error}",
   "settings_proxy_custom": "Custom",
 
+  "settings_about_title": "About",
   "settings_about": "KeychainPGP v0.1.0 — Clipboard-first PGP encryption for desktop.",
+
+  "donate_button": "Support this project",
+  "donate_title": "Support KeychainPGP",
+  "donate_desc": "KeychainPGP is free and open source. If you find it useful, consider donating directly — no middlemen, no tracking.",
+  "donate_copy": "Copy address",
+  "donate_copied": "Copied!",
+  "donate_qr_loading": "Generating QR code...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Thank you for your support!",
 
   "unnamed": "(unnamed)",
   "none_value": "(none)",

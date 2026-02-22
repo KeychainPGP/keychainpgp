@@ -54,6 +54,7 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::keyserver_upload,
             commands::keys::import_backup,
             commands::keys::test_proxy_connection,
+            commands::keys::generate_qr_svg,
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,
@@ -98,6 +99,7 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::keyserver_upload,
             commands::keys::import_backup,
             commands::keys::test_proxy_connection,
+            commands::keys::generate_qr_svg,
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,

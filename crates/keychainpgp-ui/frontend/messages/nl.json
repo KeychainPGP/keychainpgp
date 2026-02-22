@@ -280,6 +280,17 @@
   "settings_proxy_custom": "Aangepast",
 
   "settings_about": "KeychainPGP v0.1.0 — Klembordgerichte PGP-versleuteling voor desktop.",
+  "settings_about_title": "Over",
+  "donate_button": "Steun dit project",
+  "donate_title": "Steun KeychainPGP",
+  "donate_desc": "KeychainPGP is gratis en open source. Als u het nuttig vindt, overweeg dan om rechtstreeks te doneren — geen tussenpersonen, geen tracking.",
+  "donate_copy": "Adres kopiëren",
+  "donate_copied": "Gekopieerd!",
+  "donate_qr_loading": "QR-code genereren...",
+  "donate_btc": "Bitcoin",
+  "donate_eth": "Ethereum",
+  "donate_xmr": "Monero",
+  "donate_thanks": "Bedankt voor uw steun!",
 
   "unnamed": "(naamloos)",
   "none_value": "(geen)",
