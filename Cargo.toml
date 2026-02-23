@@ -31,7 +31,7 @@ subtle = "2"
 secrecy = { version = "0.10", features = ["serde"] }
 
 # Storage
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.38", features = ["bundled"] }
 keyring = "3"
 directories = "6"
 
