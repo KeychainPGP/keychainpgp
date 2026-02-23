@@ -151,7 +151,7 @@ jobs:
         working-directory: crates/keychainpgp-ui
       - name: Upload Linux artifacts
         if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: desktop-linux
           path: |
@@ -159,13 +159,13 @@ jobs:
             target/release/bundle/appimage/*.AppImage
       - name: Upload macOS artifacts
         if: matrix.platform == 'macos'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: desktop-macos
           path: target/release/bundle/dmg/*.dmg
       - name: Upload Windows artifacts
         if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: desktop-windows
           path: |
@@ -219,7 +219,7 @@ jobs:
             done
           done
       - name: Upload APKs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android-apks
           path: crates/keychainpgp-ui/gen/android/app/build/outputs/apk/*/debug/keychainpgp-*.apk
