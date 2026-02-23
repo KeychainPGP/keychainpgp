@@ -1,0 +1,18 @@
+# Default owner for everything
+* @keychainpgp/maintainers
+
+# Crypto engine — requires careful review
+/crates/keychainpgp-core/ @keychainpgp/maintainers
+
+# Key storage
+/crates/keychainpgp-keys/ @keychainpgp/maintainers
+
+# Frontend
+/crates/keychainpgp-ui/frontend/ @keychainpgp/maintainers
+/web/ @keychainpgp/maintainers
+
+# CI/CD
+/.github/workflows/ @keychainpgp/maintainers
+
+# Security-sensitive files
+/SECURITY.md @keychainpgp/maintainers
