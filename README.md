@@ -39,15 +39,20 @@ KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org
 
 <p align="center">
   <img src=".github/assets/screenshot-1_home-clipboard.png" alt="Home — Clipboard Mode" width="400">
-  <img src=".github/assets/screenshot-2_home-compose.png" alt="Home — Compose Mode" width="400">
-</p>
-<p align="center">
   <img src=".github/assets/screenshot-3_keys.png" alt="Key Manager" width="400">
+</p>
+
+<details>
+<summary>More screenshots</summary>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshot-2_home-compose.png" alt="Home — Compose Mode" width="400">
   <img src=".github/assets/screenshot-4_home-recipients.png" alt="Recipient Selection" width="400">
 </p>
 <p align="center">
   <img src=".github/assets/screenshot-5_home-encrypted.png" alt="Encrypted Message in Clipboard" width="400">
 </p>
+</details>
 
 ## Download
 
@@ -61,7 +66,7 @@ KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org
 
 | Platform | Formats | Portable |
 |----------|---------|----------|
-| **Windows** | `.exe` (NSIS) &middot; `.msi` | `.zip` |
+| **Windows** | `.exe` &middot; `.msi` | `.zip` |
 | **macOS** | `.dmg` | &mdash; |
 | **Linux** | `.AppImage` &middot; `.deb` | `.tar.gz` |
 | **Android** | `.apk` (arm64, arm, x86_64) | &mdash; |
