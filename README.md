@@ -1,34 +1,133 @@
-# KeychainPGP
+<p align="center">
+  <img src="crates/keychainpgp-ui/icons/128x128@2x.png" alt="KeychainPGP" width="128" height="128">
+</p>
 
-Simple, cross-platform OpenPGP encryption for your clipboard.
+<h1 align="center">KeychainPGP</h1>
 
-**Copy. Encrypt. Paste.** &mdash; **Copy. Decrypt. Read.**
+<p align="center">
+  <strong>Simple, cross-platform OpenPGP encryption for your clipboard.</strong><br>
+  <em>Copy. Encrypt. Paste.</em> &mdash; <em>Copy. Decrypt. Read.</em>
+</p>
 
-KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org/) to desktop: Windows, macOS, and Linux.
+<p align="center">
+  <a href="https://github.com/keychainpgp/keychainpgp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/keychainpgp/keychainpgp/ci.yml?branch=master&style=flat-square&logo=github&label=CI" alt="CI"></a>
+  <a href="https://github.com/keychainpgp/keychainpgp/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/keychainpgp/keychainpgp/release.yml?style=flat-square&logo=github&label=Release" alt="Release"></a>
+  <a href="https://github.com/keychainpgp/keychainpgp/releases/latest"><img src="https://img.shields.io/github/v/release/keychainpgp/keychainpgp?style=flat-square&color=blue" alt="Latest Release"></a>
+  <a href="https://github.com/keychainpgp/keychainpgp/blob/master/LICENSE-MIT"><img src="https://img.shields.io/badge/license-MIT%2FApache--2.0-blue?style=flat-square" alt="License"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/nicedoc/rust-toolchain"><img src="https://img.shields.io/badge/rust-1.88%2B-orange?style=flat-square&logo=rust" alt="Rust 1.88+"></a>
+  <a href="https://v2.tauri.app/"><img src="https://img.shields.io/badge/tauri-v2-24C8D8?style=flat-square&logo=tauri&logoColor=white" alt="Tauri v2"></a>
+  <a href="https://svelte.dev/"><img src="https://img.shields.io/badge/svelte-5-FF3E00?style=flat-square&logo=svelte&logoColor=white" alt="Svelte 5"></a>
+  <a href="https://sequoia-pgp.org/"><img src="https://img.shields.io/badge/crypto-Sequoia--PGP-green?style=flat-square" alt="Sequoia-PGP"></a>
+</p>
+
+<p align="center">
+  <a href="#-installation">Installation</a> &bull;
+  <a href="#-features">Features</a> &bull;
+  <a href="#-quick-start">Quick Start</a> &bull;
+  <a href="#-building-from-source">Build</a> &bull;
+  <a href="#-contributing">Contributing</a>
+</p>
+
+---
+
+KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org/) to the desktop. No command-line flags, no certificate managers, no configuration &mdash; just encryption that works.
+
+## Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshot-1_home-clipboard.png" alt="Home — Clipboard Mode" width="400">
+  <img src=".github/assets/screenshot-3_keys.png" alt="Key Manager" width="400">
+</p>
+
+<details>
+<summary>More screenshots</summary>
+<br>
+<p align="center">
+  <img src=".github/assets/screenshot-2_home-compose.png" alt="Home — Compose Mode" width="400">
+  <img src=".github/assets/screenshot-4_home-recipients.png" alt="Recipient Selection" width="400">
+</p>
+<p align="center">
+  <img src=".github/assets/screenshot-5_home-encrypted.png" alt="Encrypted Message in Clipboard" width="400">
+</p>
+</details>
+
+## Download
+
+<p align="center">
+  <a href="https://github.com/keychainpgp/keychainpgp/releases/latest"><img src="https://img.shields.io/badge/Download-GitHub_Releases-blue?style=for-the-badge&logo=github" alt="GitHub Releases" height="45"></a>
+  &nbsp;
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.keychainpgp.app%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fkeychainpgp%2Fkeychainpgp%22%2C%22author%22%3A%22keychainpgp%22%2C%22name%22%3A%22KeychainPGP%22%7D"><img src="https://img.shields.io/badge/Android-Obtainium-teal?style=for-the-badge&logo=android&logoColor=white" alt="Get it on Obtainium" height="45"></a>
+  &nbsp;
+  <a href="https://keychainpgp.github.io"><img src="https://img.shields.io/badge/Web_App-Try_Online-orange?style=for-the-badge&logo=webassembly&logoColor=white" alt="Web App" height="45"></a>
+</p>
+
+| Platform | Formats | Portable |
+|----------|---------|----------|
+| **Windows** | `.exe` &middot; `.msi` | `.zip` |
+| **macOS** | `.dmg` | &mdash; |
+| **Linux** | `.AppImage` &middot; `.deb` | `.tar.gz` |
+| **Android** | `.apk` (arm64, arm, x86_64) | &mdash; |
+
+> [!TIP]
+> **Android users:** [Obtainium](https://github.com/ImranR98/Obtainium) lets you install and update KeychainPGP directly from GitHub releases &mdash; no app store required.
 
 ## Features
 
 - **Clipboard-first workflow** &mdash; encrypt and decrypt without leaving your app
-- **Global hotkeys** &mdash; Ctrl+Shift+E to encrypt, Ctrl+Shift+D to decrypt
-- **Modern cryptography** &mdash; Ed25519 + X25519, zero configuration
+- **Global hotkeys** &mdash; <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> to encrypt, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> to decrypt
+- **Modern cryptography** &mdash; Ed25519 + X25519, powered by [Sequoia-PGP](https://sequoia-pgp.org/)
 - **System tray** &mdash; runs quietly in the background
 - **Auto-clear clipboard** &mdash; decrypted text is wiped after 30 seconds
-- **Cross-platform** &mdash; one app for Windows, macOS, and Linux
+- **Compose mode** &mdash; draft, encrypt, and sign messages in one window
+- **OPSEC mode** &mdash; RAM-only keys, no disk traces, Tor proxy support
+- **20 languages** &mdash; full i18n via [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
+- **Mobile companion** &mdash; Android app with key sync via QR codes
+- **Portable mode** &mdash; drop a `.portable` marker and run from a USB stick
+- **Cross-platform** &mdash; Windows, macOS, Linux, Android, and Web (WASM)
 
 ## Quick Start
 
-1. Install KeychainPGP
-2. Create your keys (name + email, one click)
-3. Import a contact's public key
-4. Copy text &rarr; Ctrl+Shift+E &rarr; select recipient &rarr; paste encrypted message
+1. **Install** KeychainPGP (see [Download](#download))
+2. **Create your keys** &mdash; name + email, one click
+3. **Import a contact's** public key
+4. **Encrypt** &mdash; copy text &rarr; <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> &rarr; select recipient &rarr; paste
+5. **Decrypt** &mdash; copy PGP message &rarr; <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> &rarr; read
+
+## Architecture
+
+KeychainPGP is a Rust workspace with six crates:
+
+```
+keychainpgp/
+├── crates/
+│   ├── keychainpgp-core       # OpenPGP crypto engine (Sequoia-PGP)
+│   ├── keychainpgp-keys       # Keyring: SQLite + OS credential store
+│   ├── keychainpgp-clipboard  # Clipboard monitoring, PGP detection, auto-clear
+│   ├── keychainpgp-ui         # Tauri v2 desktop + Android app (Svelte 5)
+│   ├── keychainpgp-cli        # CLI binary
+│   └── keychainpgp-wasm       # WASM bindings for the web app
+└── web/                        # Standalone Vite + Svelte 5 SPA (WASM)
+```
+
+| Crate | Purpose |
+|-------|---------|
+| `keychainpgp-core` | Pure-Rust OpenPGP operations &mdash; encrypt, decrypt, sign, verify. No I/O. |
+| `keychainpgp-keys` | Key storage with SQLite and OS credential store (Keychain/DPAPI/Secret Service) |
+| `keychainpgp-clipboard` | Clipboard watching, PGP message detection, timed auto-clear |
+| `keychainpgp-ui` | Tauri v2 desktop & mobile app with Svelte 5 frontend |
+| `keychainpgp-cli` | Command-line interface for scripting and headless use |
+| `keychainpgp-wasm` | WebAssembly bindings &mdash; same crypto engine in the browser |
 
 ## Building from Source
 
 ### Prerequisites
 
-- [Rust](https://rustup.rs/) 1.85+
+- [Rust](https://rustup.rs/) 1.88+
 - [Node.js](https://nodejs.org/) 20+ and npm
-- Platform-specific Tauri dependencies: see [Tauri Prerequisites](https://v2.tauri.app/start/prerequisites/)
+- Platform-specific Tauri v2 dependencies &mdash; see [Tauri Prerequisites](https://v2.tauri.app/start/prerequisites/)
 
 ### Build
 
@@ -50,32 +149,75 @@ cargo build --release -p keychainpgp-cli
 ### Development
 
 ```bash
-# Run the desktop app in development mode
+# Run the desktop app in dev mode (hot-reload)
 cd crates/keychainpgp-ui && cargo tauri dev
 
-# Run tests
+# Run all tests
 cargo test --workspace
 
-# Run clippy
+# Lint
 cargo clippy --workspace -- -D warnings
+cargo fmt --all -- --check
 ```
 
-## Architecture
+### WASM / Web App
 
-KeychainPGP is a Rust workspace with five crates:
+```bash
+# Build the WASM package
+wasm-pack build crates/keychainpgp-wasm --target web --out-dir ../../web/pkg
 
-| Crate | Purpose |
-|-------|---------|
-| `keychainpgp-core` | OpenPGP crypto operations (Sequoia-PGP) |
-| `keychainpgp-keys` | Keyring management (SQLite + OS credential store) |
-| `keychainpgp-clipboard` | Clipboard monitoring and auto-clear |
-| `keychainpgp-ui` | Tauri desktop application (Svelte frontend) |
-| `keychainpgp-cli` | Command-line interface |
+# Run the web app locally
+cd web && npm install && npm run dev
+```
+
+### Android
+
+```bash
+# Requires JDK 17+ and Android NDK
+cd crates/keychainpgp-ui
+npx @tauri-apps/cli android build --debug
+```
+
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a PR.
+
+**TL;DR:**
+
+1. Fork & clone
+2. `git checkout -b feature/your-feature`
+3. Make changes, add tests
+4. `cargo test --workspace && cargo clippy --workspace -- -D warnings`
+5. Commit with [Conventional Commits](https://www.conventionalcommits.org/) format
+6. Open a pull request
+
+This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md).
+
+## Security
+
+If you discover a security vulnerability, **do NOT open a public issue**. Please email **keychainpgp@protonmail.com** instead.
+
+See [SECURITY.md](SECURITY.md) for full details.
+
+## Donate
+
+If you find KeychainPGP useful, consider supporting its development:
+
+<a href="https://keychainpgp.org/#donate"><img src="https://img.shields.io/badge/Donate-KeychainPGP-orange?style=for-the-badge&logo=heart&logoColor=white" alt="Donate" height="35"></a>
 
 ## License
 
 Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
 
-## Security
+## Acknowledgments
 
-Please report security vulnerabilities via the process described in [SECURITY.md](SECURITY.md).
+- [Sequoia-PGP](https://sequoia-pgp.org/) &mdash; the modern OpenPGP implementation in Rust
+- [Tauri](https://tauri.app/) &mdash; lightweight cross-platform app framework
+- [OpenKeychain](https://www.openkeychain.org/) &mdash; the inspiration for this project
+- [Svelte](https://svelte.dev/) &mdash; the reactive UI framework
+
+---
+
+<p align="center">
+  <sub>Made with care for journalists, activists, and anyone who needs simple encryption.</sub>
+</p>
