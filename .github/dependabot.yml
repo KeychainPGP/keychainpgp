@@ -31,6 +31,13 @@ updates:
       - "dependencies"
       - "frontend"
     open-pull-requests-limit: 5
+    # vite 7 has no compatible @sveltejs/vite-plugin-svelte (v5 needs vite 6, v7 needs vite 8).
+    # Bump both together when vite 8 is stable. See #17.
+    ignore:
+      - dependency-name: "vite"
+        versions: [">=7"]
+      - dependency-name: "@sveltejs/vite-plugin-svelte"
+        versions: [">=7"]
     groups:
       minor-and-patch:
         update-types:
@@ -47,6 +54,13 @@ updates:
       - "dependencies"
       - "web"
     open-pull-requests-limit: 5
+    # vite 7 has no compatible @sveltejs/vite-plugin-svelte (v5 needs vite 6, v7 needs vite 8).
+    # Bump both together when vite 8 is stable. See #17.
+    ignore:
+      - dependency-name: "vite"
+        versions: [">=7"]
+      - dependency-name: "@sveltejs/vite-plugin-svelte"
+        versions: [">=7"]
     groups:
       minor-and-patch:
         update-types:
