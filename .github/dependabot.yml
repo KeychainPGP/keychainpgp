@@ -10,6 +10,11 @@ updates:
       - "dependencies"
       - "rust"
     open-pull-requests-limit: 10
+    # getrandom 0.4 breaks WASM build: sequoia-openpgp still uses 0.3 transitively.
+    # Remove this ignore when sequoia-openpgp migrates to getrandom 0.4. See #16.
+    ignore:
+      - dependency-name: "getrandom"
+        versions: [">=0.4"]
     groups:
       minor-and-patch:
         update-types:
