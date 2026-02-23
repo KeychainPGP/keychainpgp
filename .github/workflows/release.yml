@@ -47,7 +47,7 @@ jobs:
         working-directory: crates/keychainpgp-ui
       - name: Upload Linux artifacts
         if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-linux
           path: |
@@ -55,13 +55,13 @@ jobs:
             target/release/bundle/appimage/*.AppImage
       - name: Upload macOS artifacts
         if: matrix.platform == 'macos'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-macos
           path: target/release/bundle/dmg/*.dmg
       - name: Upload Windows artifacts
         if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-windows
           path: |
@@ -79,7 +79,7 @@ jobs:
           cd portable && 7z a -tzip "../KeychainPGP-${VERSION}-windows-portable.zip" KeychainPGP-portable/
       - name: Upload Windows portable artifact
         if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-windows-portable
           path: KeychainPGP-*-windows-portable.zip
@@ -95,7 +95,7 @@ jobs:
           tar -czf "KeychainPGP-${VERSION}-linux-portable.tar.gz" -C portable KeychainPGP-portable/
       - name: Upload Linux portable artifact
         if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-linux-portable
           path: KeychainPGP-*-linux-portable.tar.gz
@@ -157,7 +157,7 @@ jobs:
             done
           done
       - name: Upload APKs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-android
           path: crates/keychainpgp-ui/gen/android/app/build/outputs/apk/*/release/keychainpgp-*.apk
