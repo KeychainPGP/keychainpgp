@@ -68,6 +68,7 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,
+            commands::settings::is_portable,
             // Shared sync commands
             commands::sync::export_key_bundle,
             commands::sync::import_key_bundle,
@@ -113,6 +114,7 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             // Shared settings commands
             commands::settings::get_settings,
             commands::settings::update_settings,
+            commands::settings::is_portable,
             // Shared sync commands
             commands::sync::export_key_bundle,
             commands::sync::import_key_bundle,
@@ -143,43 +145,66 @@ pub fn run() {
     create_builder()
         .setup(|app| {
             // Initialize application state.
-            // On desktop, use platform-default directories (via `directories` crate).
-            // On mobile, `directories::ProjectDirs` doesn't work, so we use
+            // On desktop: check for portable mode (.portable marker), otherwise use
+            // platform-default directories (via `directories` crate).
+            // On mobile: `directories::ProjectDirs` doesn't work, so we use
             // the app data dir provided by Tauri's path resolver.
             #[cfg(desktop)]
-            let app_state = state::AppState::initialize()?;
+            let app_state = if let Some(portable_dir) = state::detect_portable_dir() {
+                tracing::info!("portable mode: data dir = {}", portable_dir.display());
+                let mut s = state::AppState::initialize_with_dir(&portable_dir)?;
+                s.portable = true;
+                s.portable_dir = Some(portable_dir);
+                // Skip OS keyring in portable mode
+                s.keyring.lock().unwrap().set_portable(true);
+                s
+            } else {
+                state::AppState::initialize()?
+            };
             #[cfg(mobile)]
             let app_state = {
                 let data_dir = app.path().app_data_dir()?;
                 state::AppState::initialize_with_dir(&data_dir)?
             };
 
-            // Load persisted settings and apply to engine
+            // Load persisted settings and apply to engine.
+            // In portable mode, read from the portable data dir directly.
+            // In normal mode, use the Tauri plugin store.
             #[cfg(desktop)]
             let mut locale = "auto".to_string();
             #[cfg(desktop)]
             let mut opsec_settings = None;
-            if let Ok(store) = tauri_plugin_store::StoreExt::store(app, "settings.json") {
-                if let Some(val) = store.get("settings") {
-                    if let Ok(settings) =
-                        serde_json::from_value::<commands::settings::Settings>(val)
-                    {
-                        app_state
-                            .engine
-                            .set_include_armor_headers(settings.include_armor_headers);
-                        if settings.opsec_mode {
-                            app_state.opsec_mode.store(true, Ordering::Relaxed);
-                        }
-                        #[cfg(desktop)]
-                        {
-                            app_state
-                                .close_to_tray
-                                .store(settings.close_to_tray, Ordering::Relaxed);
-                            locale = settings.locale.clone();
-                            if settings.opsec_mode {
-                                opsec_settings = Some(settings);
-                            }
-                        }
+
+            let loaded_settings: Option<commands::settings::Settings> =
+                if let Some(ref portable_dir) = app_state.portable_dir {
+                    let path = portable_dir.join("settings.json");
+                    std::fs::read_to_string(&path)
+                        .ok()
+                        .and_then(|data| serde_json::from_str(&data).ok())
+                } else if let Ok(store) = tauri_plugin_store::StoreExt::store(app, "settings.json")
+                {
+                    store
+                        .get("settings")
+                        .and_then(|val| serde_json::from_value(val).ok())
+                } else {
+                    None
+                };
+
+            if let Some(settings) = loaded_settings {
+                app_state
+                    .engine
+                    .set_include_armor_headers(settings.include_armor_headers);
+                if settings.opsec_mode {
+                    app_state.opsec_mode.store(true, Ordering::Relaxed);
+                }
+                #[cfg(desktop)]
+                {
+                    app_state
+                        .close_to_tray
+                        .store(settings.close_to_tray, Ordering::Relaxed);
+                    locale = settings.locale.clone();
+                    if settings.opsec_mode {
+                        opsec_settings = Some(settings);
                     }
                 }
             }

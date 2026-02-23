@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — 데스크톱용 클립보드 중심 PGP 암호화.",
   "settings_about_title": "정보",
+  "settings_portable_badge": "포터블 모드",
   "donate_button": "이 프로젝트 지원하기",
   "donate_title": "KeychainPGP 지원",
   "donate_desc": "KeychainPGP는 무료 오픈 소스 소프트웨어입니다. 유용하다고 느끼신다면 직접 기부를 고려해 주세요. 중개자 없이, 추적 없이.",

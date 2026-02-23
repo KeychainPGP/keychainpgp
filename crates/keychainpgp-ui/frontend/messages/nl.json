@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — Klembordgerichte PGP-versleuteling voor desktop.",
   "settings_about_title": "Over",
+  "settings_portable_badge": "Draagbare modus",
   "donate_button": "Steun dit project",
   "donate_title": "Steun KeychainPGP",
   "donate_desc": "KeychainPGP is gratis en open source. Als u het nuttig vindt, overweeg dan om rechtstreeks te doneren — geen tussenpersonen, geen tracking.",

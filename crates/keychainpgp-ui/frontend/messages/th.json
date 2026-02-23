@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
   "settings_about_title": "เกี่ยวกับ",
+  "settings_portable_badge": "โหมดพกพา",
   "donate_button": "สนับสนุนโครงการนี้",
   "donate_title": "สนับสนุน KeychainPGP",
   "donate_desc": "KeychainPGP เป็นซอฟต์แวร์ฟรีและโอเพนซอร์ส หากคุณพบว่ามีประโยชน์ โปรดพิจารณาบริจาคโดยตรง — ไม่มีตัวกลาง ไม่มีการติดตาม",

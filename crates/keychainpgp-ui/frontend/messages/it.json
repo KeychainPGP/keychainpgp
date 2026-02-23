@@ -283,6 +283,7 @@
 
   "settings_about_title": "Informazioni",
   "settings_about": "KeychainPGP {version} — Cifratura PGP dagli appunti per desktop.",
+  "settings_portable_badge": "Modalità portatile",
   "donate_button": "Sostieni questo progetto",
   "donate_title": "Sostieni KeychainPGP",
   "donate_desc": "KeychainPGP è gratuito e open source. Se lo trovi utile, considera di fare una donazione diretta — senza intermediari, senza tracciamento.",

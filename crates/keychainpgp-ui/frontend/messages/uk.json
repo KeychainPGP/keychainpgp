@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — PGP-шифрування через буфер обміну для настільних систем.",
   "settings_about_title": "Про програму",
+  "settings_portable_badge": "Портативний режим",
   "donate_button": "Підтримати цей проєкт",
   "donate_title": "Підтримати KeychainPGP",
   "donate_desc": "KeychainPGP — безкоштовний додаток з відкритим кодом. Якщо він вам корисний, розгляньте можливість пожертви напряму — без посередників, без відстеження.",

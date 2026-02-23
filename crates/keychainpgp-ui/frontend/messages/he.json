@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — הצפנת PGP מבוססת לוח לשולחן העבודה.",
   "settings_about_title": "אודות",
+  "settings_portable_badge": "מצב נייד",
   "donate_button": "תמכו בפרויקט",
   "donate_title": "תמכו ב-KeychainPGP",
   "donate_desc": "KeychainPGP הוא חינמי וקוד פתוח. אם מצאתם אותו שימושי, שקלו לתרום ישירות — ללא מתווכים, ללא מעקב.",

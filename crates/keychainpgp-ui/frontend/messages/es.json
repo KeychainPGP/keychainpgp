@@ -283,6 +283,7 @@
 
   "settings_about_title": "Acerca de",
   "settings_about": "KeychainPGP {version} — Cifrado PGP desde el portapapeles para escritorio.",
+  "settings_portable_badge": "Modo portátil",
   "donate_button": "Apoyar este proyecto",
   "donate_title": "Apoyar KeychainPGP",
   "donate_desc": "KeychainPGP es gratuito y de código abierto. Si te resulta útil, considera hacer una donación directa — sin intermediarios, sin rastreo.",

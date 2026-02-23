@@ -283,6 +283,7 @@
 
   "settings_about_title": "À propos",
   "settings_about": "KeychainPGP {version} — Chiffrement PGP centré sur le presse-papiers pour le bureau.",
+  "settings_portable_badge": "Mode portable",
   "donate_button": "Soutenir ce projet",
   "donate_title": "Soutenir KeychainPGP",
   "donate_desc": "KeychainPGP est gratuit et open source. Si vous le trouvez utile, envisagez de faire un don directement — sans intermédiaire, sans traçage.",

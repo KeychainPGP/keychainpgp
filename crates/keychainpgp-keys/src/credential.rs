@@ -20,8 +20,12 @@ const SERVICE_NAME: &str = "keychainpgp";
 /// Abstraction over secret key storage.
 ///
 /// Tries the OS credential store first, falls back to file-based storage.
+/// In portable mode, the OS credential store is skipped entirely to leave
+/// no traces on the host system.
 pub struct CredentialStore {
     secrets_dir: PathBuf,
+    /// When true, skip OS credential store (DPAPI/Keychain/Secret Service).
+    portable: bool,
 }
 
 impl CredentialStore {
@@ -29,31 +33,45 @@ impl CredentialStore {
     pub fn new(data_dir: &Path) -> Result<Self> {
         let secrets_dir = data_dir.join("secrets");
         std::fs::create_dir_all(&secrets_dir)?;
-        Ok(Self { secrets_dir })
+        Ok(Self {
+            secrets_dir,
+            portable: false,
+        })
     }
 
-    /// Store a private key. Always stores to file; also tries OS credential store.
+    /// Enable or disable portable mode (skips OS credential store).
+    pub fn set_portable(&mut self, portable: bool) {
+        self.portable = portable;
+    }
+
+    /// Store a private key. Always stores to file; also tries OS credential store
+    /// (unless portable mode is active).
     pub fn store_secret_key(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
         // Always store to file (guaranteed to work)
         self.store_to_file(fingerprint, secret_key)?;
 
-        // Also try OS credential store as a bonus layer
-        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
-            let encoded = base64_encode(secret_key);
-            let _ = entry.set_secret(encoded.as_bytes());
+        // Also try OS credential store as a bonus layer (skip in portable mode)
+        if !self.portable {
+            if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+                let encoded = base64_encode(secret_key);
+                let _ = entry.set_secret(encoded.as_bytes());
+            }
         }
 
         Ok(())
     }
 
-    /// Retrieve a private key. Tries OS credential store first, falls back to file.
+    /// Retrieve a private key. Tries OS credential store first (unless portable),
+    /// falls back to file.
     pub fn get_secret_key(&self, fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
-        // Try OS credential store first
-        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
-            if let Ok(mut encoded) = entry.get_secret() {
-                if let Ok(decoded) = base64_decode(&encoded) {
-                    encoded.zeroize();
-                    return Ok(SecretBox::new(Box::new(decoded)));
+        // Try OS credential store first (skip in portable mode)
+        if !self.portable {
+            if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+                if let Ok(mut encoded) = entry.get_secret() {
+                    if let Ok(decoded) = base64_decode(&encoded) {
+                        encoded.zeroize();
+                        return Ok(SecretBox::new(Box::new(decoded)));
+                    }
                 }
             }
         }
@@ -64,9 +82,11 @@ impl CredentialStore {
 
     /// Delete a private key from both stores.
     pub fn delete_secret_key(&self, fingerprint: &str) -> Result<()> {
-        // Try OS credential store (ignore errors)
-        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
-            let _ = entry.delete_credential();
+        // Try OS credential store (ignore errors, skip in portable mode)
+        if !self.portable {
+            if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+                let _ = entry.delete_credential();
+            }
         }
 
         // Try file store (ignore errors if not present)
@@ -80,10 +100,12 @@ impl CredentialStore {
 
     /// Check if a secret key exists in either store.
     pub fn has_secret_key(&self, fingerprint: &str) -> bool {
-        // Check OS credential store
-        if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
-            if entry.get_secret().is_ok() {
-                return true;
+        // Check OS credential store (skip in portable mode)
+        if !self.portable {
+            if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
+                if entry.get_secret().is_ok() {
+                    return true;
+                }
             }
         }
 

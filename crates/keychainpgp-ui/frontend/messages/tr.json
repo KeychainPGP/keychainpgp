@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — Masaüstü için pano odaklı PGP şifreleme.",
   "settings_about_title": "Hakkında",
+  "settings_portable_badge": "Taşınabilir Mod",
   "donate_button": "Bu projeyi destekle",
   "donate_title": "KeychainPGP'yi Destekle",
   "donate_desc": "KeychainPGP ücretsiz ve açık kaynaklıdır. Faydalı buluyorsanız, doğrudan bağış yapmayı düşünün — aracı yok, izleme yok.",

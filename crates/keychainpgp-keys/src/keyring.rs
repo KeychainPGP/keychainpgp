@@ -114,4 +114,9 @@ impl Keyring {
     pub fn set_trust(&self, fingerprint: &str, trust: TrustLevel) -> Result<bool> {
         self.storage.set_trust(fingerprint, trust)
     }
+
+    /// Enable portable mode on the credential store (skips OS keyring).
+    pub fn set_portable(&mut self, portable: bool) {
+        self.credentials.set_portable(portable);
+    }
 }

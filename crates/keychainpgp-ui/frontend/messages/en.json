@@ -285,6 +285,7 @@
 
   "settings_about_title": "About",
   "settings_about": "KeychainPGP {version} — Clipboard-first PGP encryption for desktop.",
+  "settings_portable_badge": "Portable Mode",
 
   "donate_button": "Support this project",
   "donate_title": "Support KeychainPGP",

@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — Criptografia PGP para desktop focada na area de transferência.",
   "settings_about_title": "Sobre",
+  "settings_portable_badge": "Modo portátil",
   "donate_button": "Apoie este projeto",
   "donate_title": "Apoie o KeychainPGP",
   "donate_desc": "O KeychainPGP é gratuito e de código aberto. Se você o considera útil, considere doar diretamente — sem intermediários, sem rastreamento.",

@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — デスクトップ向けクリップボード優先の PGP 暗号化ツール。",
   "settings_about_title": "概要",
+  "settings_portable_badge": "ポータブルモード",
   "donate_button": "このプロジェクトを支援",
   "donate_title": "KeychainPGP を支援",
   "donate_desc": "KeychainPGP は無料のオープンソースソフトウェアです。便利だと感じたら、直接寄付をご検討ください。仲介者なし、トラッキングなし。",

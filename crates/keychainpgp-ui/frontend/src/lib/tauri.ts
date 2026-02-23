@@ -291,3 +291,7 @@ export async function getSettings(): Promise<Settings> {
 export async function updateSettings(settings: Settings): Promise<void> {
   return invoke("update_settings", { settings });
 }
+
+export async function isPortable(): Promise<boolean> {
+  return invoke("is_portable");
+}

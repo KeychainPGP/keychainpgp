@@ -8,6 +8,9 @@ use tauri_plugin_store::StoreExt;
 
 use crate::state::AppState;
 
+/// Settings file name used in portable mode.
+const PORTABLE_SETTINGS_FILE: &str = "settings.json";
+
 /// Application settings exposed to the frontend.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -105,9 +108,27 @@ impl Default for Settings {
 
 const SETTINGS_KEY: &str = "settings";
 
+/// Check if the app is running in portable mode.
+#[tauri::command]
+pub fn is_portable(state: State<'_, AppState>) -> bool {
+    state.portable
+}
+
 /// Get the current application settings.
 #[tauri::command]
-pub fn get_settings(app: AppHandle) -> Settings {
+pub fn get_settings(app: AppHandle, state: State<'_, AppState>) -> Settings {
+    // In portable mode, read directly from the portable data dir
+    if let Some(ref portable_dir) = state.portable_dir {
+        let path = portable_dir.join(PORTABLE_SETTINGS_FILE);
+        if let Ok(data) = std::fs::read_to_string(&path) {
+            if let Ok(s) = serde_json::from_str::<Settings>(&data) {
+                return s;
+            }
+        }
+        return Settings::default();
+    }
+
+    // Normal mode: use Tauri plugin store
     let store = match app.store("settings.json") {
         Ok(s) => s,
         Err(_) => return Settings::default(),
@@ -134,6 +155,18 @@ pub fn update_settings(
         .close_to_tray
         .store(settings.close_to_tray, Ordering::Relaxed);
 
+    // In portable mode, write directly to the portable data dir
+    if let Some(ref portable_dir) = state.portable_dir {
+        let path = portable_dir.join(PORTABLE_SETTINGS_FILE);
+        let json =
+            serde_json::to_string_pretty(&settings).map_err(|e| format!("Serialize error: {e}"))?;
+        std::fs::write(&path, json)
+            .map_err(|e| format!("Failed to write portable settings: {e}"))?;
+        tracing::info!("settings updated (portable): {settings:?}");
+        return Ok(());
+    }
+
+    // Normal mode: use Tauri plugin store
     let store = app
         .store("settings.json")
         .map_err(|e| format!("Failed to open settings store: {e}"))?;

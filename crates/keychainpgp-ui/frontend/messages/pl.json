@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — Szyfrowanie PGP przez schowek dla komputerów stacjonarnych.",
   "settings_about_title": "O programie",
+  "settings_portable_badge": "Tryb przenośny",
   "donate_button": "Wesprzyj ten projekt",
   "donate_title": "Wesprzyj KeychainPGP",
   "donate_desc": "KeychainPGP jest darmowy i otwartoźródłowy. Jeśli uważasz go za przydatny, rozważ bezpośrednią darowiznę — bez pośredników, bez śledzenia.",

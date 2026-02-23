@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — تشفير PGP عبر الحافظة لسطح المكتب.",
   "settings_about_title": "حول",
+  "settings_portable_badge": "الوضع المحمول",
   "donate_button": "ادعم هذا المشروع",
   "donate_title": "ادعم KeychainPGP",
   "donate_desc": "KeychainPGP مجاني ومفتوح المصدر. إذا وجدته مفيدًا، فكّر في التبرّع مباشرة — بدون وسطاء، بدون تتبّع.",

@@ -283,6 +283,7 @@
 
   "settings_about": "KeychainPGP {version} — 桌面端剪貼簿優先的 PGP 加密工具。",
   "settings_about_title": "關於",
+  "settings_portable_badge": "便攜模式",
   "donate_button": "支持此專案",
   "donate_title": "支持 KeychainPGP",
   "donate_desc": "KeychainPGP 是免費的開源軟體。如果您覺得它有用，歡迎直接捐款支持——沒有中間商，沒有追蹤。",

@@ -283,6 +283,7 @@
 
   "settings_about_title": "Über",
   "settings_about": "KeychainPGP {version} — Zwischenablage-basierte PGP-Verschlüsselung für den Desktop.",
+  "settings_portable_badge": "Portabler Modus",
   "donate_button": "Dieses Projekt unterstützen",
   "donate_title": "KeychainPGP unterstützen",
   "donate_desc": "KeychainPGP ist kostenlos und quelloffen. Wenn Sie es nützlich finden, erwägen Sie eine direkte Spende — ohne Zwischenhändler, ohne Tracking.",

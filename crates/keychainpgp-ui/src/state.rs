@@ -1,7 +1,7 @@
 //! Application state management.
 
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 
@@ -12,6 +12,21 @@ use crate::passphrase_cache::PassphraseCache;
 
 /// Default passphrase cache TTL in seconds (10 minutes).
 const DEFAULT_CACHE_TTL: u64 = 600;
+
+/// Detect portable mode by looking for a `.portable` marker file next to the executable.
+///
+/// Returns `Some(data_dir)` if portable mode is detected, where `data_dir` is
+/// `{exe_dir}/data/`. Returns `None` for normal (installed) mode.
+#[cfg(desktop)]
+pub fn detect_portable_dir() -> Option<PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    let exe_dir = exe.parent()?;
+    if exe_dir.join(".portable").exists() {
+        Some(exe_dir.join("data"))
+    } else {
+        None
+    }
+}
 
 /// Shared application state managed by Tauri.
 pub struct AppState {
@@ -25,6 +40,10 @@ pub struct AppState {
     /// In OPSEC mode, secret keys live here (RAM only), not in OS credential store.
     /// Maps fingerprint → secret key bytes.
     pub opsec_secret_keys: Mutex<HashMap<String, Vec<u8>>>,
+    /// Whether the app is running in portable mode (.portable marker detected).
+    pub portable: bool,
+    /// In portable mode, the data directory next to the executable.
+    pub portable_dir: Option<PathBuf>,
 }
 
 impl AppState {
@@ -44,6 +63,8 @@ impl AppState {
             opsec_mode: AtomicBool::new(false),
             close_to_tray: AtomicBool::new(false),
             opsec_secret_keys: Mutex::new(HashMap::new()),
+            portable: false,
+            portable_dir: None,
         })
     }
 
@@ -66,6 +87,8 @@ impl AppState {
             opsec_mode: AtomicBool::new(false),
             close_to_tray: AtomicBool::new(false),
             opsec_secret_keys: Mutex::new(HashMap::new()),
+            portable: false,
+            portable_dir: None,
         })
     }
 }

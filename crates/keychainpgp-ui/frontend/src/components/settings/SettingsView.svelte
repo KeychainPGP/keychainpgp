@@ -1,15 +1,19 @@
 <script lang="ts">
   import { settingsStore } from "$lib/stores/settings.svelte";
-  import { clearPassphraseCache, enableOpsecMode, disableOpsecMode, testProxyConnection } from "$lib/tauri";
+  import { clearPassphraseCache, enableOpsecMode, disableOpsecMode, testProxyConnection, isPortable as checkPortable } from "$lib/tauri";
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { shortFingerprint } from "$lib/utils";
   import { isDesktop } from "$lib/platform";
   import { changeLocale, localeStore } from "$lib/stores/locale.svelte";
-  import { RefreshCw, Shield, Globe, Heart } from "lucide-svelte";
+  import { RefreshCw, Shield, Globe, Heart, HardDrive } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
 
   const desktop = isDesktop();
+  let portable = $state(false);
+  if (desktop) {
+    checkPortable().then(v => { portable = v; }).catch(() => {});
+  }
 
   let proxyTesting = $state(false);
   let proxyTestResult: string | null = $state(null);
@@ -492,6 +496,13 @@
     <p class="text-sm text-[var(--color-text-secondary)]">
       {m.settings_about({ version: `v${__APP_VERSION__}` })}
     </p>
+    {#if portable}
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full
+                  bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+        <HardDrive size={12} />
+        {m.settings_portable_badge()}
+      </div>
+    {/if}
     <button
       class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg
              bg-[var(--color-primary)] text-white font-medium
