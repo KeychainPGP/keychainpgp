@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -134,7 +134,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: build-${{ matrix.platform }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -192,7 +192,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: build-android
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
