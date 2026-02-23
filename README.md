@@ -37,42 +37,37 @@ KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org
 
 ## Screenshots
 
-<!-- Replace these with actual screenshots of your app -->
-<!--
 <p align="center">
-  <img src=".github/assets/screenshot-home.png" alt="Home" width="400">
-  <img src=".github/assets/screenshot-keys.png" alt="Key Management" width="400">
+  <img src=".github/assets/screenshot-1_home-clipboard.png" alt="Home — Clipboard Mode" width="400">
+  <img src=".github/assets/screenshot-2_home-compose.png" alt="Home — Compose Mode" width="400">
 </p>
--->
-
-> Screenshots coming soon. Want to help? See [Contributing](#-contributing).
+<p align="center">
+  <img src=".github/assets/screenshot-3_keys.png" alt="Key Manager" width="400">
+  <img src=".github/assets/screenshot-4_home-recipients.png" alt="Recipient Selection" width="400">
+</p>
+<p align="center">
+  <img src=".github/assets/screenshot-5_home-encrypted.png" alt="Encrypted Message in Clipboard" width="400">
+</p>
 
 ## Download
 
-### Desktop
+<p align="center">
+  <a href="https://github.com/keychainpgp/keychainpgp/releases/latest"><img src="https://img.shields.io/badge/Download-GitHub_Releases-blue?style=for-the-badge&logo=github" alt="GitHub Releases" height="45"></a>
+  &nbsp;
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.keychainpgp.app%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fkeychainpgp%2Fkeychainpgp%22%2C%22author%22%3A%22keychainpgp%22%2C%22name%22%3A%22KeychainPGP%22%7D"><img src="https://img.shields.io/badge/Android-Obtainium-teal?style=for-the-badge&logo=android&logoColor=white" alt="Get it on Obtainium" height="45"></a>
+  &nbsp;
+  <a href="https://keychainpgp.github.io"><img src="https://img.shields.io/badge/Web_App-Try_Online-orange?style=for-the-badge&logo=webassembly&logoColor=white" alt="Web App" height="45"></a>
+</p>
 
-| Platform | Formats |
-|----------|---------|
-| **Windows** | [`.exe` (NSIS)](https://github.com/keychainpgp/keychainpgp/releases/latest) &middot; [`.msi`](https://github.com/keychainpgp/keychainpgp/releases/latest) |
-| **macOS** | [`.dmg`](https://github.com/keychainpgp/keychainpgp/releases/latest) |
-| **Linux** | [`.AppImage`](https://github.com/keychainpgp/keychainpgp/releases/latest) &middot; [`.deb`](https://github.com/keychainpgp/keychainpgp/releases/latest) |
-
-### Android
-
-<a href="https://github.com/keychainpgp/keychainpgp/releases/latest"><img src="https://img.shields.io/badge/Get_it_on-GitHub_Releases-blue?style=for-the-badge&logo=github" alt="GitHub Releases" height="50"></a>
-
-**Via [Obtainium](https://obtainium.imranr.dev/)** &mdash; get automatic updates directly from GitHub:
-
-<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.keychainpgp.app%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fkeychainpgp%2Fkeychainpgp%22%2C%22author%22%3A%22keychainpgp%22%2C%22name%22%3A%22KeychainPGP%22%7D"><img src="https://img.shields.io/badge/Get_it_on-Obtainium-teal?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTEyIDJMMTIgMTZNMTIgMTZMNiAxME0xMiAxNkwxOCAxME0yIDE4TDIgMjJMMjIgMjJMMjIgMTgiLz48L3N2Zz4=" alt="Get it on Obtainium" height="50"></a>
+| Platform | Formats | Portable |
+|----------|---------|----------|
+| **Windows** | `.exe` (NSIS) &middot; `.msi` | `.zip` |
+| **macOS** | `.dmg` | &mdash; |
+| **Linux** | `.AppImage` &middot; `.deb` | `.tar.gz` |
+| **Android** | `.apk` (arm64, arm, x86_64) | &mdash; |
 
 > [!TIP]
-> [Obtainium](https://github.com/ImranR98/Obtainium) lets you install and update apps directly from their GitHub releases. No app store required.
-
-### Web App
-
-Try KeychainPGP directly in your browser (WASM-powered, nothing leaves your device):
-
-> **[web.keychainpgp.org](https://keychainpgp.org/web)** *(coming soon)*
+> **Android users:** [Obtainium](https://github.com/ImranR98/Obtainium) lets you install and update KeychainPGP directly from GitHub releases &mdash; no app store required.
 
 ## Features
 
