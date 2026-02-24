@@ -13,7 +13,6 @@ mod tray;
 use std::sync::atomic::Ordering;
 
 use tauri::Manager;
-use zeroize::Zeroize;
 
 #[cfg(desktop)]
 fn create_builder() -> tauri::Builder<tauri::Wry> {
@@ -195,7 +194,7 @@ pub fn run() {
                     .engine
                     .set_include_armor_headers(settings.include_armor_headers);
                 if settings.opsec_mode {
-                    app_state.opsec_mode.store(true, Ordering::Relaxed);
+                    app_state.opsec_mode.store(true, Ordering::SeqCst);
                 }
                 #[cfg(desktop)]
                 {
@@ -236,18 +235,19 @@ pub fn run() {
         .run(|app, event| {
             if let tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit = event {
                 if let Some(app_state) = app.try_state::<state::AppState>() {
-                    if app_state.opsec_mode.load(Ordering::Relaxed) {
-                        // Zeroize all in-memory secret keys
-                        if let Ok(mut keys) = app_state.opsec_secret_keys.lock() {
-                            for value in keys.values_mut() {
-                                value.zeroize();
-                            }
-                            keys.clear();
-                        }
+                    if app_state.opsec_mode.load(Ordering::SeqCst) {
+                        // Zeroize all in-memory secret keys (force access even if mutex is poisoned)
+                        app_state
+                            .opsec_secret_keys
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .clear();
                         // Clear passphrase cache
-                        if let Ok(mut cache) = app_state.passphrase_cache.lock() {
-                            cache.clear_all();
-                        }
+                        app_state
+                            .passphrase_cache
+                            .lock()
+                            .unwrap_or_else(|e| e.into_inner())
+                            .clear_all();
                         // Clear clipboard (desktop only)
                         #[cfg(desktop)]
                         {

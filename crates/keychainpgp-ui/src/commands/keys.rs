@@ -99,7 +99,7 @@ pub fn generate_key_pair(
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
 
-    if state.opsec_mode.load(Ordering::Relaxed) {
+    if state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
@@ -110,7 +110,7 @@ pub fn generate_key_pair(
             .map_err(|e| format!("Internal error: {e}"))?;
         opsec_keys.insert(
             record.fingerprint.clone(),
-            key_pair.secret_key.expose_secret().clone(),
+            zeroize::Zeroizing::new(key_pair.secret_key.expose_secret().clone()),
         );
     } else {
         keyring
@@ -162,7 +162,7 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
 
-    if cert_info.has_secret_key && state.opsec_mode.load(Ordering::Relaxed) {
+    if cert_info.has_secret_key && state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
@@ -171,7 +171,10 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
             .opsec_secret_keys
             .lock()
             .map_err(|e| format!("Internal error: {e}"))?;
-        opsec_keys.insert(record.fingerprint.clone(), key_data.as_bytes().to_vec());
+        opsec_keys.insert(
+            record.fingerprint.clone(),
+            zeroize::Zeroizing::new(key_data.as_bytes().to_vec()),
+        );
     } else if cert_info.has_secret_key {
         keyring
             .store_generated_key(record.clone(), key_data.as_bytes())

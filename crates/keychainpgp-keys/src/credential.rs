@@ -10,6 +10,9 @@
 
 use std::path::{Path, PathBuf};
 
+#[cfg(unix)]
+use std::os::unix::fs::OpenOptionsExt;
+
 use secrecy::SecretBox;
 use zeroize::Zeroize;
 
@@ -44,13 +47,15 @@ impl CredentialStore {
         self.portable = portable;
     }
 
-    /// Store a private key. Always stores to file; also tries OS credential store
-    /// (unless portable mode is active).
+    /// Store a private key. Always stores to file (with restrictive permissions);
+    /// also tries OS credential store as a preferred retrieval source.
     pub fn store_secret_key(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
-        // Always store to file (guaranteed to work)
+        Self::validate_fingerprint(fingerprint)?;
+
+        // Always store to file as reliable fallback (with restrictive permissions)
         self.store_to_file(fingerprint, secret_key)?;
 
-        // Also try OS credential store as a bonus layer (skip in portable mode)
+        // Also try OS credential store for faster retrieval (skip in portable mode)
         if !self.portable {
             if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
                 let encoded = base64_encode(secret_key);
@@ -64,6 +69,8 @@ impl CredentialStore {
     /// Retrieve a private key. Tries OS credential store first (unless portable),
     /// falls back to file.
     pub fn get_secret_key(&self, fingerprint: &str) -> Result<SecretBox<Vec<u8>>> {
+        Self::validate_fingerprint(fingerprint)?;
+
         // Try OS credential store first (skip in portable mode)
         if !self.portable {
             if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
@@ -82,6 +89,8 @@ impl CredentialStore {
 
     /// Delete a private key from both stores.
     pub fn delete_secret_key(&self, fingerprint: &str) -> Result<()> {
+        Self::validate_fingerprint(fingerprint)?;
+
         // Try OS credential store (ignore errors, skip in portable mode)
         if !self.portable {
             if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
@@ -100,6 +109,10 @@ impl CredentialStore {
 
     /// Check if a secret key exists in either store.
     pub fn has_secret_key(&self, fingerprint: &str) -> bool {
+        if Self::validate_fingerprint(fingerprint).is_err() {
+            return false;
+        }
+
         // Check OS credential store (skip in portable mode)
         if !self.portable {
             if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, fingerprint) {
@@ -113,6 +126,16 @@ impl CredentialStore {
         self.secret_key_path(fingerprint).exists()
     }
 
+    /// Validate that a fingerprint contains only hex characters (prevents path traversal).
+    fn validate_fingerprint(fingerprint: &str) -> Result<()> {
+        if fingerprint.is_empty() || !fingerprint.chars().all(|c| c.is_ascii_hexdigit()) {
+            return Err(Error::CredentialStore {
+                reason: format!("invalid fingerprint: must be hex only, got '{fingerprint}'"),
+            });
+        }
+        Ok(())
+    }
+
     fn secret_key_path(&self, fingerprint: &str) -> PathBuf {
         self.secrets_dir.join(format!("{fingerprint}.key"))
     }
@@ -120,9 +143,33 @@ impl CredentialStore {
     fn store_to_file(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
         let path = self.secret_key_path(fingerprint);
         let encoded = base64_encode(secret_key);
-        std::fs::write(&path, encoded.as_bytes()).map_err(|e| Error::CredentialStore {
-            reason: format!("failed to write secret key file: {e}"),
-        })?;
+
+        // On Unix, create with restrictive permissions (owner-only read/write)
+        #[cfg(unix)]
+        {
+            use std::io::Write;
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .mode(0o600)
+                .open(&path)
+                .map_err(|e| Error::CredentialStore {
+                    reason: format!("failed to write secret key file: {e}"),
+                })?;
+            file.write_all(encoded.as_bytes())
+                .map_err(|e| Error::CredentialStore {
+                    reason: format!("failed to write secret key file: {e}"),
+                })?;
+        }
+
+        #[cfg(not(unix))]
+        {
+            std::fs::write(&path, encoded.as_bytes()).map_err(|e| Error::CredentialStore {
+                reason: format!("failed to write secret key file: {e}"),
+            })?;
+        }
+
         Ok(())
     }
 

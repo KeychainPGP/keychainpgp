@@ -133,7 +133,7 @@
             class="flex justify-center items-center p-4 bg-white rounded-lg"
             style={qrFixedSize ? `min-width:${qrFixedSize + 32}px;min-height:${qrFixedSize + 32}px` : ''}
           >
-            {@html bundle.qr_parts[currentQrIndex]}
+            <img src="data:image/svg+xml;base64,{btoa(bundle.qr_parts[currentQrIndex])}" alt="QR Code" />
           </div>
           {#if bundle.qr_parts.length > 1}
             <!-- Controls: arrows + play/pause + counter -->

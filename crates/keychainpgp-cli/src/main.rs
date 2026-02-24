@@ -2,6 +2,8 @@
 
 mod commands;
 
+use std::io::IsTerminal;
+
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
@@ -33,7 +35,7 @@ enum Commands {
         #[arg(long)]
         email: String,
 
-        /// Protect with a passphrase (will prompt if not given)
+        /// Protect with a passphrase (WARNING: visible in process list; prefer interactive prompt)
         #[arg(long)]
         passphrase: Option<String>,
     },
@@ -47,7 +49,7 @@ enum Commands {
 
     /// Decrypt a message (reads from stdin, writes to stdout)
     Decrypt {
-        /// Passphrase for the private key (will prompt if needed)
+        /// Passphrase for the private key (WARNING: visible in process list; prefer interactive prompt)
         #[arg(long)]
         passphrase: Option<String>,
     },
@@ -58,7 +60,7 @@ enum Commands {
         #[arg(long)]
         key: Option<String>,
 
-        /// Passphrase for the private key
+        /// Passphrase for the private key (WARNING: visible in process list; prefer interactive prompt)
         #[arg(long)]
         passphrase: Option<String>,
     },
@@ -113,6 +115,29 @@ enum KeysAction {
     },
 }
 
+/// Prompt for a passphrase interactively (hidden input).
+/// Returns `None` if the user enters an empty string.
+fn prompt_passphrase(prompt: &str) -> Option<String> {
+    match rpassword::prompt_password(prompt) {
+        Ok(p) if p.is_empty() => None,
+        Ok(p) => Some(p),
+        Err(_) => None,
+    }
+}
+
+/// Resolve passphrase: use CLI arg if given, otherwise prompt interactively.
+fn resolve_passphrase(cli_passphrase: Option<String>, prompt: &str) -> Option<String> {
+    if cli_passphrase.is_some() {
+        return cli_passphrase;
+    }
+    // Only prompt if stdin is a TTY (not piped)
+    if std::io::stdin().is_terminal() {
+        prompt_passphrase(prompt)
+    } else {
+        None
+    }
+}
+
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
@@ -132,13 +157,23 @@ fn main() -> anyhow::Result<()> {
             name,
             email,
             passphrase,
-        } => commands::generate::run(&name, &email, passphrase.as_deref())?,
+        } => {
+            let passphrase =
+                resolve_passphrase(passphrase, "Passphrase (leave empty for no protection): ");
+            commands::generate::run(&name, &email, passphrase.as_deref())?;
+        }
 
         Commands::Encrypt { recipient } => commands::encrypt::run(&recipient)?,
 
-        Commands::Decrypt { passphrase } => commands::decrypt::run(passphrase.as_deref())?,
+        Commands::Decrypt { passphrase } => {
+            let passphrase =
+                resolve_passphrase(passphrase, "Passphrase (leave empty if key has none): ");
+            commands::decrypt::run(passphrase.as_deref())?;
+        }
 
         Commands::Sign { key, passphrase } => {
+            let passphrase =
+                resolve_passphrase(passphrase, "Passphrase (leave empty if key has none): ");
             commands::sign::run(key.as_deref(), passphrase.as_deref())?;
         }
 

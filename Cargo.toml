@@ -47,6 +47,7 @@ serde_json = "1"
 
 # CLI
 clap = { version = "4", features = ["derive"] }
+rpassword = "7"
 
 # Error handling
 thiserror = "2"

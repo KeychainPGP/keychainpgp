@@ -5,7 +5,6 @@ use std::sync::atomic::Ordering;
 #[cfg(desktop)]
 use tauri::Manager;
 use tauri::{AppHandle, State};
-use zeroize::Zeroize;
 
 use crate::state::AppState;
 
@@ -16,7 +15,7 @@ pub fn enable_opsec_mode(
     state: State<'_, AppState>,
     #[allow(unused_variables)] title: Option<String>,
 ) -> Result<(), String> {
-    state.opsec_mode.store(true, Ordering::Relaxed);
+    state.opsec_mode.store(true, Ordering::SeqCst);
 
     #[cfg(desktop)]
     {
@@ -41,15 +40,14 @@ pub fn disable_opsec_mode(
     #[allow(unused_variables)] app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    state.opsec_mode.store(false, Ordering::Relaxed);
+    state.opsec_mode.store(false, Ordering::SeqCst);
 
-    // Zeroize and clear any RAM-only keys
-    if let Ok(mut keys) = state.opsec_secret_keys.lock() {
-        for value in keys.values_mut() {
-            value.zeroize();
-        }
-        keys.clear();
-    }
+    // Zeroize and clear any RAM-only keys (force access even if mutex is poisoned)
+    let mut keys = state
+        .opsec_secret_keys
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    keys.clear();
 
     #[cfg(desktop)]
     if let Some(window) = app.get_webview_window("main") {
@@ -67,18 +65,19 @@ pub fn disable_opsec_mode(
 pub fn panic_wipe(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     tracing::warn!("OPSEC panic wipe triggered");
 
-    // Zeroize all in-memory secret keys
-    if let Ok(mut keys) = state.opsec_secret_keys.lock() {
-        for value in keys.values_mut() {
-            value.zeroize();
-        }
-        keys.clear();
-    }
+    // Zeroize all in-memory secret keys (force access even if mutex is poisoned)
+    state
+        .opsec_secret_keys
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clear();
 
     // Clear passphrase cache
-    if let Ok(mut cache) = state.passphrase_cache.lock() {
-        cache.clear_all();
-    }
+    state
+        .passphrase_cache
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .clear_all();
 
     // Clear clipboard (desktop only)
     #[cfg(desktop)]
@@ -95,5 +94,5 @@ pub fn panic_wipe(app: AppHandle, state: State<'_, AppState>) -> Result<(), Stri
 /// Get whether OPSEC mode is currently active.
 #[tauri::command]
 pub fn get_opsec_status(state: State<'_, AppState>) -> bool {
-    state.opsec_mode.load(Ordering::Relaxed)
+    state.opsec_mode.load(Ordering::SeqCst)
 }
