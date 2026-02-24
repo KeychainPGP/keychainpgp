@@ -3,7 +3,7 @@
 **Date:** 2026-02-24
 **Scope:** Full codebase — core, keys, clipboard, UI, CLI, WASM, web, CI/CD
 **Total:** 4 High, 14 Medium, 15 Low, 3 Info
-**Status:** 4/4 High FIXED, 12/14 Medium FIXED (M3 fixed with H1, M4 deferred, M5 fixed with H2), 13/15 Low FIXED (L3 deferred, L9 documented)
+**Status:** 4/4 High FIXED, 12/14 Medium FIXED (M3 fixed with H1, M4 deferred, M5 fixed with H2), 13/15 Low FIXED (L3 deferred, L9 documented), I3 FIXED
 
 ---
 
@@ -409,8 +409,10 @@ All SQLite queries use `params![]`. No SQL injection found.
 
 `[workspace.lints.rust] unsafe_code = "deny"` — no `unsafe` blocks found anywhere.
 
-### I3 — WASM exposes secret key as immutable JS string
+### I3 — WASM exposes secret key as immutable JS string ✅ FIXED
 
 **File:** `crates/keychainpgp-wasm/src/lib.rs:85-91`
 
 Inherent WASM/JS limitation. JS strings cannot be zeroed. Document for web users. Consider `Uint8Array` (manually zeroable) instead.
+
+**Fix applied:** Secret key now returned as `Uint8Array` (via `serde_bytes`). Callers zeroize with `.fill(0)` after use. Keystore encrypts/decrypts raw bytes directly.
