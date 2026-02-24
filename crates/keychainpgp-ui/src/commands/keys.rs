@@ -13,6 +13,24 @@ use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
 
+/// Validate that a keyserver URL uses an allowed protocol.
+fn validate_keyserver_url(url: &str) -> Result<(), String> {
+    if url.starts_with("https://") || url.starts_with("http://") {
+        Ok(())
+    } else {
+        Err("Keyserver URL must use https:// or http:// protocol".into())
+    }
+}
+
+/// Validate that a proxy URL uses an allowed SOCKS5 protocol.
+fn validate_proxy_url(url: &str) -> Result<(), String> {
+    if url.starts_with("socks5://") || url.starts_with("socks5h://") {
+        Ok(())
+    } else {
+        Err("Proxy URL must use socks5:// or socks5h:// protocol".into())
+    }
+}
+
 /// Read the proxy URL from settings if proxy is enabled.
 fn get_proxy_url(app: &AppHandle) -> Option<String> {
     let store = app.store("settings.json").ok()?;
@@ -22,8 +40,8 @@ fn get_proxy_url(app: &AppHandle) -> Option<String> {
         return None;
     }
     let url = match settings.proxy_preset.as_str() {
-        "tor" => "socks5://127.0.0.1:9050".to_string(),
-        "lokinet" => "socks5://127.0.0.1:1080".to_string(),
+        "tor" => "socks5h://127.0.0.1:9050".to_string(),
+        "lokinet" => "socks5h://127.0.0.1:1080".to_string(),
         _ => settings.proxy_url,
     };
     if url.is_empty() { None } else { Some(url) }
@@ -65,6 +83,14 @@ pub fn generate_key_pair(
     email: String,
     passphrase: Option<String>,
 ) -> Result<KeyInfo, String> {
+    // Input validation
+    if name.is_empty() || name.len() > 256 {
+        return Err("Name must be between 1 and 256 characters".into());
+    }
+    if email.is_empty() || email.len() > 256 {
+        return Err("Email must be between 1 and 256 characters".into());
+    }
+
     let user_id = UserId::new(&name, &email);
     let mut options = KeyGenOptions::new(user_id);
 
@@ -99,7 +125,7 @@ pub fn generate_key_pair(
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
 
-    if state.opsec_mode.load(Ordering::Relaxed) {
+    if state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
@@ -110,12 +136,21 @@ pub fn generate_key_pair(
             .map_err(|e| format!("Internal error: {e}"))?;
         opsec_keys.insert(
             record.fingerprint.clone(),
-            key_pair.secret_key.expose_secret().clone(),
+            zeroize::Zeroizing::new(key_pair.secret_key.expose_secret().clone()),
         );
     } else {
         keyring
             .store_generated_key(record.clone(), key_pair.secret_key.expose_secret())
             .map_err(|e| format!("Failed to store key: {e}"))?;
+    }
+
+    // Store revocation certificate
+    if !key_pair.revocation_cert.is_empty() {
+        if let Err(e) =
+            keyring.store_revocation_cert(&record.fingerprint, &key_pair.revocation_cert)
+        {
+            tracing::warn!("failed to store revocation certificate: {e}");
+        }
     }
 
     Ok(KeyInfo::from(record))
@@ -162,7 +197,7 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
 
-    if cert_info.has_secret_key && state.opsec_mode.load(Ordering::Relaxed) {
+    if cert_info.has_secret_key && state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
             .import_public_key(record.clone())
@@ -171,7 +206,10 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
             .opsec_secret_keys
             .lock()
             .map_err(|e| format!("Internal error: {e}"))?;
-        opsec_keys.insert(record.fingerprint.clone(), key_data.as_bytes().to_vec());
+        opsec_keys.insert(
+            record.fingerprint.clone(),
+            zeroize::Zeroizing::new(key_data.as_bytes().to_vec()),
+        );
     } else if cert_info.has_secret_key {
         keyring
             .store_generated_key(record.clone(), key_data.as_bytes())
@@ -430,6 +468,7 @@ pub async fn keyserver_search(
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    validate_keyserver_url(&url)?;
     let proxy = get_proxy_url(&app);
 
     let results =
@@ -471,6 +510,7 @@ pub async fn keyserver_upload(
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    validate_keyserver_url(&url)?;
     let proxy = get_proxy_url(&app);
 
     let key_data = {
@@ -493,6 +533,7 @@ pub async fn keyserver_upload(
 /// Test a proxy connection by making a simple HTTPS request through it.
 #[tauri::command]
 pub async fn test_proxy_connection(proxy_url: String) -> Result<String, String> {
+    validate_proxy_url(&proxy_url)?;
     let proxy = reqwest::Proxy::all(&proxy_url).map_err(|e| format!("Invalid proxy URL: {e}"))?;
     let client = reqwest::Client::builder()
         .proxy(proxy)

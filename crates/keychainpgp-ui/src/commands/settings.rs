@@ -39,7 +39,7 @@ pub struct Settings {
     /// User's preferred display language. "auto" = detect from OS.
     #[serde(default = "default_locale")]
     pub locale: String,
-    /// SOCKS5 proxy URL for anonymous keyserver access (e.g., "socks5://127.0.0.1:9050").
+    /// SOCKS5 proxy URL for anonymous keyserver access (e.g., "socks5h://127.0.0.1:9050").
     #[serde(default = "default_proxy_url")]
     pub proxy_url: String,
     /// Whether the proxy is active for keyserver requests.
@@ -69,7 +69,7 @@ fn default_locale() -> String {
     "auto".into()
 }
 fn default_proxy_url() -> String {
-    "socks5://127.0.0.1:9050".into()
+    "socks5h://127.0.0.1:9050".into()
 }
 fn default_proxy_preset() -> String {
     "tor".into()
@@ -95,7 +95,7 @@ impl Default for Settings {
             keyserver_url: "https://keys.openpgp.org".into(),
             include_armor_headers: true,
             locale: "auto".into(),
-            proxy_url: "socks5://127.0.0.1:9050".into(),
+            proxy_url: "socks5h://127.0.0.1:9050".into(),
             proxy_enabled: false,
             proxy_preset: "tor".into(),
             close_to_tray: false,
@@ -155,6 +155,11 @@ pub fn update_settings(
         .close_to_tray
         .store(settings.close_to_tray, Ordering::Relaxed);
 
+    // Sync passphrase cache TTL
+    if let Ok(mut cache) = state.passphrase_cache.lock() {
+        cache.set_ttl(settings.passphrase_cache_secs);
+    }
+
     // In portable mode, write directly to the portable data dir
     if let Some(ref portable_dir) = state.portable_dir {
         let path = portable_dir.join(PORTABLE_SETTINGS_FILE);
@@ -162,7 +167,7 @@ pub fn update_settings(
             serde_json::to_string_pretty(&settings).map_err(|e| format!("Serialize error: {e}"))?;
         std::fs::write(&path, json)
             .map_err(|e| format!("Failed to write portable settings: {e}"))?;
-        tracing::info!("settings updated (portable): {settings:?}");
+        tracing::info!("settings updated (portable)");
         return Ok(());
     }
 
@@ -174,6 +179,6 @@ pub fn update_settings(
     let val = serde_json::to_value(&settings).map_err(|e| format!("Serialize error: {e}"))?;
     store.set(SETTINGS_KEY, val);
 
-    tracing::info!("settings updated: {settings:?}");
+    tracing::info!("settings updated");
     Ok(())
 }

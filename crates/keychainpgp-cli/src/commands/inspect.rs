@@ -4,9 +4,11 @@ use anyhow::{Context, Result};
 use keychainpgp_core::{CryptoEngine, SequoiaEngine};
 
 pub fn run(file: &str) -> Result<()> {
+    const MAX_INPUT: u64 = 64 * 1024 * 1024;
     let data = if file == "-" {
         let mut buf = Vec::new();
         io::stdin()
+            .take(MAX_INPUT)
             .read_to_end(&mut buf)
             .context("failed to read from stdin")?;
         buf

@@ -7,6 +7,7 @@ use std::sync::atomic::AtomicBool;
 
 use keychainpgp_core::SequoiaEngine;
 use keychainpgp_keys::Keyring;
+use zeroize::Zeroizing;
 
 use crate::passphrase_cache::PassphraseCache;
 
@@ -38,8 +39,8 @@ pub struct AppState {
     /// Whether closing the window hides to system tray instead of quitting.
     pub close_to_tray: AtomicBool,
     /// In OPSEC mode, secret keys live here (RAM only), not in OS credential store.
-    /// Maps fingerprint → secret key bytes.
-    pub opsec_secret_keys: Mutex<HashMap<String, Vec<u8>>>,
+    /// Maps fingerprint → secret key bytes (auto-zeroized on drop).
+    pub opsec_secret_keys: Mutex<HashMap<String, Zeroizing<Vec<u8>>>>,
     /// Whether the app is running in portable mode (.portable marker detected).
     pub portable: bool,
     /// In portable mode, the data directory next to the executable.

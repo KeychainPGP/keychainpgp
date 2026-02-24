@@ -17,10 +17,16 @@ pub fn init() {
 }
 
 /// Result of key generation, returned as a JS object.
+///
+/// **Security note:** `secret_key` is returned as a `Uint8Array` so that
+/// JavaScript callers can zeroize it after use (`.fill(0)`).  JS strings
+/// are immutable and managed by the GC — they cannot be reliably erased
+/// from memory.
 #[derive(Serialize)]
 struct KeyPairResult {
     public_key: String,
-    secret_key: String,
+    #[serde(with = "serde_bytes")]
+    secret_key: Vec<u8>,
     fingerprint: String,
 }
 
@@ -84,7 +90,7 @@ pub fn generate_key_pair(
 
     let result = KeyPairResult {
         public_key: String::from_utf8_lossy(&key_pair.public_key).into_owned(),
-        secret_key: String::from_utf8_lossy(key_pair.secret_key.expose_secret()).into_owned(),
+        secret_key: key_pair.secret_key.expose_secret().clone(),
         fingerprint: key_pair.fingerprint.0.clone(),
     };
 

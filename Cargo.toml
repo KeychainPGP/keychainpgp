@@ -25,9 +25,11 @@ keychainpgp-keys = { path = "crates/keychainpgp-keys" }
 keychainpgp-clipboard = { path = "crates/keychainpgp-clipboard" }
 
 # Crypto
+# NOTE: allow-variable-time-crypto is required by the crypto-rust backend.
+# The timing side-channel risk is accepted: the main threat model is
+# data-at-rest / clipboard confidentiality, not network protocol attacks.
 sequoia-openpgp = { version = "2", default-features = false, features = ["crypto-rust", "allow-experimental-crypto", "allow-variable-time-crypto", "compression-deflate"] }
 zeroize = { version = "1", features = ["derive"] }
-subtle = "2"
 secrecy = { version = "0.10", features = ["serde"] }
 
 # Storage
@@ -47,6 +49,7 @@ serde_json = "1"
 
 # CLI
 clap = { version = "4", features = ["derive"] }
+rpassword = "7"
 
 # Error handling
 thiserror = "2"

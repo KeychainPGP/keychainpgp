@@ -38,9 +38,11 @@ pub fn run(recipient_fingerprints: &[String]) -> Result<()> {
         }
     }
 
-    // Read plaintext from stdin
+    // Read plaintext from stdin (limit to 64 MB to prevent memory exhaustion)
+    const MAX_INPUT: u64 = 64 * 1024 * 1024;
     let mut plaintext = Vec::new();
     io::stdin()
+        .take(MAX_INPUT)
         .read_to_end(&mut plaintext)
         .context("failed to read from stdin")?;
 

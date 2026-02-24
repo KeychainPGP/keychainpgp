@@ -24,7 +24,7 @@
       <p class="text-sm text-red-600">{error}</p>
     {:else if svgData}
       <div class="flex justify-center p-4 bg-white rounded-lg">
-        {@html svgData}
+        <img src="data:image/svg+xml;base64,{btoa(svgData)}" alt="QR Code" />
       </div>
       <p class="text-xs text-center text-[var(--color-text-secondary)]">
         {m.qr_desc()}

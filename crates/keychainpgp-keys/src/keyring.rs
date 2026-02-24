@@ -115,6 +115,12 @@ impl Keyring {
         self.storage.set_trust(fingerprint, trust)
     }
 
+    /// Store a revocation certificate for the given key.
+    pub fn store_revocation_cert(&self, fingerprint: &str, rev_cert: &[u8]) -> Result<()> {
+        self.credentials
+            .store_revocation_cert(fingerprint, rev_cert)
+    }
+
     /// Enable portable mode on the credential store (skips OS keyring).
     pub fn set_portable(&mut self, portable: bool) {
         self.credentials.set_portable(portable);

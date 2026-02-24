@@ -32,8 +32,19 @@ impl PassphraseCache {
         }
     }
 
+    /// Update the TTL duration. Does not affect already-cached entries.
+    pub fn set_ttl(&mut self, ttl_secs: u64) {
+        self.ttl = Duration::from_secs(ttl_secs);
+    }
+
     /// Store a passphrase for the given fingerprint.
+    /// Also purges any expired entries to prevent unbounded memory growth.
     pub fn store(&mut self, fingerprint: &str, passphrase: &[u8]) {
+        // Purge expired entries on each store to bound memory usage
+        let ttl = self.ttl;
+        self.entries
+            .retain(|_, entry| entry.stored_at.elapsed() < ttl);
+
         self.entries.insert(
             fingerprint.to_string(),
             CacheEntry {

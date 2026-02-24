@@ -8,5 +8,11 @@ rustflags = ["-C", "link-arg=-Wl,-z,relro,-z,now"]
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "link-arg=/DYNAMICBASE", "-C", "link-arg=/NXCOMPAT"]
 
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-Wl,-bind_at_load"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-Wl,-bind_at_load"]
+
 [target.wasm32-unknown-unknown]
 rustflags = ['--cfg', 'getrandom_backend="wasm_js"']

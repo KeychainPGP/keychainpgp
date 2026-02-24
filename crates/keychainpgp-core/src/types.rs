@@ -17,6 +17,11 @@ pub struct GeneratedKeyPair {
     /// Human-readable fingerprint of the primary key.
     #[zeroize(skip)]
     pub fingerprint: Fingerprint,
+
+    /// ASCII-armored revocation certificate for the generated key.
+    /// Should be stored securely and used to revoke the key if compromised.
+    #[zeroize(skip)]
+    pub revocation_cert: Vec<u8>,
 }
 
 /// An OpenPGP key fingerprint.

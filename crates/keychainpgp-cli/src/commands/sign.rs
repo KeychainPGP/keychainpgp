@@ -29,9 +29,11 @@ pub fn run(key_fingerprint: Option<&str>, passphrase: Option<&str>) -> Result<()
         keyring.get_secret_key(&first.fingerprint)?
     };
 
-    // Read data from stdin
+    // Read data from stdin (limit to 64 MB to prevent memory exhaustion)
+    const MAX_INPUT: u64 = 64 * 1024 * 1024;
     let mut data = Vec::new();
     io::stdin()
+        .take(MAX_INPUT)
         .read_to_end(&mut data)
         .context("failed to read from stdin")?;
 

@@ -27,6 +27,14 @@ pub struct KeyBundleEntry {
     pub trust_level: i32,
 }
 
+impl Drop for KeyBundleEntry {
+    fn drop(&mut self) {
+        if let Some(ref mut sk) = self.secret_key {
+            zeroize::Zeroize::zeroize(sk);
+        }
+    }
+}
+
 /// Maximum bytes per QR code part.
 ///
 /// Lower values produce simpler (lower-version) QR codes that phone cameras
@@ -107,22 +115,43 @@ pub fn reassemble_from_qr(parts: &[String]) -> Result<Vec<u8>, String> {
 /// Generate a cryptographically random sync passphrase.
 ///
 /// Format: 6 groups of 4 digits separated by dashes (e.g., `1234-5678-9012-3456-7890-1234`).
+/// Uses rejection sampling to avoid modulo bias, batched random for fewer syscalls.
 pub fn generate_sync_passphrase() -> String {
     use keychainpgp_core::crypto_random;
 
-    let mut bytes = [0u8; 12];
-    crypto_random(&mut bytes);
+    let mut out = String::with_capacity(6 * 5 - 1); // 4 digits + '-' x5
+    let mut groups = 0;
 
-    // Convert each byte pair to a 4-digit group (0000-9999)
-    let groups: Vec<String> = bytes
-        .chunks(2)
-        .map(|pair| {
-            let val = u16::from_be_bytes([pair[0], pair[1]]) % 10000;
-            format!("{val:04}")
-        })
-        .collect();
+    while groups < 6 {
+        let mut buf = [0u8; 32];
+        crypto_random(&mut buf);
 
-    groups.join("-")
+        for chunk in buf.chunks_exact(2) {
+            let val = u16::from_be_bytes([chunk[0], chunk[1]]);
+
+            // Reject values >= 60000 to avoid modulo bias
+            // (65536 % 10000 = 5536, so values 60000..65535 are biased)
+            if val < 60000 {
+                let num = val % 10000;
+
+                if groups > 0 {
+                    out.push('-');
+                }
+
+                out.push(char::from(b'0' + ((num / 1000) % 10) as u8));
+                out.push(char::from(b'0' + ((num / 100) % 10) as u8));
+                out.push(char::from(b'0' + ((num / 10) % 10) as u8));
+                out.push(char::from(b'0' + (num % 10) as u8));
+
+                groups += 1;
+                if groups == 6 {
+                    break;
+                }
+            }
+        }
+    }
+
+    out
 }
 
 /// Encode bytes to base64 (URL-safe, no padding).

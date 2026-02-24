@@ -1,14 +1,17 @@
 /**
  * Browser key storage using IndexedDB.
  *
- * Secret keys are encrypted with AES-256-GCM using a wrapping key
- * stored in sessionStorage (lost when the tab closes).
+ * Secret keys are encrypted with AES-256-GCM using a non-extractable wrapping
+ * key held in memory. The key is lost on page refresh (secrets become
+ * inaccessible — this is by design for a browser-based ephemeral PGP tool).
  */
 
 const DB_NAME = "keychainpgp";
 const DB_VERSION = 1;
 const STORE_NAME = "keys";
-const WRAPPING_KEY_ID = "keychainpgp-wrapping-key";
+
+/** In-memory wrapping key — non-extractable, lost on page reload. */
+let cachedWrappingKey: CryptoKey | null = null;
 
 export interface StoredKey {
   fingerprint: string;
@@ -39,38 +42,25 @@ function openDb(): Promise<IDBDatabase> {
 
 /** Get or generate the AES-256-GCM wrapping key for this session. */
 async function getWrappingKey(): Promise<CryptoKey> {
-  const stored = sessionStorage.getItem(WRAPPING_KEY_ID);
-  if (stored) {
-    const raw = Uint8Array.from(atob(stored), (c) => c.charCodeAt(0));
-    return crypto.subtle.importKey("raw", raw, "AES-GCM", true, [
-      "encrypt",
-      "decrypt",
-    ]);
-  }
+  if (cachedWrappingKey) return cachedWrappingKey;
 
-  const key = await crypto.subtle.generateKey(
+  cachedWrappingKey = await crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
-    true,
+    false, // non-extractable — cannot be read from JS
     ["encrypt", "decrypt"],
   );
-  const exported = await crypto.subtle.exportKey("raw", key);
-  sessionStorage.setItem(
-    WRAPPING_KEY_ID,
-    btoa(String.fromCharCode(...new Uint8Array(exported))),
-  );
-  return key;
+  return cachedWrappingKey;
 }
 
 async function encryptSecret(
-  plaintext: string,
+  plaintext: Uint8Array,
 ): Promise<{ ciphertext: string; iv: string }> {
   const key = await getWrappingKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plaintext);
   const encrypted = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    encoded,
+    plaintext,
   );
   return {
     ciphertext: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
@@ -81,7 +71,7 @@ async function encryptSecret(
 async function decryptSecret(
   ciphertext: string,
   ivBase64: string,
-): Promise<string> {
+): Promise<Uint8Array> {
   const key = await getWrappingKey();
   const iv = Uint8Array.from(atob(ivBase64), (c) => c.charCodeAt(0));
   const data = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));
@@ -90,7 +80,7 @@ async function decryptSecret(
     key,
     data,
   );
-  return new TextDecoder().decode(decrypted);
+  return new Uint8Array(decrypted);
 }
 
 export async function listKeys(): Promise<StoredKey[]> {
@@ -120,7 +110,7 @@ export async function storeKey(
   name: string | null,
   email: string | null,
   publicKey: string,
-  secretKey: string | null,
+  secretKey: Uint8Array | null,
 ): Promise<void> {
   let encryptedSecretKey: string | null = null;
   let iv: string | null = null;
@@ -152,13 +142,19 @@ export async function storeKey(
   });
 }
 
-export async function getSecretKey(fingerprint: string): Promise<string | null> {
+/**
+ * Retrieve the decrypted secret key as raw bytes.
+ *
+ * Callers MUST call `.fill(0)` on the returned `Uint8Array` after use
+ * to zeroize the secret key material from memory.
+ */
+export async function getSecretKey(fingerprint: string): Promise<Uint8Array | null> {
   const record = await getKey(fingerprint);
   if (!record?.encryptedSecretKey || !record.iv) return null;
   try {
     return await decryptSecret(record.encryptedSecretKey, record.iv);
   } catch {
-    // Wrapping key lost (new session) — secret is inaccessible
+    // Wrapping key lost (new session or page refresh) — secret is inaccessible
     return null;
   }
 }

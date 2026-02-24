@@ -78,16 +78,19 @@
   async function handleDecrypt() {
     decryptError = "";
     decrypting = true;
+    let sk: Uint8Array | null = null;
     try {
-      const sk = await getSecretKey(fingerprint);
+      sk = await getSecretKey(fingerprint);
       if (!sk) {
         decryptError = "Could not retrieve secret key.";
         return;
       }
-      decryptedMsg = decrypt(encryptedMsg, sk, passphrase || undefined);
+      const skStr = new TextDecoder().decode(sk);
+      decryptedMsg = decrypt(encryptedMsg, skStr, passphrase || undefined);
     } catch (e) {
       decryptError = String(e);
     } finally {
+      sk?.fill(0);
       decrypting = false;
     }
   }

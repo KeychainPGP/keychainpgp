@@ -129,7 +129,7 @@ fn decrypt_impl(
         return Err("You don't have any private keys. Generate or import a key first.".into());
     }
 
-    let is_opsec = state.opsec_mode.load(Ordering::Relaxed);
+    let is_opsec = state.opsec_mode.load(Ordering::SeqCst);
 
     for key_record in &own_keys {
         let secret_key: SecretBox<Vec<u8>> = if is_opsec {
@@ -138,7 +138,7 @@ fn decrypt_impl(
                 .lock()
                 .map_err(|e| format!("Internal error: {e}"))?;
             match opsec_keys.get(&key_record.fingerprint) {
-                Some(k) => SecretBox::new(Box::new(k.clone())),
+                Some(k) => SecretBox::new(Box::new((**k).clone())),
                 None => {
                     // Also try the regular keyring (keys imported before OPSEC was enabled)
                     match keyring.get_secret_key(&key_record.fingerprint) {
@@ -254,7 +254,7 @@ fn sign_impl(
         return Err("You don't have any private keys. Generate or import a key first.".into());
     }
 
-    let is_opsec = state.opsec_mode.load(Ordering::Relaxed);
+    let is_opsec = state.opsec_mode.load(Ordering::SeqCst);
 
     for key_record in &own_keys {
         let secret_key: SecretBox<Vec<u8>> = if is_opsec {
@@ -263,7 +263,7 @@ fn sign_impl(
                 .lock()
                 .map_err(|e| format!("Internal error: {e}"))?;
             match opsec_keys.get(&key_record.fingerprint) {
-                Some(k) => SecretBox::new(Box::new(k.clone())),
+                Some(k) => SecretBox::new(Box::new((**k).clone())),
                 None => match keyring.get_secret_key(&key_record.fingerprint) {
                     Ok(sk) => sk,
                     Err(_) => continue,

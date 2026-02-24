@@ -14,7 +14,8 @@ import wasmInit, {
 
 export interface KeyPairResult {
   public_key: string;
-  secret_key: string;
+  /** Raw bytes of the armored secret key — use `.fill(0)` to zeroize after use. */
+  secret_key: Uint8Array;
   fingerprint: string;
 }
 

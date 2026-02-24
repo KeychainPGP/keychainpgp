@@ -69,7 +69,7 @@
       const info = inspectKey(importData);
       const name = info.user_ids[0]?.name ?? null;
       const email = info.user_ids[0]?.email ?? null;
-      const secretKey = info.has_secret_key ? importData : null;
+      const secretKey = info.has_secret_key ? new TextEncoder().encode(importData) : null;
       await storeKey(info.fingerprint, name, email, importData, secretKey);
       await refresh();
       showImport = false;
