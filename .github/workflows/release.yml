@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - platform: linux
-            runner: ubuntu-latest
+            runner: ubuntu-22.04
           - platform: macos
             runner: macos-latest
           - platform: windows

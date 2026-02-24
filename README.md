@@ -64,12 +64,15 @@ KeychainPGP brings the simplicity of [OpenKeychain](https://www.openkeychain.org
   <a href="https://keychainpgp.github.io"><img src="https://img.shields.io/badge/Web_App-Try_Online-orange?style=for-the-badge&logo=webassembly&logoColor=white" alt="Web App" height="45"></a>
 </p>
 
-| Platform | Formats | Portable |
-|----------|---------|----------|
-| **Windows** | `.exe` &middot; `.msi` | `.zip` |
-| **macOS** | `.dmg` | &mdash; |
-| **Linux** | `.AppImage` &middot; `.deb` | `.tar.gz` |
-| **Android** | `.apk` (arm64, arm, x86_64) | &mdash; |
+| Platform | Formats | Portable | Requirements |
+|----------|---------|----------|--------------|
+| **Windows** | `.exe` &middot; `.msi` | `.zip` | Windows 10+ |
+| **macOS** | `.dmg` | &mdash; | macOS 10.15+ |
+| **Linux** | `.AppImage` &middot; `.deb` | `.tar.gz` | glibc 2.35+, WebKit2GTK 4.1 |
+| **Android** | `.apk` (arm64, arm, x86_64) | &mdash; | Android 7.0+ |
+
+> [!NOTE]
+> **Linux users:** Pre-built binaries require **glibc 2.35** or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, RHEL 9+). On older distributions, [build from source](#-building-from-source).
 
 > [!TIP]
 > **Android users:** [Obtainium](https://github.com/ImranR98/Obtainium) lets you install and update KeychainPGP directly from GitHub releases &mdash; no app store required.
