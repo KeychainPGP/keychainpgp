@@ -15,7 +15,6 @@ wasm = []
 [dependencies]
 sequoia-openpgp.workspace = true
 zeroize.workspace = true
-subtle.workspace = true
 secrecy.workspace = true
 thiserror.workspace = true
 

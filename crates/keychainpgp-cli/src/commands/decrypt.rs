@@ -9,9 +9,11 @@ pub fn run(passphrase: Option<&str>) -> Result<()> {
     let engine = SequoiaEngine::new();
     let keyring = Keyring::open_default()?;
 
-    // Read ciphertext from stdin
+    // Read ciphertext from stdin (limit to 64 MB to prevent memory exhaustion)
+    const MAX_INPUT: u64 = 64 * 1024 * 1024;
     let mut ciphertext = Vec::new();
     io::stdin()
+        .take(MAX_INPUT)
         .read_to_end(&mut ciphertext)
         .context("failed to read from stdin")?;
 

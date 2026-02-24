@@ -83,6 +83,14 @@ pub fn generate_key_pair(
     email: String,
     passphrase: Option<String>,
 ) -> Result<KeyInfo, String> {
+    // Input validation
+    if name.is_empty() || name.len() > 256 {
+        return Err("Name must be between 1 and 256 characters".into());
+    }
+    if email.is_empty() || email.len() > 256 {
+        return Err("Email must be between 1 and 256 characters".into());
+    }
+
     let user_id = UserId::new(&name, &email);
     let mut options = KeyGenOptions::new(user_id);
 

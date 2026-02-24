@@ -98,10 +98,23 @@ impl CredentialStore {
             }
         }
 
-        // Try file store (ignore errors if not present)
+        // Overwrite file with zeros before deleting to minimize residual data on disk.
+        // NOTE: On SSDs with wear-leveling, overwritten data may persist in other blocks.
         let path = self.secret_key_path(fingerprint);
         if path.exists() {
+            if let Ok(metadata) = std::fs::metadata(&path) {
+                let _ = std::fs::write(&path, vec![0u8; metadata.len() as usize]);
+            }
             std::fs::remove_file(&path)?;
+        }
+
+        // Also overwrite any revocation cert
+        let rev_path = self.secrets_dir.join(format!("{fingerprint}.rev"));
+        if rev_path.exists() {
+            if let Ok(metadata) = std::fs::metadata(&rev_path) {
+                let _ = std::fs::write(&rev_path, vec![0u8; metadata.len() as usize]);
+            }
+            let _ = std::fs::remove_file(&rev_path);
         }
 
         Ok(())
@@ -175,8 +188,11 @@ impl CredentialStore {
 
     fn store_to_file(&self, fingerprint: &str, secret_key: &[u8]) -> Result<()> {
         let path = self.secret_key_path(fingerprint);
+        let tmp_path = path.with_extension("key.tmp");
         let encoded = base64_encode(secret_key);
 
+        // Write to a temp file first, then atomically rename to prevent
+        // data loss on crash/power failure during write.
         // On Unix, create with restrictive permissions (owner-only read/write)
         #[cfg(unix)]
         {
@@ -186,7 +202,7 @@ impl CredentialStore {
                 .create(true)
                 .truncate(true)
                 .mode(0o600)
-                .open(&path)
+                .open(&tmp_path)
                 .map_err(|e| Error::CredentialStore {
                     reason: format!("failed to write secret key file: {e}"),
                 })?;
@@ -198,10 +214,15 @@ impl CredentialStore {
 
         #[cfg(not(unix))]
         {
-            std::fs::write(&path, encoded.as_bytes()).map_err(|e| Error::CredentialStore {
+            std::fs::write(&tmp_path, encoded.as_bytes()).map_err(|e| Error::CredentialStore {
                 reason: format!("failed to write secret key file: {e}"),
             })?;
         }
+
+        // Atomic rename: if this fails, the original file is untouched
+        std::fs::rename(&tmp_path, &path).map_err(|e| Error::CredentialStore {
+            reason: format!("failed to finalize secret key file: {e}"),
+        })?;
 
         Ok(())
     }

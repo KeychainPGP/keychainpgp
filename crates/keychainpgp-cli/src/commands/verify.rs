@@ -14,9 +14,11 @@ pub fn run(signer: &str) -> Result<()> {
         .first()
         .with_context(|| format!("no key found matching '{signer}'"))?;
 
-    // Read signed data from stdin
+    // Read signed data from stdin (limit to 64 MB to prevent memory exhaustion)
+    const MAX_INPUT: u64 = 64 * 1024 * 1024;
     let mut signed_data = Vec::new();
     io::stdin()
+        .take(MAX_INPUT)
         .read_to_end(&mut signed_data)
         .context("failed to read from stdin")?;
 

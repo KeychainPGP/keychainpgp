@@ -45,6 +45,11 @@ pub fn schedule_clear(delay: Duration) -> ClearHandle {
 }
 
 /// Immediately clear the clipboard by overwriting with empty content.
+///
+/// **Limitation:** On Windows, the built-in clipboard history may capture
+/// content before this clear runs. Third-party clipboard managers on any
+/// platform may also retain copies. This function provides best-effort
+/// clearing, not guaranteed data destruction.
 pub fn clear_clipboard() -> Result<()> {
     let mut clipboard = arboard::Clipboard::new().map_err(|e| Error::Clipboard {
         reason: e.to_string(),
@@ -57,6 +62,11 @@ pub fn clear_clipboard() -> Result<()> {
         .map_err(|e| Error::Clipboard {
             reason: e.to_string(),
         })?;
+
+    // Also call clear() to remove the clipboard entry entirely
+    clipboard.clear().map_err(|e| Error::Clipboard {
+        reason: e.to_string(),
+    })?;
 
     Ok(())
 }

@@ -3,7 +3,7 @@
 **Date:** 2026-02-24
 **Scope:** Full codebase — core, keys, clipboard, UI, CLI, WASM, web, CI/CD
 **Total:** 4 High, 14 Medium, 15 Low, 3 Info
-**Status:** 4/4 High FIXED, 12/14 Medium FIXED (M3 fixed with H1, M4 deferred, M5 fixed with H2)
+**Status:** 4/4 High FIXED, 12/14 Medium FIXED (M3 fixed with H1, M4 deferred, M5 fixed with H2), 13/15 Low FIXED (L3 deferred, L9 documented)
 
 ---
 
@@ -249,7 +249,7 @@ Linux and Windows have hardening flags, but macOS has none.
 
 ## LOW
 
-### L1 — `allow-variable-time-crypto` enabled on Sequoia
+### L1 — `allow-variable-time-crypto` enabled on Sequoia ✅ DOCUMENTED
 
 **File:** `Cargo.toml:28`
 
@@ -259,7 +259,7 @@ May allow non-constant-time crypto operations, opening timing side-channels.
 
 ---
 
-### L2 — `subtle` crate declared but never used
+### L2 — `subtle` crate declared but never used ✅ FIXED
 
 **File:** `crates/keychainpgp-core/Cargo.toml:18`
 
@@ -279,7 +279,7 @@ Public keys and metadata (names, emails, fingerprints, `is_own_key`) are stored 
 
 ---
 
-### L4 — Secret key files not securely deleted
+### L4 — Secret key files not securely deleted ✅ FIXED
 
 **File:** `crates/keychainpgp-keys/src/credential.rs:93-96`
 
@@ -299,7 +299,7 @@ No memory ordering guarantee. A thread could read `false` and use the non-OPSEC 
 
 ---
 
-### L6 — Settings logged with full Debug representation
+### L6 — Settings logged with full Debug representation ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/commands/settings.rs:165, 177`
 
@@ -309,7 +309,7 @@ No memory ordering guarantee. A thread could read `false` and use the non-OPSEC 
 
 ---
 
-### L7 — Sync passphrase modulo bias
+### L7 — Sync passphrase modulo bias ✅ FIXED
 
 **File:** `crates/keychainpgp-keys/src/sync.rs:110-126`
 
@@ -319,7 +319,7 @@ No memory ordering guarantee. A thread could read `false` and use the non-OPSEC 
 
 ---
 
-### L8 — `withGlobalTauri: true` exposes IPC globally
+### L8 — `withGlobalTauri: true` exposes IPC globally ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/tauri.conf.json:14`
 
@@ -329,7 +329,7 @@ No memory ordering guarantee. A thread could read `false` and use the non-OPSEC 
 
 ---
 
-### L9 — `unsafe-inline` in CSP style-src
+### L9 — `unsafe-inline` in CSP style-src ⚠️ DOCUMENTED
 
 **File:** `crates/keychainpgp-ui/tauri.conf.json:27`
 
@@ -339,7 +339,7 @@ Allows CSS injection, which can be used for CSS-based data exfiltration.
 
 ---
 
-### L10 — No input validation on key generation parameters
+### L10 — No input validation on key generation parameters ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/commands/keys.rs:62-67`
 
@@ -349,7 +349,7 @@ Allows CSS injection, which can be used for CSS-based data exfiltration.
 
 ---
 
-### L11 — No input size limit on CLI stdin
+### L11 — No input size limit on CLI stdin ✅ FIXED
 
 **File:** `crates/keychainpgp-cli/src/commands/encrypt.rs:42-45` (and decrypt, sign, verify, inspect)
 
@@ -359,7 +359,7 @@ Allows CSS injection, which can be used for CSS-based data exfiltration.
 
 ---
 
-### L12 — Non-atomic secret key file writes
+### L12 — Non-atomic secret key file writes ✅ FIXED
 
 **File:** `crates/keychainpgp-keys/src/credential.rs:120-127`
 
@@ -369,7 +369,7 @@ Process interruption during `std::fs::write()` can corrupt the file, losing the 
 
 ---
 
-### L13 — Yanked dependencies only warned, not denied
+### L13 — Yanked dependencies only warned, not denied ✅ FIXED
 
 **File:** `deny.toml:4`
 
@@ -379,7 +379,7 @@ Process interruption during `std::fs::write()` can corrupt the file, losing the 
 
 ---
 
-### L14 — CI keystore and key.properties not cleaned up
+### L14 — CI keystore and key.properties not cleaned up ✅ FIXED
 
 **File:** `.github/workflows/release.yml:133-143`
 
@@ -389,7 +389,7 @@ Android signing secrets written to disk during build are never removed.
 
 ---
 
-### L15 — Clipboard clear may not defeat all history managers
+### L15 — Clipboard clear may not defeat all history managers ✅ FIXED
 
 **File:** `crates/keychainpgp-clipboard/src/clear.rs:48-62`
 

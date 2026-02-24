@@ -115,20 +115,21 @@ pub fn reassemble_from_qr(parts: &[String]) -> Result<Vec<u8>, String> {
 /// Generate a cryptographically random sync passphrase.
 ///
 /// Format: 6 groups of 4 digits separated by dashes (e.g., `1234-5678-9012-3456-7890-1234`).
+/// Uses rejection sampling to avoid modulo bias.
 pub fn generate_sync_passphrase() -> String {
     use keychainpgp_core::crypto_random;
 
-    let mut bytes = [0u8; 12];
-    crypto_random(&mut bytes);
-
-    // Convert each byte pair to a 4-digit group (0000-9999)
-    let groups: Vec<String> = bytes
-        .chunks(2)
-        .map(|pair| {
-            let val = u16::from_be_bytes([pair[0], pair[1]]) % 10000;
-            format!("{val:04}")
-        })
-        .collect();
+    let mut groups = Vec::with_capacity(6);
+    while groups.len() < 6 {
+        let mut pair = [0u8; 2];
+        crypto_random(&mut pair);
+        let val = u16::from_be_bytes(pair);
+        // Reject values >= 60000 to avoid modulo bias
+        // (65536 % 10000 = 5536, so values 60000..65535 are biased)
+        if val < 60000 {
+            groups.push(format!("{:04}", val % 10000));
+        }
+    }
 
     groups.join("-")
 }

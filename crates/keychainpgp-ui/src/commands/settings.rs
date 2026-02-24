@@ -167,7 +167,7 @@ pub fn update_settings(
             serde_json::to_string_pretty(&settings).map_err(|e| format!("Serialize error: {e}"))?;
         std::fs::write(&path, json)
             .map_err(|e| format!("Failed to write portable settings: {e}"))?;
-        tracing::info!("settings updated (portable): {settings:?}");
+        tracing::info!("settings updated (portable)");
         return Ok(());
     }
 
@@ -179,6 +179,6 @@ pub fn update_settings(
     let val = serde_json::to_value(&settings).map_err(|e| format!("Serialize error: {e}"))?;
     store.set(SETTINGS_KEY, val);
 
-    tracing::info!("settings updated: {settings:?}");
+    tracing::info!("settings updated");
     Ok(())
 }

@@ -156,6 +156,11 @@ jobs:
               [ -f "$apk" ] && mv "$apk" "$abi_dir/keychainpgp-${VERSION}-${abi}.apk"
             done
           done
+      - name: Clean up signing secrets
+        if: always()
+        run: |
+          rm -f crates/keychainpgp-ui/gen/android/keystore.jks
+          rm -f crates/keychainpgp-ui/gen/android/key.properties
       - name: Upload APKs
         uses: actions/upload-artifact@v6
         with:
