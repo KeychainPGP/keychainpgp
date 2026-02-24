@@ -19,9 +19,11 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
   class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  role="button"
+  tabindex="-1"
   onclick={onBackdropClick}
 >
   <div
