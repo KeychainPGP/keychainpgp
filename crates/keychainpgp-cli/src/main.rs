@@ -2,8 +2,6 @@
 
 mod commands;
 
-use std::io::IsTerminal;
-
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
@@ -126,16 +124,14 @@ fn prompt_passphrase(prompt: &str) -> Option<String> {
 }
 
 /// Resolve passphrase: use CLI arg if given, otherwise prompt interactively.
+///
+/// The prompt reads from the console handle directly (CONIN$/`/dev/tty`),
+/// so it works even when stdin is piped with ciphertext data.
 fn resolve_passphrase(cli_passphrase: Option<String>, prompt: &str) -> Option<String> {
     if cli_passphrase.is_some() {
         return cli_passphrase;
     }
-    // Only prompt if stdin is a TTY (not piped)
-    if std::io::stdin().is_terminal() {
-        prompt_passphrase(prompt)
-    } else {
-        None
-    }
+    prompt_passphrase(prompt)
 }
 
 fn main() -> anyhow::Result<()> {
