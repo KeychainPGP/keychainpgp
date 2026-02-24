@@ -16,7 +16,9 @@
   let theme: ThemeMode = $state(getTheme());
   let showOnboarding = $state(!hasCompletedOnboarding());
 
-  applyTheme(theme);
+  $effect(() => {
+    applyTheme(theme);
+  });
 
   function toggleTheme() {
     theme = theme === "dark" ? "light" : "dark";
