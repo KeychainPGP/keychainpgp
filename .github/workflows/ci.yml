@@ -211,7 +211,7 @@ jobs:
       - name: Rename APKs
         run: |
           APK_DIR="crates/keychainpgp-ui/gen/android/app/build/outputs/apk"
-          VERSION="0.1.0"
+          VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
           for abi_dir in "$APK_DIR"/*/debug; do
             abi=$(basename "$(dirname "$abi_dir")")
             for apk in "$abi_dir"/*.apk; do

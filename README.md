@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/nicedoc/rust-toolchain"><img src="https://img.shields.io/badge/rust-1.88%2B-orange?style=flat-square&logo=rust" alt="Rust 1.88+"></a>
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/rust-stable-orange?style=flat-square&logo=rust" alt="Rust"></a>
   <a href="https://v2.tauri.app/"><img src="https://img.shields.io/badge/tauri-v2-24C8D8?style=flat-square&logo=tauri&logoColor=white" alt="Tauri v2"></a>
   <a href="https://svelte.dev/"><img src="https://img.shields.io/badge/svelte-5-FF3E00?style=flat-square&logo=svelte&logoColor=white" alt="Svelte 5"></a>
   <a href="https://sequoia-pgp.org/"><img src="https://img.shields.io/badge/crypto-Sequoia--PGP-green?style=flat-square" alt="Sequoia-PGP"></a>
@@ -128,7 +128,7 @@ keychainpgp/
 
 ### Prerequisites
 
-- [Rust](https://rustup.rs/) 1.88+
+- [Rust](https://rustup.rs/) (version pinned in `rust-toolchain.toml`)
 - [Node.js](https://nodejs.org/) 20+ and npm
 - Platform-specific Tauri v2 dependencies &mdash; see [Tauri Prerequisites](https://v2.tauri.app/start/prerequisites/)
 
