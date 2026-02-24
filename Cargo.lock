@@ -2630,7 +2630,6 @@ dependencies = [
  "chrono",
  "secrecy",
  "sequoia-openpgp",
- "subtle",
  "tempfile",
  "thiserror 2.0.18",
  "zeroize",
