@@ -35,6 +35,15 @@ pub fn run(name: &str, email: &str, passphrase: Option<&str>) -> Result<()> {
 
     keyring.store_generated_key(record, key_pair.secret_key.expose_secret())?;
 
+    // Store revocation certificate alongside the key
+    if !key_pair.revocation_cert.is_empty() {
+        if let Err(e) =
+            keyring.store_revocation_cert(&key_pair.fingerprint.0, &key_pair.revocation_cert)
+        {
+            eprintln!("Warning: failed to store revocation certificate: {e}");
+        }
+    }
+
     eprintln!("Key generated successfully!");
     eprintln!("Fingerprint: {}", key_pair.fingerprint);
     eprintln!("Algorithm:   {}", info.algorithm);

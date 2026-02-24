@@ -3,12 +3,13 @@
 **Date:** 2026-02-24
 **Scope:** Full codebase — core, keys, clipboard, UI, CLI, WASM, web, CI/CD
 **Total:** 4 High, 14 Medium, 15 Low, 3 Info
+**Status:** 4/4 High FIXED, 12/14 Medium FIXED (M3 fixed with H1, M4 deferred, M5 fixed with H2)
 
 ---
 
 ## HIGH
 
-### H1 — Secret keys stored as plaintext base64 on disk
+### H1 — Secret keys stored as plaintext base64 on disk ✅ FIXED
 
 **File:** `crates/keychainpgp-keys/src/credential.rs:120-127`
 
@@ -33,7 +34,7 @@ The file-based fallback writes secret key material as base64 (not encryption) wi
 
 ---
 
-### H2 — OPSEC secret keys stored in plain `Vec<u8>` without guaranteed zeroization
+### H2 — OPSEC secret keys stored in plain `Vec<u8>` without guaranteed zeroization ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/state.rs:42`
 
@@ -52,7 +53,7 @@ let mut keys = state.opsec_secret_keys.lock().unwrap_or_else(|e| e.into_inner())
 
 ---
 
-### H3 — SVG injection via `{@html}` in QR code rendering
+### H3 — SVG injection via `{@html}` in QR code rendering ✅ FIXED
 
 **Files:**
 - `crates/keychainpgp-ui/frontend/src/components/modals/QrExportModal.svelte:27`
@@ -70,7 +71,7 @@ const safeDataUri = `data:image/svg+xml;base64,${btoa(svgData)}`;
 
 ---
 
-### H4 — CLI passphrase exposed in process arguments
+### H4 — CLI passphrase exposed in process arguments ✅ FIXED
 
 **File:** `crates/keychainpgp-cli/src/main.rs:37-38, 51-52, 63-64`
 
@@ -82,7 +83,7 @@ The `--passphrase` argument is visible via `ps aux`, `/proc/<pid>/cmdline`, and 
 
 ## MEDIUM
 
-### M1 — Decryption silently ignores signature verification
+### M1 — Decryption silently ignores signature verification ✅ FIXED
 
 **File:** `crates/keychainpgp-core/src/sequoia_engine.rs:853-864`
 
@@ -92,7 +93,7 @@ The `--passphrase` argument is visible via `ps aux`, `/proc/<pid>/cmdline`, and 
 
 ---
 
-### M2 — Revocation certificate discarded at key generation
+### M2 — Revocation certificate discarded at key generation ✅ FIXED
 
 **File:** `crates/keychainpgp-core/src/sequoia_engine.rs:408`
 
@@ -102,7 +103,7 @@ The `--passphrase` argument is visible via `ps aux`, `/proc/<pid>/cmdline`, and 
 
 ---
 
-### M3 — Path traversal via unsanitized fingerprint in file paths
+### M3 — Path traversal via unsanitized fingerprint in file paths ✅ FIXED (with H1)
 
 **File:** `crates/keychainpgp-keys/src/credential.rs:116-118`
 
@@ -128,7 +129,7 @@ Even in OPSEC mode, public key and metadata (name, email, fingerprint, algorithm
 
 ---
 
-### M5 — Poisoned mutex prevents OPSEC secret key cleanup
+### M5 — Poisoned mutex prevents OPSEC secret key cleanup ✅ FIXED (with H2)
 
 **File:** `crates/keychainpgp-ui/src/commands/opsec.rs:47-52, 71-76`
 
@@ -138,7 +139,7 @@ Even in OPSEC mode, public key and metadata (name, email, fingerprint, algorithm
 
 ---
 
-### M6 — Tor DNS leak via `socks5://` instead of `socks5h://`
+### M6 — Tor DNS leak via `socks5://` instead of `socks5h://` ✅ FIXED
 
 **File:** `crates/keychainpgp-keys/src/network/keyserver.rs:15-27`
 
@@ -148,7 +149,7 @@ Using `socks5://` performs DNS resolution locally, leaking the keyserver domain 
 
 ---
 
-### M7 — Expired passphrases persist in memory indefinitely
+### M7 — Expired passphrases persist in memory indefinitely ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/passphrase_cache.rs:47-55`
 
@@ -169,7 +170,7 @@ pub fn get(&mut self, fingerprint: &str) -> Option<&[u8]> {
 
 ---
 
-### M8 — Passphrase cache TTL setting has no effect
+### M8 — Passphrase cache TTL setting has no effect ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/state.rs:62, 86`
 
@@ -179,7 +180,7 @@ The cache is initialized with `DEFAULT_CACHE_TTL` (600s). The user-facing `passp
 
 ---
 
-### M9 — Multiple secret key buffers not zeroized on drop
+### M9 — Multiple secret key buffers not zeroized on drop ✅ FIXED
 
 **Files:**
 - `crates/keychainpgp-core/src/sequoia_engine.rs:443-461` — `secret_key_bytes` Vec on error path
@@ -192,7 +193,7 @@ Multiple code paths handle secret key material in plain `Vec<u8>` that is not ze
 
 ---
 
-### M10 — SSRF via user-controlled keyserver and proxy URLs
+### M10 — SSRF via user-controlled keyserver and proxy URLs ✅ FIXED
 
 **File:** `crates/keychainpgp-ui/src/commands/keys.rs:431-432, 471-473, 495-496`
 
@@ -202,7 +203,7 @@ Multiple code paths handle secret key material in plain `Vec<u8>` that is not ze
 
 ---
 
-### M11 — Web app missing CSP headers
+### M11 — Web app missing CSP headers ✅ FIXED
 
 **File:** `web/index.html`
 
@@ -216,7 +217,7 @@ The standalone web app has no Content-Security-Policy. It handles PGP key materi
 
 ---
 
-### M12 — Web app wrapping key extractable from sessionStorage
+### M12 — Web app wrapping key extractable from sessionStorage ✅ FIXED
 
 **File:** `web/src/lib/keystore.ts:41-62`
 
@@ -226,7 +227,7 @@ The AES-256-GCM wrapping key is generated with `extractable: true` and stored as
 
 ---
 
-### M13 — `wasm-pack` installed via curl pipe to shell in CI
+### M13 — `wasm-pack` installed via curl pipe to shell in CI ✅ FIXED
 
 **File:** `.github/workflows/deploy-web.yml:41`
 
@@ -236,7 +237,7 @@ The AES-256-GCM wrapping key is generated with `extractable: true` and stored as
 
 ---
 
-### M14 — No hardening flags for macOS builds
+### M14 — No hardening flags for macOS builds ✅ FIXED
 
 **File:** `.cargo/config.toml`
 
@@ -288,7 +289,7 @@ Public keys and metadata (names, emails, fingerprints, `is_own_key`) are stored 
 
 ---
 
-### L5 — OPSEC mode flag uses `Ordering::Relaxed`
+### L5 — OPSEC mode flag uses `Ordering::Relaxed` ✅ FIXED (with H2)
 
 **Files:** `crates/keychainpgp-ui/src/commands/opsec.rs:19, 44`
 

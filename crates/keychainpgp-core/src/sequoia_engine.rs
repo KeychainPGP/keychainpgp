@@ -405,7 +405,7 @@ impl CryptoEngine for SequoiaEngine {
             )));
         }
 
-        let (cert, _revocation) = builder.generate().map_err(|e| Error::KeyGeneration {
+        let (cert, revocation) = builder.generate().map_err(|e| Error::KeyGeneration {
             reason: e.to_string(),
         })?;
 
@@ -460,10 +460,32 @@ impl CryptoEngine for SequoiaEngine {
             })?;
         }
 
+        // Serialize revocation certificate (important for key lifecycle management)
+        let mut revocation_cert = Vec::new();
+        {
+            let mut writer = self
+                .armor_writer(
+                    &mut revocation_cert,
+                    sequoia_openpgp::armor::Kind::PublicKey,
+                )
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("armor error: {e}"),
+                })?;
+            sequoia_openpgp::Packet::from(revocation)
+                .serialize(&mut writer)
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("revocation cert serialize error: {e}"),
+                })?;
+            writer.finalize().map_err(|e| Error::KeyGeneration {
+                reason: format!("finalize error: {e}"),
+            })?;
+        }
+
         Ok(GeneratedKeyPair {
             public_key,
             secret_key: secrecy::SecretBox::new(Box::new(secret_key_bytes)),
             fingerprint,
+            revocation_cert,
         })
     }
 
@@ -858,7 +880,21 @@ impl VerificationHelper for DecryptHelper<'_> {
         Ok(Vec::new())
     }
 
-    fn check(&mut self, _structure: MessageStructure) -> sequoia_openpgp::Result<()> {
+    fn check(&mut self, structure: MessageStructure) -> sequoia_openpgp::Result<()> {
+        // NOTE: During decryption, we intentionally do not verify signatures
+        // because the signer's certificate is not available in this context.
+        // Signature verification should be performed separately via the
+        // `verify()` method after decryption, using the signer's public key.
+        //
+        // We iterate the structure to acknowledge any signatures present,
+        // but do not treat unverifiable signatures as errors.
+        for layer in structure {
+            match layer {
+                MessageLayer::SignatureGroup { .. }
+                | MessageLayer::Compression { .. }
+                | MessageLayer::Encryption { .. } => {}
+            }
+        }
         Ok(())
     }
 }

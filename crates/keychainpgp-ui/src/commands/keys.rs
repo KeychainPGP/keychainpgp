@@ -13,6 +13,24 @@ use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
 
+/// Validate that a keyserver URL uses an allowed protocol.
+fn validate_keyserver_url(url: &str) -> Result<(), String> {
+    if url.starts_with("https://") || url.starts_with("http://") {
+        Ok(())
+    } else {
+        Err("Keyserver URL must use https:// or http:// protocol".into())
+    }
+}
+
+/// Validate that a proxy URL uses an allowed SOCKS5 protocol.
+fn validate_proxy_url(url: &str) -> Result<(), String> {
+    if url.starts_with("socks5://") || url.starts_with("socks5h://") {
+        Ok(())
+    } else {
+        Err("Proxy URL must use socks5:// or socks5h:// protocol".into())
+    }
+}
+
 /// Read the proxy URL from settings if proxy is enabled.
 fn get_proxy_url(app: &AppHandle) -> Option<String> {
     let store = app.store("settings.json").ok()?;
@@ -22,8 +40,8 @@ fn get_proxy_url(app: &AppHandle) -> Option<String> {
         return None;
     }
     let url = match settings.proxy_preset.as_str() {
-        "tor" => "socks5://127.0.0.1:9050".to_string(),
-        "lokinet" => "socks5://127.0.0.1:1080".to_string(),
+        "tor" => "socks5h://127.0.0.1:9050".to_string(),
+        "lokinet" => "socks5h://127.0.0.1:1080".to_string(),
         _ => settings.proxy_url,
     };
     if url.is_empty() { None } else { Some(url) }
@@ -116,6 +134,15 @@ pub fn generate_key_pair(
         keyring
             .store_generated_key(record.clone(), key_pair.secret_key.expose_secret())
             .map_err(|e| format!("Failed to store key: {e}"))?;
+    }
+
+    // Store revocation certificate
+    if !key_pair.revocation_cert.is_empty() {
+        if let Err(e) =
+            keyring.store_revocation_cert(&record.fingerprint, &key_pair.revocation_cert)
+        {
+            tracing::warn!("failed to store revocation certificate: {e}");
+        }
     }
 
     Ok(KeyInfo::from(record))
@@ -433,6 +460,7 @@ pub async fn keyserver_search(
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    validate_keyserver_url(&url)?;
     let proxy = get_proxy_url(&app);
 
     let results =
@@ -474,6 +502,7 @@ pub async fn keyserver_upload(
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
+    validate_keyserver_url(&url)?;
     let proxy = get_proxy_url(&app);
 
     let key_data = {
@@ -496,6 +525,7 @@ pub async fn keyserver_upload(
 /// Test a proxy connection by making a simple HTTPS request through it.
 #[tauri::command]
 pub async fn test_proxy_connection(proxy_url: String) -> Result<String, String> {
+    validate_proxy_url(&proxy_url)?;
     let proxy = reqwest::Proxy::all(&proxy_url).map_err(|e| format!("Invalid proxy URL: {e}"))?;
     let client = reqwest::Client::builder()
         .proxy(proxy)

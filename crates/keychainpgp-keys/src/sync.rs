@@ -27,6 +27,14 @@ pub struct KeyBundleEntry {
     pub trust_level: i32,
 }
 
+impl Drop for KeyBundleEntry {
+    fn drop(&mut self) {
+        if let Some(ref mut sk) = self.secret_key {
+            zeroize::Zeroize::zeroize(sk);
+        }
+    }
+}
+
 /// Maximum bytes per QR code part.
 ///
 /// Lower values produce simpler (lower-version) QR codes that phone cameras

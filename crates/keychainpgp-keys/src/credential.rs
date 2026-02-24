@@ -107,6 +107,39 @@ impl CredentialStore {
         Ok(())
     }
 
+    /// Store a revocation certificate for the given key.
+    pub fn store_revocation_cert(&self, fingerprint: &str, rev_cert: &[u8]) -> Result<()> {
+        Self::validate_fingerprint(fingerprint)?;
+        let path = self.secrets_dir.join(format!("{fingerprint}.rev"));
+
+        #[cfg(unix)]
+        {
+            use std::io::Write;
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .mode(0o600)
+                .open(&path)
+                .map_err(|e| Error::CredentialStore {
+                    reason: format!("failed to write revocation cert: {e}"),
+                })?;
+            file.write_all(rev_cert)
+                .map_err(|e| Error::CredentialStore {
+                    reason: format!("failed to write revocation cert: {e}"),
+                })?;
+        }
+
+        #[cfg(not(unix))]
+        {
+            std::fs::write(&path, rev_cert).map_err(|e| Error::CredentialStore {
+                reason: format!("failed to write revocation cert: {e}"),
+            })?;
+        }
+
+        Ok(())
+    }
+
     /// Check if a secret key exists in either store.
     pub fn has_secret_key(&self, fingerprint: &str) -> bool {
         if Self::validate_fingerprint(fingerprint).is_err() {

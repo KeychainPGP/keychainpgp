@@ -1,14 +1,17 @@
 /**
  * Browser key storage using IndexedDB.
  *
- * Secret keys are encrypted with AES-256-GCM using a wrapping key
- * stored in sessionStorage (lost when the tab closes).
+ * Secret keys are encrypted with AES-256-GCM using a non-extractable wrapping
+ * key held in memory. The key is lost on page refresh (secrets become
+ * inaccessible — this is by design for a browser-based ephemeral PGP tool).
  */
 
 const DB_NAME = "keychainpgp";
 const DB_VERSION = 1;
 const STORE_NAME = "keys";
-const WRAPPING_KEY_ID = "keychainpgp-wrapping-key";
+
+/** In-memory wrapping key — non-extractable, lost on page reload. */
+let cachedWrappingKey: CryptoKey | null = null;
 
 export interface StoredKey {
   fingerprint: string;
@@ -39,26 +42,14 @@ function openDb(): Promise<IDBDatabase> {
 
 /** Get or generate the AES-256-GCM wrapping key for this session. */
 async function getWrappingKey(): Promise<CryptoKey> {
-  const stored = sessionStorage.getItem(WRAPPING_KEY_ID);
-  if (stored) {
-    const raw = Uint8Array.from(atob(stored), (c) => c.charCodeAt(0));
-    return crypto.subtle.importKey("raw", raw, "AES-GCM", true, [
-      "encrypt",
-      "decrypt",
-    ]);
-  }
+  if (cachedWrappingKey) return cachedWrappingKey;
 
-  const key = await crypto.subtle.generateKey(
+  cachedWrappingKey = await crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
-    true,
+    false, // non-extractable — cannot be read from JS
     ["encrypt", "decrypt"],
   );
-  const exported = await crypto.subtle.exportKey("raw", key);
-  sessionStorage.setItem(
-    WRAPPING_KEY_ID,
-    btoa(String.fromCharCode(...new Uint8Array(exported))),
-  );
-  return key;
+  return cachedWrappingKey;
 }
 
 async function encryptSecret(
@@ -158,7 +149,7 @@ export async function getSecretKey(fingerprint: string): Promise<string | null> 
   try {
     return await decryptSecret(record.encryptedSecretKey, record.iv);
   } catch {
-    // Wrapping key lost (new session) — secret is inaccessible
+    // Wrapping key lost (new session or page refresh) — secret is inaccessible
     return null;
   }
 }
