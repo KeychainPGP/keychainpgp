@@ -29,7 +29,8 @@
       if (!secretKey) continue;
 
       try {
-        output = decrypt(ciphertext, secretKey, passphrase || undefined);
+        const secretKeyStr = new TextDecoder().decode(secretKey);
+        output = decrypt(ciphertext, secretKeyStr, passphrase || undefined);
         return;
       } catch {
         // Try next key
