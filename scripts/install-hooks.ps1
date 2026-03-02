@@ -4,8 +4,8 @@
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = git rev-parse --show-toplevel
-$HooksSrc = Join-Path $RepoRoot "scripts" "hooks"
-$HooksDst = Join-Path $RepoRoot ".git" "hooks"
+$HooksSrc = Join-Path (Join-Path $RepoRoot "scripts") "hooks"
+$HooksDst = Join-Path (Join-Path $RepoRoot ".git") "hooks"
 
 Get-ChildItem -Path $HooksSrc -File | ForEach-Object {
     Copy-Item $_.FullName -Destination (Join-Path $HooksDst $_.Name) -Force
