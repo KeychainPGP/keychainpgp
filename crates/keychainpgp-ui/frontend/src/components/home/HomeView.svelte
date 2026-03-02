@@ -171,13 +171,25 @@
   }
 </script>
 
-<div class="max-w-2xl mx-auto space-y-6">
-  <div class="text-center space-y-2">
-    <h1 class="text-2xl font-bold">{m.home_title()}</h1>
-    <p class="text-[var(--color-text-secondary)]">
-      {isCompose ? m.home_tagline_compose() : m.home_tagline_clipboard()}
-    </p>
-  </div>
+<div class="max-w-2xl mx-auto space-y-6" class:flex={!desktop} class:flex-col={!desktop} class:h-full={!desktop}>
+  {#if desktop}
+    <div class="text-center space-y-2">
+      <h1 class="text-2xl font-bold">{m.home_title()}</h1>
+      <p class="text-[var(--color-text-secondary)]">
+        {isCompose ? m.home_tagline_compose() : m.home_tagline_clipboard()}
+      </p>
+    </div>
+  {:else}
+    <div class="flex items-center gap-3">
+      <img src="/logo-32.png" alt="KeychainPGP" class="w-8 h-8 rounded-lg" />
+      <div>
+        <h1 class="text-xl font-bold">{m.home_title()}</h1>
+        <p class="text-sm text-[var(--color-text-secondary)]">
+          {isCompose ? m.home_tagline_compose() : m.home_tagline_clipboard()}
+        </p>
+      </div>
+    </div>
+  {/if}
 
   <!-- Input mode toggle (desktop only — mobile always uses compose) -->
   {#if desktop}
@@ -206,49 +218,60 @@
   {/if}
 
   {#if isCompose}
-    <ComposeInput />
+    <div class:flex-1={!desktop} class:min-h-0={!desktop}>
+      <ComposeInput mobile={!desktop} />
+    </div>
   {:else}
     <ClipboardPreview />
   {/if}
 
-  <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+  <div class="grid grid-cols-2 max-w-md mx-auto w-full" class:mt-auto={!desktop}
+    class:gap-2={!desktop} class:gap-3={desktop}>
     <button
-      class="py-4 rounded-lg bg-[var(--color-primary)] text-white font-semibold
+      class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
              hover:bg-[var(--color-primary-hover)] transition-colors
-             flex flex-col items-center gap-1"
+             flex flex-col items-center"
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class:text-sm={!desktop}
       onclick={handleEncrypt}
     >
-      <Lock size={20} />
+      <Lock size={desktop ? 20 : 18} />
       {m.action_encrypt()}
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />{/if}
     </button>
     <button
-      class="py-4 rounded-lg bg-[var(--color-primary)] text-white font-semibold
+      class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
              hover:bg-[var(--color-primary-hover)] transition-colors
-             flex flex-col items-center gap-1"
+             flex flex-col items-center"
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class:text-sm={!desktop}
       onclick={handleDecrypt}
     >
-      <Unlock size={20} />
+      <Unlock size={desktop ? 20 : 18} />
       {m.action_decrypt()}
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />{/if}
     </button>
     <button
-      class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
+      class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
              hover:bg-[var(--color-primary)] hover:text-white transition-colors
-             flex flex-col items-center gap-1"
+             flex flex-col items-center"
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class:text-sm={!desktop}
       onclick={handleSign}
     >
-      <PenLine size={20} />
+      <PenLine size={desktop ? 20 : 18} />
       {m.action_sign()}
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />{/if}
     </button>
     <button
-      class="py-4 rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
+      class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
              hover:bg-[var(--color-primary)] hover:text-white transition-colors
-             flex flex-col items-center gap-1"
+             flex flex-col items-center"
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class:text-sm={!desktop}
       onclick={handleVerify}
     >
-      <ShieldCheck size={20} />
+      <ShieldCheck size={desktop ? 20 : 18} />
       {m.action_verify()}
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]} />{/if}
     </button>

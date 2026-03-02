@@ -34,10 +34,12 @@
   import DonateModal from "./components/modals/DonateModal.svelte";
 
   let initialized = $state(false);
+  let mobile = $state(false);
   let unlistenTray: UnlistenFn | null = null;
 
   onMount(async () => {
     await initPlatform();
+    mobile = isMobile();
 
     await Promise.all([
       keyStore.refresh(),
@@ -84,7 +86,7 @@
   const showOnboarding = $derived(initialized && !keyStore.hasOwnKey);
 </script>
 
-<main class="flex flex-col h-screen" class:safe-area-top={isMobile()}>
+<main class="flex flex-col h-screen" class:safe-area-top={mobile}>
   {#if !initialized}
     <div class="flex items-center justify-center h-full">
       <p class="text-[var(--color-text-secondary)]">{m.loading()}</p>
@@ -96,7 +98,7 @@
       {:else}
         <NavBar />
 
-        <div class="flex-1 overflow-auto p-6" class:pb-24={isMobile()}>
+        <div class="flex-1 overflow-auto p-6" class:pb-14={mobile}>
           {#if appStore.currentView === "home"}
             <HomeView />
           {:else if appStore.currentView === "keys"}

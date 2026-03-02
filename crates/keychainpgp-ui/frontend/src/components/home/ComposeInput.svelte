@@ -4,12 +4,15 @@
   import { isPgpMessage, isPgpSignedMessage } from "$lib/utils";
   import * as m from "$lib/paraglide/messages.js";
 
+  let { mobile = false }: { mobile?: boolean } = $props();
+
   let pgpMessage = $derived(appStore.composeText ? isPgpMessage(appStore.composeText) : false);
   let signedMessage = $derived(appStore.composeText ? isPgpSignedMessage(appStore.composeText) : false);
 </script>
 
 <div
-  class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 min-h-32 relative"
+  class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 relative flex flex-col"
+  class:min-h-32={!mobile} class:h-full={mobile}
 >
   <div class="flex items-center justify-between mb-2">
     <span class="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
@@ -40,9 +43,11 @@
   </div>
 
   <textarea
-    class="w-full min-h-24 max-h-60 text-sm font-mono bg-transparent resize-y
+    class="w-full text-sm font-mono bg-transparent
            text-[var(--color-text)] placeholder-[var(--color-text-secondary)]
            focus:outline-none"
+    class:min-h-24={!mobile} class:max-h-60={!mobile} class:resize-y={!mobile}
+    class:flex-1={mobile} class:resize-none={mobile}
     placeholder={m.compose_placeholder()}
     bind:value={appStore.composeText}
   ></textarea>
