@@ -90,6 +90,12 @@ pub async fn keyserver_fetch(
     keyserver_url: &str,
     proxy_url: Option<&str>,
 ) -> Result<Vec<u8>, String> {
+    if !fingerprint.chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err(format!(
+            "Invalid fingerprint: must be hexadecimal: {fingerprint}"
+        ));
+    }
+
     let client = build_client(15, proxy_url)?;
 
     let url = format!(
@@ -333,5 +339,38 @@ mod tests {
         assert_eq!(results[1].user_ids.len(), 2);
         assert_eq!(results[1].user_ids[0], "Bob Brown");
         assert_eq!(results[1].user_ids[1], "Bob Admin <admin@example.com>");
+    }
+
+    #[tokio::test]
+    async fn test_keyserver_fetch_invalid_fingerprint() {
+        let result = keyserver_fetch(
+            "AAAA&op=delete&search=",
+            "https://keyserver.ubuntu.com",
+            None,
+        )
+        .await;
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Invalid fingerprint"));
+
+        let result = keyserver_fetch("not-hex", "https://keyserver.ubuntu.com", None).await;
+        assert!(result.is_err());
+
+        let result = keyserver_fetch("123G", "https://keyserver.ubuntu.com", None).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_keyserver_fetch_valid_fingerprint_format() {
+        // We don't want to actually hit the network in unit tests if possible,
+        // but here we are just testing the validation step which happens before the network call.
+        // However, since it's an async function and build_client will be called,
+        // it might try to make a request if we don't mock it or use an invalid URL.
+
+        let result = keyserver_fetch("ABCDEF0123456789", "invalid-url", None).await;
+        // It should pass validation and then fail on build_client or the actual request
+        match result {
+            Err(e) => assert!(!e.contains("Invalid fingerprint")),
+            _ => panic!("Should have failed with network/URL error, not validation error"),
+        }
     }
 }
