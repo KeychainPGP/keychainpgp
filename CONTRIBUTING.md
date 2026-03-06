@@ -20,6 +20,19 @@ Thank you for your interest in contributing to KeychainPGP!
 - Rust 1.85+ (via [rustup](https://rustup.rs/))
 - Node.js 20+ and npm
 - Platform-specific Tauri dependencies
+### Git Hooks
+
+Set up the shared pre-commit hook (runs `cargo fmt`, `clippy`, and `prettier` automatically):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+### Frontend Dependencies
+
+```bash
+cd crates/keychainpgp-ui/frontend && npm install
+```
 
 ### Build & Test
 
@@ -28,6 +41,19 @@ cargo build --workspace
 cargo test --workspace
 cargo clippy --workspace -- -D warnings
 cargo fmt --all -- --check
+```
+
+### Formatting
+
+Formatting is enforced automatically via pre-commit hook. You can also run manually:
+
+```bash
+# Rust
+cargo fmt --all
+
+# Frontend (from crates/keychainpgp-ui/frontend/)
+npm run format
+npm run format:check   # CI check (no writes)
 ```
 
 ## Pull Request Requirements
