@@ -1,5 +1,6 @@
 //! Tauri commands for key management.
 
+use std::sync::Arc;
 use std::sync::atomic::Ordering;
 
 use serde::Serialize;
@@ -13,6 +14,7 @@ use keychainpgp_keys::network::keyserver::{
 };
 use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
+use tokio::sync::Semaphore;
 
 use crate::state::AppState;
 
@@ -509,12 +511,18 @@ pub async fn keyserver_search(
     let proxy = get_proxy_url(&app);
     let query_clone = query.clone();
 
+    // Limit concurrency to avoid spawning an unbounded number of network requests.
+    // 10 is a reasonable default for standard use cases.
+    let semaphore = Arc::new(Semaphore::new(10));
+
     let mut futures = Vec::new();
     for url in urls {
         let u = url.to_string();
         let q = query_clone.clone();
         let p = proxy.clone();
+        let sem = semaphore.clone();
         futures.push(tokio::spawn(async move {
+            let _permit = sem.acquire().await.map_err(|e| e.to_string())?;
             ks_search(&q, &u, p.as_deref()).await
         }));
     }
