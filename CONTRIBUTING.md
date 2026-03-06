@@ -39,21 +39,18 @@ cd crates/keychainpgp-ui/frontend && npm install
 ```bash
 cargo build --workspace
 cargo test --workspace
-cargo clippy --workspace -- -D warnings
-cargo fmt --all -- --check
 ```
 
 ### Formatting
 
-Formatting is enforced automatically via pre-commit hook. You can also run manually:
+All formatting (Rust via `rustfmt`, frontend via Prettier) is applied **automatically** on every commit by the pre-commit hook. No manual step needed.
+
+To format manually:
 
 ```bash
-# Rust
-cargo fmt --all
-
-# Frontend (from crates/keychainpgp-ui/frontend/)
-npm run format
-npm run format:check   # CI check (no writes)
+cargo fmt --all                   # Rust
+cd crates/keychainpgp-ui/frontend
+npm run format                    # Frontend
 ```
 
 ## Pull Request Requirements

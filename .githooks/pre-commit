@@ -4,8 +4,12 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 set -e
 
-echo "==> Running cargo fmt --check..."
-cargo fmt --all -- --check
+echo "==> Running cargo fmt..."
+cargo fmt --all
+RUST_FILES=$(git diff --name-only -- '*.rs' || true)
+if [ -n "$RUST_FILES" ]; then
+  echo "$RUST_FILES" | xargs git add
+fi
 
 echo "==> Running cargo clippy..."
 cargo clippy --workspace --all-targets --exclude keychainpgp-wasm --exclude keychainpgp-ui -- -D warnings
