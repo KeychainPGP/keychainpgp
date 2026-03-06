@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Yükleniyor...",
   "ready": "Hazır",
-
   "nav_home": "Şifrele / Çöz",
   "nav_keys": "Anahtarlar",
   "nav_settings": "Ayarlar",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Metni kopyalayın, ardından aşağıdan bir işlem seçin.",
   "home_tagline_compose": "Mesajınızı yazın, ardından aşağıdan bir işlem seçin.",
   "mode_clipboard": "Pano",
   "mode_compose": "Yaz",
-
   "action_encrypt": "ŞİFRELE",
   "action_decrypt": "ÇÖZ",
   "action_sign": "İMZALA",
   "action_verify": "DOĞRULA",
-
   "clipboard_label": "Pano",
   "clipboard_empty": "Panonuz boş. Başlamak için bir metin kopyalayın.",
   "clipboard_pgp_message": "PGP Mesajı",
   "clipboard_signed_message": "İmzalı Mesaj",
   "clipboard_refresh": "Panoyu yenile",
-
   "compose_label": "Yaz",
   "compose_placeholder": "Mesajınızı buraya yazın veya yapıştırın...",
   "compose_clear": "Temizle",
-
   "encrypt_empty_clipboard": "Pano boş. Önce bir metin kopyalayın.",
   "encrypt_empty_compose": "Yazma alanı boş. Önce bir mesaj yazın.",
   "encrypt_no_keys": "Kullanılabilir anahtar yok. Önce bir anahtar oluşturun veya içe aktarın.",
-
   "decrypt_empty_clipboard": "Pano boş. Önce şifrelenmiş bir mesaj kopyalayın.",
   "decrypt_empty_compose": "Yazma alanı boş.",
   "decrypt_no_pgp": "PGP mesajı algılanamadı.",
   "decrypt_in_progress": "Çözülüyor...",
   "decrypt_success": "Başarıyla çözüldü.",
   "decrypt_wrong_key_hint": "Doğru özel anahtarın içe aktarılmış olduğundan emin olun.",
-
   "sign_empty_clipboard": "Pano boş. Önce bir metin kopyalayın.",
   "sign_empty_compose": "Yazma alanı boş.",
   "sign_no_key": "Kullanılabilir özel anahtar yok. Önce bir anahtar oluşturun veya içe aktarın.",
   "sign_in_progress": "İmzalanıyor...",
   "sign_success_compose": "Mesaj imzalandı.",
-
   "verify_empty_clipboard": "Pano boş. Önce imzalanmış bir mesaj kopyalayın.",
   "verify_empty_compose": "Yazma alanı boş.",
   "verify_in_progress": "Doğrulanıyor...",
   "verify_success": "İmza doğrulandı.",
   "verify_failed": "Doğrulama başarısız.",
-
   "verify_modal_title": "İmza Doğrulama",
   "verify_valid_verified": "Geçerli İmza — Doğrulanmış",
   "verify_valid_verified_desc": "Bu mesaj doğrulanmış bir anahtarla imzalanmıştır.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "İmzacı",
   "verify_email_label": "E-posta",
   "verify_fingerprint_label": "Parmak İzi",
-
   "keys_title": "Anahtar Yöneticisi",
   "keys_generate": "Oluştur",
   "keys_import_btn": "İçe Aktar",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Kişiler",
   "keys_export_success": "Açık anahtar panoya kopyalandı.",
   "keys_deleted": "Anahtar silindi.",
-
   "key_details_title": "Anahtar Ayrıntıları",
   "key_details_btn": "Ayrıntılar",
   "key_export_btn": "Açık anahtarı dışa aktar",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR Kodu",
   "key_details_not_found": "Anahtar bulunamadı.",
   "key_trust_update_failed": "Güven güncellenemedi: {error}",
-
   "keygen_title": "Yeni Anahtar Çifti Oluştur",
   "keygen_name_placeholder": "Ad",
   "keygen_email_placeholder": "E-posta",
@@ -112,7 +98,6 @@
   "keygen_submit": "Oluştur",
   "keygen_loading": "Oluşturuluyor...",
   "keygen_success": "Anahtar çifti başarıyla oluşturuldu!",
-
   "onboarding_title": "KeychainPGP'ye Hoş Geldiniz",
   "onboarding_subtitle": "Pano şifrelemesine başlamak için ilk anahtar çiftinizi oluşturun.",
   "onboarding_name_placeholder": "Adınız",
@@ -123,7 +108,6 @@
   "onboarding_import": "Mevcut Anahtarı İçe Aktar",
   "onboarding_scan_qr": "QR Kod Tara",
   "onboarding_sync": "Başka bir cihazdan senkronize et",
-
   "recipient_title": "Alıcıları Seçin",
   "recipient_search_placeholder": "Anahtar ara...",
   "recipient_no_keys": "Kullanılabilir anahtar yok.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "{count} alıcı için şifrele",
   "recipient_encrypting": "Şifreleniyor...",
   "recipient_encrypt_success": "Mesaj şifrelendi ve panoya kopyalandı.",
-
   "import_title": "Anahtar İçe Aktar",
   "import_textarea_placeholder": "ASCII-armored PGP anahtarını veya yedek dosyasını yapıştırın...",
   "import_or": "veya",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "1 anahtar içe aktarıldı",
   "import_backup_success_other": "{count} anahtar içe aktarıldı",
   "import_backup_skipped": ", {count} anahtar zaten anahtarlıkta",
-
   "passphrase_title": "Parola Girin",
   "passphrase_desc": "Bu anahtar parola ile korunuyor. Çözmek için parolayı girin.",
   "passphrase_placeholder": "Parola",
   "passphrase_cancel": "İptal",
   "passphrase_submit": "Çöz",
-
   "decrypted_title": "Çözülmüş Mesaj",
   "decrypted_copy": "Kopyala",
   "decrypted_copied": "Kopyalandı",
   "decrypted_close": "Kapat",
-
   "error_title": "Hata",
   "error_fallback": "Beklenmeyen bir hata oluştu.",
   "error_ok": "Tamam",
-
   "confirm_default_title": "Onay",
   "confirm_default_message": "Emin misiniz?",
   "confirm_cancel": "İptal",
   "confirm_delete": "Sil",
-
   "qr_title": "QR Kodu Dışa Aktarma",
   "qr_generating": "QR kodu oluşturuluyor...",
   "qr_desc": "Açık anahtarı içe aktarmak için bu QR kodunu tarayın.",
   "qr_close": "Kapat",
-
   "discovery_title": "Anahtar Keşfet",
   "discovery_placeholder": "E-posta adresi veya ad...",
   "discovery_search": "Ara",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Keşfedilen bir anahtarı içe aktarmak için açık anahtarını kopyalayın ve Anahtarlar görünümündeki İçe Aktar işlevini kullanın.",
   "discovery_import_fail": "İçe aktarma için anahtar verileri alınamadı.",
   "discovery_close": "Kapat",
-
   "trust_unknown": "Bilinmiyor",
   "trust_imported": "İçe Aktarılmış",
   "trust_verified": "Doğrulanmış",
-
   "settings_title": "Ayarlar",
   "settings_appearance": "Görünüm",
   "settings_theme_system": "Sistem",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Koyu",
   "settings_close_to_tray_label": "Tepsi alanına küçült",
   "settings_close_to_tray_desc": "Pencereyi kapattığınızda uygulamayı sistem tepsisinde çalışır durumda tut",
-
   "settings_clipboard": "Pano",
   "settings_auto_clear_label": "Panoyu otomatik temizle",
   "settings_auto_clear_desc": "Çözme işleminden sonra panodan hassas verileri temizle",
   "settings_auto_clear_delay_label": "Otomatik temizleme gecikmesi",
   "settings_auto_clear_delay_desc": "Panonun temizlenmesine kadar geçecek süre (saniye)",
-
   "settings_encryption": "Şifreleme",
   "settings_encrypt_to_self_label": "Kendine de şifrele",
   "settings_encrypt_to_self_desc": "Kendi anahtarınızı her zaman alıcı olarak ekle",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "{count} anahtar seçili.",
   "settings_include_armor_label": "Zırh başlıklarını ekle",
   "settings_include_armor_desc": "PGP çıktısına Sürüm ve Yorum meta verilerini ekle",
-
   "settings_security": "Güvenlik",
   "settings_passphrase_cache_label": "Parola önbellek süresi",
   "settings_passphrase_cache_desc": "Parolaların hatırlanma süresi (saniye, 0 = devre dışı)",
   "settings_clear_cache": "Önbelleğe alınmış parolaları temizle",
   "settings_cache_cleared": "Parola önbelleği temizlendi.",
   "settings_cache_clear_failed": "Önbellek temizlenemedi: {error}",
-
   "settings_key_discovery": "Anahtar Keşfi",
   "settings_keyserver_label": "Anahtar sunucusu URL'si",
   "settings_keyserver_desc": "Anahtar arama ve yükleme için kullanılır",
-
   "settings_language": "Dil",
   "settings_language_label": "Görüntüleme dili",
   "settings_language_desc": "Arayüz dilini seçin",
-
   "settings_sync": "Anahtar Senkronizasyonu",
   "settings_sync_desc": "Anahtarlarınızı cihazlar arasında güvenle aktarın.",
   "settings_sync_export": "Anahtarları Dışa Aktar",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Dışa aktaran cihazda gösterilen senkronizasyon parolasını girin.",
   "done": "Tamam",
   "cancel": "İptal",
-
   "settings_opsec": "OPSEC Modu",
   "settings_opsec_desc": "Yüksek riskli ortamlar için güçlendirilmiş mod. Anahtarlar yalnızca RAM'de saklanır ve çıkışta silinir.",
   "settings_opsec_enable": "OPSEC Modunu Etkinleştir",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "Bağlantı başarılı!",
   "settings_proxy_failed": "Bağlantı başarısız: {error}",
   "settings_proxy_custom": "Özel",
-
-  "settings_about": "KeychainPGP {version} — Masaüstü için pano odaklı PGP şifreleme.",
   "settings_about_title": "Hakkında",
+  "settings_about": "KeychainPGP {version} — Masaüstü için pano odaklı PGP şifreleme.",
   "settings_portable_badge": "Taşınabilir Mod",
   "donate_button": "Bu projeyi destekle",
   "donate_title": "KeychainPGP'yi Destekle",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Desteğiniz için teşekkürler!",
-
   "unnamed": "(isimsiz)",
   "none_value": "(yok)",
   "date_na": "Yok",
   "fingerprint_copy": "Parmak izini kopyala",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

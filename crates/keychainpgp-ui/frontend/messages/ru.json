@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Загрузка...",
   "ready": "Готово",
-
   "nav_home": "Шифрование / Расшифровка",
   "nav_keys": "Ключи",
   "nav_settings": "Настройки",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Скопируйте текст, затем выберите действие ниже.",
   "home_tagline_compose": "Введите сообщение, затем выберите действие ниже.",
   "mode_clipboard": "Буфер обмена",
   "mode_compose": "Редактор",
-
   "action_encrypt": "ЗАШИФРОВАТЬ",
   "action_decrypt": "РАСШИФРОВАТЬ",
   "action_sign": "ПОДПИСАТЬ",
   "action_verify": "ПРОВЕРИТЬ",
-
   "clipboard_label": "Буфер обмена",
   "clipboard_empty": "Буфер обмена пуст. Скопируйте текст, чтобы начать.",
   "clipboard_pgp_message": "Сообщение PGP",
   "clipboard_signed_message": "Подписанное сообщение",
   "clipboard_refresh": "Обновить буфер обмена",
-
   "compose_label": "Редактор",
   "compose_placeholder": "Введите или вставьте сообщение...",
   "compose_clear": "Очистить",
-
   "encrypt_empty_clipboard": "Буфер обмена пуст. Сначала скопируйте текст.",
   "encrypt_empty_compose": "Поле ввода пусто. Сначала введите сообщение.",
   "encrypt_no_keys": "Нет доступных ключей. Сначала создайте или импортируйте ключ.",
-
   "decrypt_empty_clipboard": "Буфер обмена пуст. Сначала скопируйте зашифрованное сообщение.",
   "decrypt_empty_compose": "Поле ввода пусто.",
   "decrypt_no_pgp": "Сообщение PGP не обнаружено.",
   "decrypt_in_progress": "Расшифровка...",
   "decrypt_success": "Успешно расшифровано.",
   "decrypt_wrong_key_hint": "Убедитесь, что у вас импортирован правильный закрытый ключ.",
-
   "sign_empty_clipboard": "Буфер обмена пуст. Сначала скопируйте текст.",
   "sign_empty_compose": "Поле ввода пусто.",
   "sign_no_key": "Нет закрытого ключа. Сначала создайте или импортируйте его.",
   "sign_in_progress": "Подписание...",
   "sign_success_compose": "Сообщение подписано.",
-
   "verify_empty_clipboard": "Буфер обмена пуст. Сначала скопируйте подписанное сообщение.",
   "verify_empty_compose": "Поле ввода пусто.",
   "verify_in_progress": "Проверка...",
   "verify_success": "Подпись подтверждена.",
   "verify_failed": "Проверка не пройдена.",
-
   "verify_modal_title": "Проверка подписи",
   "verify_valid_verified": "Действительная подпись — проверенный ключ",
   "verify_valid_verified_desc": "Это сообщение подписано проверенным ключом.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Подписант",
   "verify_email_label": "Эл. почта",
   "verify_fingerprint_label": "Отпечаток",
-
   "keys_title": "Управление ключами",
   "keys_generate": "Создать",
   "keys_import_btn": "Импорт",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Контакты",
   "keys_export_success": "Открытый ключ скопирован в буфер обмена.",
   "keys_deleted": "Ключ удалён.",
-
   "key_details_title": "Сведения о ключе",
   "key_details_btn": "Подробнее",
   "key_export_btn": "Экспортировать открытый ключ",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR-код",
   "key_details_not_found": "Ключ не найден.",
   "key_trust_update_failed": "Не удалось обновить доверие: {error}",
-
   "keygen_title": "Создание новой пары ключей",
   "keygen_name_placeholder": "Имя",
   "keygen_email_placeholder": "Эл. почта",
@@ -112,7 +98,6 @@
   "keygen_submit": "Создать",
   "keygen_loading": "Создание...",
   "keygen_success": "Пара ключей успешно создана!",
-
   "onboarding_title": "Добро пожаловать в KeychainPGP",
   "onboarding_subtitle": "Создайте свою первую пару ключей, чтобы начать шифрование через буфер обмена.",
   "onboarding_name_placeholder": "Ваше имя",
@@ -123,7 +108,6 @@
   "onboarding_import": "Импортировать существующий ключ",
   "onboarding_scan_qr": "Сканировать QR-код",
   "onboarding_sync": "Синхронизация с другого устройства",
-
   "recipient_title": "Выбор получателей",
   "recipient_search_placeholder": "Поиск ключей...",
   "recipient_no_keys": "Нет доступных ключей.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Зашифровать для {count} получателей",
   "recipient_encrypting": "Шифрование...",
   "recipient_encrypt_success": "Сообщение зашифровано и скопировано в буфер обмена.",
-
   "import_title": "Импорт ключа",
   "import_textarea_placeholder": "Вставьте PGP-ключ в формате ASCII-armored или файл резервной копии...",
   "import_or": "или",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "Импортирован 1 ключ",
   "import_backup_success_other": "Импортировано ключей: {count}",
   "import_backup_skipped": ", {count} уже в связке ключей",
-
   "passphrase_title": "Введите парольную фразу",
   "passphrase_desc": "Этот ключ защищён парольной фразой. Введите её для расшифровки.",
   "passphrase_placeholder": "Парольная фраза",
   "passphrase_cancel": "Отмена",
   "passphrase_submit": "Расшифровать",
-
   "decrypted_title": "Расшифрованное сообщение",
   "decrypted_copy": "Копировать",
   "decrypted_copied": "Скопировано",
   "decrypted_close": "Закрыть",
-
   "error_title": "Ошибка",
   "error_fallback": "Произошла непредвиденная ошибка.",
   "error_ok": "ОК",
-
   "confirm_default_title": "Подтверждение",
   "confirm_default_message": "Вы уверены?",
   "confirm_cancel": "Отмена",
   "confirm_delete": "Удалить",
-
   "qr_title": "Экспорт QR-кода",
   "qr_generating": "Создание QR-кода...",
   "qr_desc": "Отсканируйте этот QR-код, чтобы импортировать открытый ключ.",
   "qr_close": "Закрыть",
-
   "discovery_title": "Поиск ключей",
   "discovery_placeholder": "Адрес электронной почты или имя...",
   "discovery_search": "Найти",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Чтобы импортировать найденный ключ, скопируйте его открытый ключ и используйте функцию импорта на вкладке «Ключи».",
   "discovery_import_fail": "Не удалось получить данные ключа для импорта.",
   "discovery_close": "Закрыть",
-
   "trust_unknown": "Неизвестно",
   "trust_imported": "Импортирован",
   "trust_verified": "Проверен",
-
   "settings_title": "Настройки",
   "settings_appearance": "Оформление",
   "settings_theme_system": "Системная",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Тёмная",
   "settings_close_to_tray_label": "Сворачивать в трей",
   "settings_close_to_tray_desc": "Оставлять приложение в области уведомлений при закрытии окна",
-
   "settings_clipboard": "Буфер обмена",
   "settings_auto_clear_label": "Автоочистка буфера обмена",
   "settings_auto_clear_desc": "Очищать конфиденциальные данные из буфера обмена после расшифровки",
   "settings_auto_clear_delay_label": "Задержка автоочистки",
   "settings_auto_clear_delay_desc": "Секунды до очистки буфера обмена",
-
   "settings_encryption": "Шифрование",
   "settings_encrypt_to_self_label": "Шифровать для себя",
   "settings_encrypt_to_self_desc": "Всегда включать ваш ключ в список получателей",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "Выбрано ключей: {count}.",
   "settings_include_armor_label": "Включать заголовки ASCII-armored",
   "settings_include_armor_desc": "Добавлять метаданные Version и Comment в вывод PGP",
-
   "settings_security": "Безопасность",
   "settings_passphrase_cache_label": "Время кэширования парольной фразы",
   "settings_passphrase_cache_desc": "Секунды хранения парольных фраз (0 = отключено)",
   "settings_clear_cache": "Очистить кэш парольных фраз",
   "settings_cache_cleared": "Кэш парольных фраз очищен.",
   "settings_cache_clear_failed": "Не удалось очистить кэш: {error}",
-
   "settings_key_discovery": "Поиск ключей",
   "settings_keyserver_label": "URL сервера ключей",
   "settings_keyserver_desc": "Используется для поиска и загрузки ключей",
-
   "settings_language": "Язык",
   "settings_language_label": "Язык интерфейса",
   "settings_language_desc": "Выберите язык интерфейса",
-
   "settings_sync": "Синхронизация ключей",
   "settings_sync_desc": "Безопасная передача ключей между устройствами.",
   "settings_sync_export": "Экспортировать ключи",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Введите парольную фразу синхронизации, показанную на экспортирующем устройстве.",
   "done": "Готово",
   "cancel": "Отмена",
-
   "settings_opsec": "Режим OPSEC",
   "settings_opsec_desc": "Усиленный режим для высокорисковых сред. Ключи хранятся только в оперативной памяти и уничтожаются при выходе.",
   "settings_opsec_enable": "Включить режим OPSEC",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "Соединение успешно!",
   "settings_proxy_failed": "Ошибка соединения: {error}",
   "settings_proxy_custom": "Другой",
-
-  "settings_about": "KeychainPGP {version} — PGP-шифрование через буфер обмена для настольных систем.",
   "settings_about_title": "О программе",
+  "settings_about": "KeychainPGP {version} — PGP-шифрование через буфер обмена для настольных систем.",
   "settings_portable_badge": "Портативный режим",
   "donate_button": "Поддержать проект",
   "donate_title": "Поддержите KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Спасибо за вашу поддержку!",
-
   "unnamed": "(без имени)",
   "none_value": "(нет)",
   "date_na": "Н/Д",
   "fingerprint_copy": "Копировать отпечаток",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

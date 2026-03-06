@@ -41,7 +41,10 @@
     await initPlatform();
     mobile = isMobile();
 
-    await Promise.all([keyStore.refresh(), settingsStore.load()]);
+    await Promise.all([
+      keyStore.refresh(),
+      settingsStore.load(),
+    ]);
     initLocale(settingsStore.settings.locale);
 
     if (isDesktop()) {

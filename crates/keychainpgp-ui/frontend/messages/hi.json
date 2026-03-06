@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "लोड हो रहा है...",
   "ready": "तैयार",
-
   "nav_home": "एन्क्रिप्ट / डिक्रिप्ट",
   "nav_keys": "कुंजियाँ",
   "nav_settings": "सेटिंग्स",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "टेक्स्ट कॉपी करें, फिर नीचे कोई क्रिया चुनें।",
   "home_tagline_compose": "अपना संदेश टाइप करें, फिर नीचे कोई क्रिया चुनें।",
   "mode_clipboard": "क्लिपबोर्ड",
   "mode_compose": "लिखें",
-
   "action_encrypt": "एन्क्रिप्ट",
   "action_decrypt": "डिक्रिप्ट",
   "action_sign": "हस्ताक्षर",
   "action_verify": "सत्यापन",
-
   "clipboard_label": "क्लिपबोर्ड",
   "clipboard_empty": "आपका क्लिपबोर्ड खाली है। शुरू करने के लिए कुछ टेक्स्ट कॉपी करें।",
   "clipboard_pgp_message": "PGP संदेश",
   "clipboard_signed_message": "हस्ताक्षरित संदेश",
   "clipboard_refresh": "क्लिपबोर्ड रिफ़्रेश करें",
-
   "compose_label": "लिखें",
   "compose_placeholder": "अपना संदेश यहाँ टाइप या पेस्ट करें...",
   "compose_clear": "साफ़ करें",
-
   "encrypt_empty_clipboard": "क्लिपबोर्ड खाली है। पहले कुछ टेक्स्ट कॉपी करें।",
   "encrypt_empty_compose": "लेखन फ़ील्ड खाली है। पहले कोई संदेश टाइप करें।",
   "encrypt_no_keys": "कोई कुंजी उपलब्ध नहीं है। पहले कुंजी बनाएँ या आयात करें।",
-
   "decrypt_empty_clipboard": "क्लिपबोर्ड खाली है। पहले एक एन्क्रिप्टेड संदेश कॉपी करें।",
   "decrypt_empty_compose": "लेखन फ़ील्ड खाली है।",
   "decrypt_no_pgp": "कोई PGP संदेश नहीं मिला।",
   "decrypt_in_progress": "डिक्रिप्ट हो रहा है...",
   "decrypt_success": "सफलतापूर्वक डिक्रिप्ट किया गया।",
   "decrypt_wrong_key_hint": "सुनिश्चित करें कि सही निजी कुंजी आयात की गई है।",
-
   "sign_empty_clipboard": "क्लिपबोर्ड खाली है। पहले कुछ टेक्स्ट कॉपी करें।",
   "sign_empty_compose": "लेखन फ़ील्ड खाली है।",
   "sign_no_key": "कोई निजी कुंजी उपलब्ध नहीं है। पहले एक बनाएँ या आयात करें।",
   "sign_in_progress": "हस्ताक्षर हो रहा है...",
   "sign_success_compose": "संदेश पर हस्ताक्षर किया गया।",
-
   "verify_empty_clipboard": "क्लिपबोर्ड खाली है। पहले एक हस्ताक्षरित संदेश कॉपी करें।",
   "verify_empty_compose": "लेखन फ़ील्ड खाली है।",
   "verify_in_progress": "सत्यापित हो रहा है...",
   "verify_success": "हस्ताक्षर सत्यापित।",
   "verify_failed": "सत्यापन विफल।",
-
   "verify_modal_title": "हस्ताक्षर सत्यापन",
   "verify_valid_verified": "वैध हस्ताक्षर — सत्यापित",
   "verify_valid_verified_desc": "यह संदेश एक सत्यापित कुंजी द्वारा हस्ताक्षरित है।",
@@ -61,7 +50,6 @@
   "verify_signer_label": "हस्ताक्षरकर्ता",
   "verify_email_label": "ईमेल",
   "verify_fingerprint_label": "फ़िंगरप्रिंट",
-
   "keys_title": "कुंजी प्रबंधक",
   "keys_generate": "बनाएँ",
   "keys_import_btn": "आयात",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "संपर्क",
   "keys_export_success": "सार्वजनिक कुंजी क्लिपबोर्ड पर कॉपी की गई।",
   "keys_deleted": "कुंजी हटाई गई।",
-
   "key_details_title": "कुंजी विवरण",
   "key_details_btn": "विवरण",
   "key_export_btn": "सार्वजनिक कुंजी निर्यात करें",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR कोड",
   "key_details_not_found": "कुंजी नहीं मिली।",
   "key_trust_update_failed": "विश्वास अपडेट विफल: {error}",
-
   "keygen_title": "नया कुंजी युग्म बनाएँ",
   "keygen_name_placeholder": "नाम",
   "keygen_email_placeholder": "ईमेल",
@@ -112,7 +98,6 @@
   "keygen_submit": "बनाएँ",
   "keygen_loading": "बनाया जा रहा है...",
   "keygen_success": "कुंजी युग्म सफलतापूर्वक बनाया गया!",
-
   "onboarding_title": "KeychainPGP में आपका स्वागत है",
   "onboarding_subtitle": "क्लिपबोर्ड एन्क्रिप्शन शुरू करने के लिए अपना पहला कुंजी युग्म बनाएँ।",
   "onboarding_name_placeholder": "आपका नाम",
@@ -123,7 +108,6 @@
   "onboarding_import": "मौजूदा कुंजी आयात करें",
   "onboarding_scan_qr": "QR कोड स्कैन करें",
   "onboarding_sync": "किसी अन्य डिवाइस से सिंक करें",
-
   "recipient_title": "प्राप्तकर्ता चुनें",
   "recipient_search_placeholder": "कुंजियाँ खोजें...",
   "recipient_no_keys": "कोई कुंजी उपलब्ध नहीं है।",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "{count} प्राप्तकर्ताओं के लिए एन्क्रिप्ट करें",
   "recipient_encrypting": "एन्क्रिप्ट हो रहा है...",
   "recipient_encrypt_success": "संदेश एन्क्रिप्ट होकर क्लिपबोर्ड पर कॉपी किया गया।",
-
   "import_title": "कुंजी आयात करें",
   "import_textarea_placeholder": "ASCII-armored PGP कुंजी या बैकअप फ़ाइल पेस्ट करें...",
   "import_or": "या",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "1 कुंजी आयात की गई",
   "import_backup_success_other": "{count} कुंजियाँ आयात की गईं",
   "import_backup_skipped": ", {count} पहले से कीरिंग में हैं",
-
   "passphrase_title": "पासफ़्रेज़ दर्ज करें",
   "passphrase_desc": "यह कुंजी पासफ़्रेज़ से सुरक्षित है। डिक्रिप्ट करने के लिए इसे दर्ज करें।",
   "passphrase_placeholder": "पासफ़्रेज़",
   "passphrase_cancel": "रद्द करें",
   "passphrase_submit": "डिक्रिप्ट",
-
   "decrypted_title": "डिक्रिप्ट किया गया संदेश",
   "decrypted_copy": "कॉपी",
   "decrypted_copied": "कॉपी किया गया",
   "decrypted_close": "बंद करें",
-
   "error_title": "त्रुटि",
   "error_fallback": "एक अनपेक्षित त्रुटि हुई।",
   "error_ok": "ठीक है",
-
   "confirm_default_title": "पुष्टि करें",
   "confirm_default_message": "क्या आप निश्चित हैं?",
   "confirm_cancel": "रद्द करें",
   "confirm_delete": "हटाएँ",
-
   "qr_title": "QR कोड निर्यात",
   "qr_generating": "QR कोड बनाया जा रहा है...",
   "qr_desc": "सार्वजनिक कुंजी आयात करने के लिए इस QR कोड को स्कैन करें।",
   "qr_close": "बंद करें",
-
   "discovery_title": "कुंजियाँ खोजें",
   "discovery_placeholder": "ईमेल पता या नाम...",
   "discovery_search": "खोजें",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "खोजी गई कुंजी आयात करने के लिए, उसकी सार्वजनिक कुंजी कॉपी करें और कुंजी दृश्य में आयात फ़ंक्शन का उपयोग करें।",
   "discovery_import_fail": "आयात के लिए कुंजी डेटा प्राप्त नहीं हो सका।",
   "discovery_close": "बंद करें",
-
   "trust_unknown": "अज्ञात",
   "trust_imported": "आयातित",
   "trust_verified": "सत्यापित",
-
   "settings_title": "सेटिंग्स",
   "settings_appearance": "दिखावट",
   "settings_theme_system": "सिस्टम",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "डार्क",
   "settings_close_to_tray_label": "ट्रे में बंद करें",
   "settings_close_to_tray_desc": "विंडो बंद करने पर ऐप को सिस्टम ट्रे में चालू रखें",
-
   "settings_clipboard": "क्लिपबोर्ड",
   "settings_auto_clear_label": "क्लिपबोर्ड स्वतः साफ़ करें",
   "settings_auto_clear_desc": "डिक्रिप्शन के बाद क्लिपबोर्ड से संवेदनशील डेटा साफ़ करें",
   "settings_auto_clear_delay_label": "स्वतः साफ़ विलंब",
   "settings_auto_clear_delay_desc": "क्लिपबोर्ड साफ़ होने से पहले सेकंड",
-
   "settings_encryption": "एन्क्रिप्शन",
   "settings_encrypt_to_self_label": "स्वयं को एन्क्रिप्ट करें",
   "settings_encrypt_to_self_desc": "हमेशा अपनी कुंजी को प्राप्तकर्ता के रूप में शामिल करें",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "{count} कुंजियाँ चयनित।",
   "settings_include_armor_label": "Armor हेडर शामिल करें",
   "settings_include_armor_desc": "PGP आउटपुट में संस्करण और टिप्पणी मेटाडेटा जोड़ें",
-
   "settings_security": "सुरक्षा",
   "settings_passphrase_cache_label": "पासफ़्रेज़ कैश अवधि",
   "settings_passphrase_cache_desc": "पासफ़्रेज़ याद रखने के सेकंड (0 = अक्षम)",
   "settings_clear_cache": "कैश किए गए पासफ़्रेज़ साफ़ करें",
   "settings_cache_cleared": "पासफ़्रेज़ कैश साफ़ किया गया।",
   "settings_cache_clear_failed": "कैश साफ़ करने में विफल: {error}",
-
   "settings_key_discovery": "कुंजी खोज",
   "settings_keyserver_label": "कीसर्वर URL",
   "settings_keyserver_desc": "कुंजी खोज और अपलोड के लिए उपयोग किया जाता है",
-
   "settings_language": "भाषा",
   "settings_language_label": "प्रदर्शन भाषा",
   "settings_language_desc": "इंटरफ़ेस के लिए भाषा चुनें",
-
   "settings_sync": "कुंजी सिंक",
   "settings_sync_desc": "अपनी कुंजियाँ उपकरणों के बीच सुरक्षित रूप से स्थानांतरित करें।",
   "settings_sync_export": "कुंजियाँ निर्यात करें",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "निर्यात करने वाले उपकरण पर दिखाया गया सिंक पासफ़्रेज़ दर्ज करें।",
   "done": "हो गया",
   "cancel": "रद्द करें",
-
   "settings_opsec": "OPSEC मोड",
   "settings_opsec_desc": "उच्च-जोखिम वातावरण के लिए सुदृढ़ मोड। कुंजियाँ केवल RAM में संग्रहीत होती हैं और बाहर निकलने पर मिटा दी जाती हैं।",
   "settings_opsec_enable": "OPSEC मोड सक्षम करें",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "कनेक्शन सफल!",
   "settings_proxy_failed": "कनेक्शन विफल: {error}",
   "settings_proxy_custom": "कस्टम",
-
-  "settings_about": "KeychainPGP {version} — डेस्कटॉप के लिए क्लिपबोर्ड-प्रथम PGP एन्क्रिप्शन।",
   "settings_about_title": "परिचय",
+  "settings_about": "KeychainPGP {version} — डेस्कटॉप के लिए क्लिपबोर्ड-प्रथम PGP एन्क्रिप्शन।",
   "settings_portable_badge": "पोर्टेबल मोड",
   "donate_button": "इस परियोजना का समर्थन करें",
   "donate_title": "KeychainPGP का समर्थन करें",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "आपके समर्थन के लिए धन्यवाद!",
-
   "unnamed": "(अनामित)",
   "none_value": "(कोई नहीं)",
   "date_na": "उपलब्ध नहीं",
   "fingerprint_copy": "फ़िंगरप्रिंट कॉपी करें",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

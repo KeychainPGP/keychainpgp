@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "جارٍ التحميل...",
   "ready": "جاهز",
-
   "nav_home": "تشفير / فك تشفير",
   "nav_keys": "المفاتيح",
   "nav_settings": "الإعدادات",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "انسخ نصًا، ثم اختر إجراءً أدناه.",
   "home_tagline_compose": "اكتب رسالتك، ثم اختر إجراءً أدناه.",
   "mode_clipboard": "الحافظة",
   "mode_compose": "كتابة",
-
   "action_encrypt": "تشفير",
   "action_decrypt": "فك التشفير",
   "action_sign": "توقيع",
   "action_verify": "تحقّق",
-
   "clipboard_label": "الحافظة",
   "clipboard_empty": "الحافظة فارغة. انسخ نصًا للبدء.",
   "clipboard_pgp_message": "رسالة PGP",
   "clipboard_signed_message": "رسالة موقّعة",
   "clipboard_refresh": "تحديث الحافظة",
-
   "compose_label": "كتابة",
   "compose_placeholder": "اكتب أو الصق رسالتك هنا...",
   "compose_clear": "مسح",
-
   "encrypt_empty_clipboard": "الحافظة فارغة. انسخ نصًا أولاً.",
   "encrypt_empty_compose": "حقل الكتابة فارغ. اكتب رسالة أولاً.",
   "encrypt_no_keys": "لا توجد مفاتيح متاحة. أنشئ مفتاحًا أو استورده أولاً.",
-
   "decrypt_empty_clipboard": "الحافظة فارغة. انسخ رسالة مشفّرة أولاً.",
   "decrypt_empty_compose": "حقل الكتابة فارغ.",
   "decrypt_no_pgp": "لم يتم اكتشاف رسالة PGP.",
   "decrypt_in_progress": "جارٍ فك التشفير...",
   "decrypt_success": "تم فك التشفير بنجاح.",
   "decrypt_wrong_key_hint": "تأكّد من استيراد المفتاح الخاص الصحيح.",
-
   "sign_empty_clipboard": "الحافظة فارغة. انسخ نصًا أولاً.",
   "sign_empty_compose": "حقل الكتابة فارغ.",
   "sign_no_key": "لا يوجد مفتاح خاص متاح. أنشئ مفتاحًا أو استورده أولاً.",
   "sign_in_progress": "جارٍ التوقيع...",
   "sign_success_compose": "تم توقيع الرسالة.",
-
   "verify_empty_clipboard": "الحافظة فارغة. انسخ رسالة موقّعة أولاً.",
   "verify_empty_compose": "حقل الكتابة فارغ.",
   "verify_in_progress": "جارٍ التحقّق...",
   "verify_success": "تم التحقّق من التوقيع.",
   "verify_failed": "فشل التحقّق.",
-
   "verify_modal_title": "التحقّق من التوقيع",
   "verify_valid_verified": "توقيع صالح — تم التحقّق",
   "verify_valid_verified_desc": "تم توقيع هذه الرسالة بمفتاح تم التحقّق منه.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "المُوقِّع",
   "verify_email_label": "البريد الإلكتروني",
   "verify_fingerprint_label": "البصمة",
-
   "keys_title": "مدير المفاتيح",
   "keys_generate": "إنشاء",
   "keys_import_btn": "استيراد",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "جهات الاتصال",
   "keys_export_success": "تم نسخ المفتاح العام إلى الحافظة.",
   "keys_deleted": "تم حذف المفتاح.",
-
   "key_details_title": "تفاصيل المفتاح",
   "key_details_btn": "التفاصيل",
   "key_export_btn": "تصدير المفتاح العام",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "رمز QR",
   "key_details_not_found": "لم يتم العثور على المفتاح.",
   "key_trust_update_failed": "فشل تحديث الثقة: {error}",
-
   "keygen_title": "إنشاء زوج مفاتيح جديد",
   "keygen_name_placeholder": "الاسم",
   "keygen_email_placeholder": "البريد الإلكتروني",
@@ -112,7 +98,6 @@
   "keygen_submit": "إنشاء",
   "keygen_loading": "جارٍ الإنشاء...",
   "keygen_success": "تم إنشاء زوج المفاتيح بنجاح!",
-
   "onboarding_title": "مرحبًا بك في KeychainPGP",
   "onboarding_subtitle": "أنشئ زوج المفاتيح الأول للبدء بتشفير الحافظة.",
   "onboarding_name_placeholder": "اسمك",
@@ -123,7 +108,6 @@
   "onboarding_import": "استيراد مفتاح موجود",
   "onboarding_scan_qr": "مسح رمز QR",
   "onboarding_sync": "مزامنة من جهاز آخر",
-
   "recipient_title": "اختيار المستلمين",
   "recipient_search_placeholder": "البحث عن مفاتيح...",
   "recipient_no_keys": "لا توجد مفاتيح متاحة.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "تشفير لـ {count} مستلمين",
   "recipient_encrypting": "جارٍ التشفير...",
   "recipient_encrypt_success": "تم تشفير الرسالة ونسخها إلى الحافظة.",
-
   "import_title": "استيراد مفتاح",
   "import_textarea_placeholder": "الصق مفتاح PGP بتنسيق ASCII-armored أو ملف نسخة احتياطية...",
   "import_or": "أو",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "تم استيراد مفتاح واحد",
   "import_backup_success_other": "تم استيراد {count} مفاتيح",
   "import_backup_skipped": "، {count} موجودة بالفعل في حلقة المفاتيح",
-
   "passphrase_title": "أدخل عبارة المرور",
   "passphrase_desc": "هذا المفتاح محمي بعبارة مرور. أدخلها لفك التشفير.",
   "passphrase_placeholder": "عبارة المرور",
   "passphrase_cancel": "إلغاء",
   "passphrase_submit": "فك التشفير",
-
   "decrypted_title": "الرسالة المفكّكة",
   "decrypted_copy": "نسخ",
   "decrypted_copied": "تم النسخ",
   "decrypted_close": "إغلاق",
-
   "error_title": "خطأ",
   "error_fallback": "حدث خطأ غير متوقع.",
   "error_ok": "حسنًا",
-
   "confirm_default_title": "تأكيد",
   "confirm_default_message": "هل أنت متأكد؟",
   "confirm_cancel": "إلغاء",
   "confirm_delete": "حذف",
-
   "qr_title": "تصدير رمز QR",
   "qr_generating": "جارٍ إنشاء رمز QR...",
   "qr_desc": "امسح رمز QR هذا لاستيراد المفتاح العام.",
   "qr_close": "إغلاق",
-
   "discovery_title": "اكتشاف المفاتيح",
   "discovery_placeholder": "عنوان البريد الإلكتروني أو الاسم...",
   "discovery_search": "بحث",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "لاستيراد مفتاح مكتشف، انسخ مفتاحه العام واستخدم وظيفة الاستيراد في عرض المفاتيح.",
   "discovery_import_fail": "تعذّر استرداد بيانات المفتاح للاستيراد.",
   "discovery_close": "إغلاق",
-
   "trust_unknown": "غير معروف",
   "trust_imported": "مُستورد",
   "trust_verified": "تم التحقّق",
-
   "settings_title": "الإعدادات",
   "settings_appearance": "المظهر",
   "settings_theme_system": "النظام",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "داكن",
   "settings_close_to_tray_label": "إغلاق إلى علبة النظام",
   "settings_close_to_tray_desc": "إبقاء التطبيق في علبة النظام عند إغلاق النافذة",
-
   "settings_clipboard": "الحافظة",
   "settings_auto_clear_label": "مسح الحافظة تلقائيًا",
   "settings_auto_clear_desc": "مسح البيانات الحساسة من الحافظة بعد فك التشفير",
   "settings_auto_clear_delay_label": "مهلة المسح التلقائي",
   "settings_auto_clear_delay_desc": "عدد الثواني قبل مسح الحافظة",
-
   "settings_encryption": "التشفير",
   "settings_encrypt_to_self_label": "التشفير لنفسك",
   "settings_encrypt_to_self_desc": "تضمين مفتاحك دائمًا كمستلم",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "تم اختيار {count} مفاتيح.",
   "settings_include_armor_label": "تضمين ترويسات الدرع",
   "settings_include_armor_desc": "إضافة بيانات الإصدار والتعليق الوصفية إلى مخرجات PGP",
-
   "settings_security": "الأمان",
   "settings_passphrase_cache_label": "مدة تخزين عبارة المرور مؤقتًا",
   "settings_passphrase_cache_desc": "مدة تذكّر عبارات المرور بالثواني (0 = معطّل)",
   "settings_clear_cache": "مسح عبارات المرور المخزّنة مؤقتًا",
   "settings_cache_cleared": "تم مسح ذاكرة عبارات المرور المؤقتة.",
   "settings_cache_clear_failed": "فشل مسح الذاكرة المؤقتة: {error}",
-
   "settings_key_discovery": "اكتشاف المفاتيح",
   "settings_keyserver_label": "عنوان خادم المفاتيح",
   "settings_keyserver_desc": "يُستخدم للبحث عن المفاتيح ورفعها",
-
   "settings_language": "اللغة",
   "settings_language_label": "لغة العرض",
   "settings_language_desc": "اختر لغة الواجهة",
-
   "settings_sync": "مزامنة المفاتيح",
   "settings_sync_desc": "انقل مفاتيحك بين الأجهزة بأمان.",
   "settings_sync_export": "تصدير المفاتيح",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "أدخل عبارة مرور المزامنة الظاهرة على جهاز التصدير.",
   "done": "تم",
   "cancel": "إلغاء",
-
   "settings_opsec": "وضع OPSEC",
   "settings_opsec_desc": "وضع مُحصَّن للبيئات عالية الخطورة. تُخزَّن المفاتيح في الذاكرة العشوائية فقط وتُمسح عند الخروج.",
   "settings_opsec_enable": "تفعيل وضع OPSEC",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "نجح الاتصال!",
   "settings_proxy_failed": "فشل الاتصال: {error}",
   "settings_proxy_custom": "مخصص",
-
-  "settings_about": "KeychainPGP {version} — تشفير PGP عبر الحافظة لسطح المكتب.",
   "settings_about_title": "حول",
+  "settings_about": "KeychainPGP {version} — تشفير PGP عبر الحافظة لسطح المكتب.",
   "settings_portable_badge": "الوضع المحمول",
   "donate_button": "ادعم هذا المشروع",
   "donate_title": "ادعم KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "شكرًا لدعمك!",
-
   "unnamed": "(بدون اسم)",
   "none_value": "(لا شيء)",
   "date_na": "غير متاح",
   "fingerprint_copy": "نسخ البصمة",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

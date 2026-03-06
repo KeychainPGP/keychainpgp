@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Завантаження...",
   "ready": "Готово",
-
   "nav_home": "Шифрування / Розшифрування",
   "nav_keys": "Ключі",
   "nav_settings": "Налаштування",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Скопіюйте текст, потім оберіть дію нижче.",
   "home_tagline_compose": "Введіть повідомлення, потім оберіть дію нижче.",
   "mode_clipboard": "Буфер обміну",
   "mode_compose": "Редактор",
-
   "action_encrypt": "ЗАШИФРУВАТИ",
   "action_decrypt": "РОЗШИФРУВАТИ",
   "action_sign": "ПІДПИСАТИ",
   "action_verify": "ПЕРЕВІРИТИ",
-
   "clipboard_label": "Буфер обміну",
   "clipboard_empty": "Буфер обміну порожній. Скопіюйте текст, щоб почати.",
   "clipboard_pgp_message": "Повідомлення PGP",
   "clipboard_signed_message": "Підписане повідомлення",
   "clipboard_refresh": "Оновити буфер обміну",
-
   "compose_label": "Редактор",
   "compose_placeholder": "Введіть або вставте повідомлення...",
   "compose_clear": "Очистити",
-
   "encrypt_empty_clipboard": "Буфер обміну порожній. Спершу скопіюйте текст.",
   "encrypt_empty_compose": "Поле введення порожнє. Спершу введіть повідомлення.",
   "encrypt_no_keys": "Немає доступних ключів. Спершу створіть або імпортуйте ключ.",
-
   "decrypt_empty_clipboard": "Буфер обміну порожній. Спершу скопіюйте зашифроване повідомлення.",
   "decrypt_empty_compose": "Поле введення порожнє.",
   "decrypt_no_pgp": "Повідомлення PGP не виявлено.",
   "decrypt_in_progress": "Розшифрування...",
   "decrypt_success": "Успішно розшифровано.",
   "decrypt_wrong_key_hint": "Переконайтеся, що у вас імпортовано правильний закритий ключ.",
-
   "sign_empty_clipboard": "Буфер обміну порожній. Спершу скопіюйте текст.",
   "sign_empty_compose": "Поле введення порожнє.",
   "sign_no_key": "Немає закритого ключа. Спершу створіть або імпортуйте його.",
   "sign_in_progress": "Підписання...",
   "sign_success_compose": "Повідомлення підписано.",
-
   "verify_empty_clipboard": "Буфер обміну порожній. Спершу скопіюйте підписане повідомлення.",
   "verify_empty_compose": "Поле введення порожнє.",
   "verify_in_progress": "Перевірка...",
   "verify_success": "Підпис підтверджено.",
   "verify_failed": "Перевірку не пройдено.",
-
   "verify_modal_title": "Перевірка підпису",
   "verify_valid_verified": "Дійсний підпис — перевірений ключ",
   "verify_valid_verified_desc": "Це повідомлення підписано перевіреним ключем.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Підписант",
   "verify_email_label": "Ел. пошта",
   "verify_fingerprint_label": "Відбиток",
-
   "keys_title": "Керування ключами",
   "keys_generate": "Створити",
   "keys_import_btn": "Імпорт",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Контакти",
   "keys_export_success": "Відкритий ключ скопійовано до буфера обміну.",
   "keys_deleted": "Ключ видалено.",
-
   "key_details_title": "Відомості про ключ",
   "key_details_btn": "Детальніше",
   "key_export_btn": "Експортувати відкритий ключ",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR-код",
   "key_details_not_found": "Ключ не знайдено.",
   "key_trust_update_failed": "Не вдалося оновити довіру: {error}",
-
   "keygen_title": "Створення нової пари ключів",
   "keygen_name_placeholder": "Ім'я",
   "keygen_email_placeholder": "Ел. пошта",
@@ -112,7 +98,6 @@
   "keygen_submit": "Створити",
   "keygen_loading": "Створення...",
   "keygen_success": "Пару ключів успішно створено!",
-
   "onboarding_title": "Ласкаво просимо до KeychainPGP",
   "onboarding_subtitle": "Створіть свою першу пару ключів, щоб почати шифрування через буфер обміну.",
   "onboarding_name_placeholder": "Ваше ім'я",
@@ -123,7 +108,6 @@
   "onboarding_import": "Імпортувати наявний ключ",
   "onboarding_scan_qr": "Сканувати QR-код",
   "onboarding_sync": "Синхронізація з іншого пристрою",
-
   "recipient_title": "Вибір отримувачів",
   "recipient_search_placeholder": "Пошук ключів...",
   "recipient_no_keys": "Немає доступних ключів.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Зашифрувати для {count} отримувачів",
   "recipient_encrypting": "Шифрування...",
   "recipient_encrypt_success": "Повідомлення зашифровано та скопійовано до буфера обміну.",
-
   "import_title": "Імпорт ключа",
   "import_textarea_placeholder": "Вставте PGP-ключ у форматі ASCII-armored або файл резервної копії...",
   "import_or": "або",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "Імпортовано 1 ключ",
   "import_backup_success_other": "Імпортовано ключів: {count}",
   "import_backup_skipped": ", {count} вже у зв'язці ключів",
-
   "passphrase_title": "Введіть парольну фразу",
   "passphrase_desc": "Цей ключ захищено парольною фразою. Введіть її для розшифрування.",
   "passphrase_placeholder": "Парольна фраза",
   "passphrase_cancel": "Скасувати",
   "passphrase_submit": "Розшифрувати",
-
   "decrypted_title": "Розшифроване повідомлення",
   "decrypted_copy": "Копіювати",
   "decrypted_copied": "Скопійовано",
   "decrypted_close": "Закрити",
-
   "error_title": "Помилка",
   "error_fallback": "Сталася непередбачена помилка.",
   "error_ok": "ОК",
-
   "confirm_default_title": "Підтвердження",
   "confirm_default_message": "Ви впевнені?",
   "confirm_cancel": "Скасувати",
   "confirm_delete": "Видалити",
-
   "qr_title": "Експорт QR-коду",
   "qr_generating": "Створення QR-коду...",
   "qr_desc": "Відскануйте цей QR-код, щоб імпортувати відкритий ключ.",
   "qr_close": "Закрити",
-
   "discovery_title": "Пошук ключів",
   "discovery_placeholder": "Адреса електронної пошти або ім'я...",
   "discovery_search": "Знайти",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Щоб імпортувати знайдений ключ, скопіюйте його відкритий ключ і скористайтеся функцією імпорту на вкладці «Ключі».",
   "discovery_import_fail": "Не вдалося отримати дані ключа для імпорту.",
   "discovery_close": "Закрити",
-
   "trust_unknown": "Невідомо",
   "trust_imported": "Імпортовано",
   "trust_verified": "Перевірено",
-
   "settings_title": "Налаштування",
   "settings_appearance": "Оформлення",
   "settings_theme_system": "Системна",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Темна",
   "settings_close_to_tray_label": "Згортати в трей",
   "settings_close_to_tray_desc": "Залишати додаток в області сповіщень при закритті вікна",
-
   "settings_clipboard": "Буфер обміну",
   "settings_auto_clear_label": "Автоочищення буфера обміну",
   "settings_auto_clear_desc": "Очищати конфіденційні дані з буфера обміну після розшифрування",
   "settings_auto_clear_delay_label": "Затримка автоочищення",
   "settings_auto_clear_delay_desc": "Секунди до очищення буфера обміну",
-
   "settings_encryption": "Шифрування",
   "settings_encrypt_to_self_label": "Шифрувати для себе",
   "settings_encrypt_to_self_desc": "Завжди включати ваш ключ до списку отримувачів",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "Обрано ключів: {count}.",
   "settings_include_armor_label": "Включати заголовки ASCII-armored",
   "settings_include_armor_desc": "Додавати метадані Version та Comment до виводу PGP",
-
   "settings_security": "Безпека",
   "settings_passphrase_cache_label": "Час кешування парольної фрази",
   "settings_passphrase_cache_desc": "Секунди зберігання парольних фраз (0 = вимкнено)",
   "settings_clear_cache": "Очистити кеш парольних фраз",
   "settings_cache_cleared": "Кеш парольних фраз очищено.",
   "settings_cache_clear_failed": "Не вдалося очистити кеш: {error}",
-
   "settings_key_discovery": "Пошук ключів",
   "settings_keyserver_label": "URL сервера ключів",
   "settings_keyserver_desc": "Використовується для пошуку та завантаження ключів",
-
   "settings_language": "Мова",
   "settings_language_label": "Мова інтерфейсу",
   "settings_language_desc": "Оберіть мову інтерфейсу",
-
   "settings_sync": "Синхронізація ключів",
   "settings_sync_desc": "Безпечна передача ключів між пристроями.",
   "settings_sync_export": "Експортувати ключі",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Введіть парольну фразу синхронізації, показану на експортуючому пристрої.",
   "done": "Готово",
   "cancel": "Скасувати",
-
   "settings_opsec": "Режим OPSEC",
   "settings_opsec_desc": "Посилений режим для середовищ з високим ризиком. Ключі зберігаються лише в оперативній пам'яті та знищуються при виході.",
   "settings_opsec_enable": "Увімкнути режим OPSEC",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "З'єднання успішне!",
   "settings_proxy_failed": "Помилка з'єднання: {error}",
   "settings_proxy_custom": "Інший",
-
-  "settings_about": "KeychainPGP {version} — PGP-шифрування через буфер обміну для настільних систем.",
   "settings_about_title": "Про програму",
+  "settings_about": "KeychainPGP {version} — PGP-шифрування через буфер обміну для настільних систем.",
   "settings_portable_badge": "Портативний режим",
   "donate_button": "Підтримати цей проєкт",
   "donate_title": "Підтримати KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Дякуємо за вашу підтримку!",
-
   "unnamed": "(без імені)",
   "none_value": "(немає)",
   "date_na": "Н/Д",
   "fingerprint_copy": "Копіювати відбиток",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

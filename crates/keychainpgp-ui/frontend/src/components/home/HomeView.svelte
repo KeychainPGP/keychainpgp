@@ -1,12 +1,5 @@
 <script lang="ts">
-  import {
-    Lock,
-    Unlock,
-    PenLine,
-    ShieldCheck,
-    Clipboard,
-    MessageSquare,
-  } from "lucide-svelte";
+  import { Lock, Unlock, PenLine, ShieldCheck, Clipboard, MessageSquare } from "lucide-svelte";
   import ClipboardPreview from "./ClipboardPreview.svelte";
   import ComposeInput from "./ComposeInput.svelte";
   import Kbd from "../shared/Kbd.svelte";
@@ -17,13 +10,8 @@
   import { isPgpMessage } from "$lib/utils";
   import { isDesktop } from "$lib/platform";
   import {
-    decryptClipboard,
-    signClipboard,
-    verifyClipboard,
-    decryptText,
-    signText,
-    verifyText,
-    writeClipboard,
+    decryptClipboard, signClipboard, verifyClipboard,
+    decryptText, signText, verifyText, writeClipboard,
   } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
@@ -44,27 +32,17 @@
     if (!action) return;
     appStore.clearAction();
     switch (action) {
-      case "encrypt":
-        handleEncrypt();
-        break;
-      case "decrypt":
-        handleDecrypt();
-        break;
-      case "sign":
-        handleSign();
-        break;
-      case "verify":
-        handleVerify();
-        break;
+      case "encrypt": handleEncrypt(); break;
+      case "decrypt": handleDecrypt(); break;
+      case "sign": handleSign(); break;
+      case "verify": handleVerify(); break;
     }
   });
 
   function handleEncrypt() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(
-        isCompose ? m.encrypt_empty_compose() : m.encrypt_empty_clipboard(),
-      );
+      appStore.setStatus(isCompose ? m.encrypt_empty_compose() : m.encrypt_empty_clipboard());
       return;
     }
     if (keyStore.keys.length === 0) {
@@ -81,9 +59,7 @@
   async function handleDecrypt() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(
-        isCompose ? m.decrypt_empty_compose() : m.decrypt_empty_clipboard(),
-      );
+      appStore.setStatus(isCompose ? m.decrypt_empty_compose() : m.decrypt_empty_clipboard());
       return;
     }
     if (!isPgpMessage(content)) {
@@ -92,9 +68,7 @@
     }
     appStore.setStatus(m.decrypt_in_progress(), 0);
     try {
-      const result = isCompose
-        ? await decryptText(content)
-        : await decryptClipboard();
+      const result = isCompose ? await decryptText(content) : await decryptClipboard();
       if (result.success) {
         appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
         appStore.setStatus(m.decrypt_success());
@@ -108,13 +82,9 @@
         appStore.openModal("passphrase", {
           onSubmit: async (passphrase: string) => {
             try {
-              const result = isCompose
-                ? await decryptText(content, passphrase)
-                : await decryptClipboard(passphrase);
+              const result = isCompose ? await decryptText(content, passphrase) : await decryptClipboard(passphrase);
               if (result.success) {
-                appStore.openModal("decrypted-viewer", {
-                  plaintext: result.plaintext,
-                });
+                appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
                 appStore.setStatus(m.decrypt_success());
                 clipboardStore.scheduleAutoClear();
               } else {
@@ -126,10 +96,7 @@
           },
         });
       } else {
-        appStore.openModal("error", {
-          error: msg,
-          suggestion: m.decrypt_wrong_key_hint(),
-        });
+        appStore.openModal("error", { error: msg, suggestion: m.decrypt_wrong_key_hint() });
       }
     }
   }
@@ -137,9 +104,7 @@
   async function handleSign() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(
-        isCompose ? m.sign_empty_compose() : m.sign_empty_clipboard(),
-      );
+      appStore.setStatus(isCompose ? m.sign_empty_compose() : m.sign_empty_clipboard());
       return;
     }
     if (!keyStore.hasOwnKey) {
@@ -193,16 +158,12 @@
   async function handleVerify() {
     const content = getContent();
     if (!content) {
-      appStore.setStatus(
-        isCompose ? m.verify_empty_compose() : m.verify_empty_clipboard(),
-      );
+      appStore.setStatus(isCompose ? m.verify_empty_compose() : m.verify_empty_clipboard());
       return;
     }
     appStore.setStatus(m.verify_in_progress(), 0);
     try {
-      const result = isCompose
-        ? await verifyText(content)
-        : await verifyClipboard();
+      const result = isCompose ? await verifyText(content) : await verifyClipboard();
       appStore.openModal("verify-result", { verifyResult: result });
       appStore.setStatus(result.valid ? m.verify_success() : m.verify_failed());
     } catch (e) {
@@ -211,12 +172,7 @@
   }
 </script>
 
-<div
-  class="max-w-2xl mx-auto space-y-6"
-  class:flex={!desktop}
-  class:flex-col={!desktop}
-  class:h-full={!desktop}
->
+<div class="max-w-2xl mx-auto space-y-6" class:flex={!desktop} class:flex-col={!desktop} class:h-full={!desktop}>
   {#if desktop}
     <div class="text-center space-y-2">
       <h1 class="text-2xl font-bold">{m.home_title()}</h1>
@@ -236,17 +192,14 @@
     </div>
   {/if}
 
-  <!-- Input mode toggle (desktop only — mobile always uses compose) -->
   {#if desktop && settingsStore.settings.clipboard_monitoring}
     <div class="flex justify-center">
-      <div
-        class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5"
-      >
+      <div class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5">
         <button
           class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
           class:bg-[var(--color-primary)]={!isCompose}
           class:text-white={!isCompose}
-          onclick={() => (appStore.inputMode = "clipboard")}
+          onclick={() => appStore.inputMode = "clipboard"}
         >
           <Clipboard size={14} />
           {m.mode_clipboard()}
@@ -255,7 +208,7 @@
           class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
           class:bg-[var(--color-primary)]={isCompose}
           class:text-white={isCompose}
-          onclick={() => (appStore.inputMode = "compose")}
+          onclick={() => appStore.inputMode = "compose"}
         >
           <MessageSquare size={14} />
           {m.mode_compose()}
@@ -272,81 +225,55 @@
     <ClipboardPreview />
   {/if}
 
-  <div
-    class="grid grid-cols-2 max-w-md mx-auto w-full"
-    class:mt-auto={!desktop}
-    class:gap-2={!desktop}
-    class:gap-3={desktop}
-  >
+  <div class="grid grid-cols-2 max-w-md mx-auto w-full" class:mt-auto={!desktop}
+    class:gap-2={!desktop} class:gap-3={desktop}>
     <button
       class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
              hover:bg-[var(--color-primary-hover)] transition-colors
              flex flex-col items-center"
-      class:py-4={desktop}
-      class:py-2.5={!desktop}
-      class:gap-1={desktop}
-      class:gap-0.5={!desktop}
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleEncrypt}
     >
       <Lock size={desktop ? 20 : 18} />
       {m.action_encrypt()}
-      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd
-          keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]}
-          variant="light"
-        />{/if}
+      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />{/if}
     </button>
     <button
       class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
              hover:bg-[var(--color-primary-hover)] transition-colors
              flex flex-col items-center"
-      class:py-4={desktop}
-      class:py-2.5={!desktop}
-      class:gap-1={desktop}
-      class:gap-0.5={!desktop}
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleDecrypt}
     >
       <Unlock size={desktop ? 20 : 18} />
       {m.action_decrypt()}
-      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd
-          keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]}
-          variant="light"
-        />{/if}
+      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />{/if}
     </button>
     <button
       class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
              hover:bg-[var(--color-primary)] hover:text-white transition-colors
              flex flex-col items-center"
-      class:py-4={desktop}
-      class:py-2.5={!desktop}
-      class:gap-1={desktop}
-      class:gap-0.5={!desktop}
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleSign}
     >
       <PenLine size={desktop ? 20 : 18} />
       {m.action_sign()}
-      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd
-          keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]}
-        />{/if}
+      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />{/if}
     </button>
     <button
       class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
              hover:bg-[var(--color-primary)] hover:text-white transition-colors
              flex flex-col items-center"
-      class:py-4={desktop}
-      class:py-2.5={!desktop}
-      class:gap-1={desktop}
-      class:gap-0.5={!desktop}
+      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleVerify}
     >
       <ShieldCheck size={desktop ? 20 : 18} />
       {m.action_verify()}
-      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd
-          keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]}
-        />{/if}
+      {#if desktop && settingsStore.settings.clipboard_monitoring}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "V"]} />{/if}
     </button>
   </div>
 </div>

@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Caricamento...",
   "ready": "Pronto",
-
   "nav_home": "Cifra / Decifra",
   "nav_keys": "Chiavi",
   "nav_settings": "Impostazioni",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Copia del testo, poi scegli un'azione qui sotto.",
   "home_tagline_compose": "Scrivi il tuo messaggio, poi scegli un'azione qui sotto.",
   "mode_clipboard": "Appunti",
   "mode_compose": "Composizione",
-
   "action_encrypt": "CIFRA",
   "action_decrypt": "DECIFRA",
   "action_sign": "FIRMA",
   "action_verify": "VERIFICA",
-
   "clipboard_label": "Appunti",
   "clipboard_empty": "Gli appunti sono vuoti. Copia del testo per iniziare.",
   "clipboard_pgp_message": "Messaggio PGP",
   "clipboard_signed_message": "Messaggio firmato",
   "clipboard_refresh": "Aggiorna appunti",
-
   "compose_label": "Composizione",
   "compose_placeholder": "Scrivi o incolla il tuo messaggio qui...",
   "compose_clear": "Cancella",
-
   "encrypt_empty_clipboard": "Gli appunti sono vuoti. Copia prima del testo.",
   "encrypt_empty_compose": "Il campo di composizione è vuoto. Scrivi prima un messaggio.",
   "encrypt_no_keys": "Nessuna chiave disponibile. Genera o importa prima una chiave.",
-
   "decrypt_empty_clipboard": "Gli appunti sono vuoti. Copia prima un messaggio cifrato.",
   "decrypt_empty_compose": "Il campo di composizione è vuoto.",
   "decrypt_no_pgp": "Nessun messaggio PGP rilevato.",
   "decrypt_in_progress": "Decifrazione in corso...",
   "decrypt_success": "Decifrato con successo.",
   "decrypt_wrong_key_hint": "Assicurati di aver importato la chiave privata corretta.",
-
   "sign_empty_clipboard": "Gli appunti sono vuoti. Copia prima del testo.",
   "sign_empty_compose": "Il campo di composizione è vuoto.",
   "sign_no_key": "Nessuna chiave privata disponibile. Genera o importane prima una.",
   "sign_in_progress": "Firma in corso...",
   "sign_success_compose": "Messaggio firmato.",
-
   "verify_empty_clipboard": "Gli appunti sono vuoti. Copia prima un messaggio firmato.",
   "verify_empty_compose": "Il campo di composizione è vuoto.",
   "verify_in_progress": "Verifica in corso...",
   "verify_success": "Firma verificata.",
   "verify_failed": "Verifica fallita.",
-
   "verify_modal_title": "Verifica della firma",
   "verify_valid_verified": "Firma valida — Verificata",
   "verify_valid_verified_desc": "Questo messaggio è stato firmato da una chiave verificata.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Firmatario",
   "verify_email_label": "E-mail",
   "verify_fingerprint_label": "Impronta digitale",
-
   "keys_title": "Gestione chiavi",
   "keys_generate": "Genera",
   "keys_import_btn": "Importa",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Contatti",
   "keys_export_success": "Chiave pubblica copiata negli appunti.",
   "keys_deleted": "Chiave eliminata.",
-
   "key_details_title": "Dettagli chiave",
   "key_details_btn": "Dettagli",
   "key_export_btn": "Esporta chiave pubblica",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "Codice QR",
   "key_details_not_found": "Chiave non trovata.",
   "key_trust_update_failed": "Impossibile aggiornare la fiducia: {error}",
-
   "keygen_title": "Genera nuova coppia di chiavi",
   "keygen_name_placeholder": "Nome",
   "keygen_email_placeholder": "E-mail",
@@ -112,7 +98,6 @@
   "keygen_submit": "Genera",
   "keygen_loading": "Generazione in corso...",
   "keygen_success": "Coppia di chiavi generata con successo!",
-
   "onboarding_title": "Benvenuto in KeychainPGP",
   "onboarding_subtitle": "Genera la tua prima coppia di chiavi per iniziare a cifrare dagli appunti.",
   "onboarding_name_placeholder": "Il tuo nome",
@@ -123,7 +108,6 @@
   "onboarding_import": "Importa chiave esistente",
   "onboarding_scan_qr": "Scansiona codice QR",
   "onboarding_sync": "Sincronizza da un altro dispositivo",
-
   "recipient_title": "Seleziona destinatari",
   "recipient_search_placeholder": "Cerca chiavi...",
   "recipient_no_keys": "Nessuna chiave disponibile.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Cifra per {count} destinatari",
   "recipient_encrypting": "Cifratura in corso...",
   "recipient_encrypt_success": "Messaggio cifrato e copiato negli appunti.",
-
   "import_title": "Importa chiave",
   "import_textarea_placeholder": "Incolla una chiave PGP in formato ASCII-armored o un file di backup...",
   "import_or": "oppure",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "1 chiave importata",
   "import_backup_success_other": "{count} chiavi importate",
   "import_backup_skipped": ", {count} già nel portachiavi",
-
   "passphrase_title": "Inserisci passphrase",
   "passphrase_desc": "Questa chiave è protetta da una passphrase. Inseriscila per decifrare.",
   "passphrase_placeholder": "Passphrase",
   "passphrase_cancel": "Annulla",
   "passphrase_submit": "Decifra",
-
   "decrypted_title": "Messaggio decifrato",
   "decrypted_copy": "Copia",
   "decrypted_copied": "Copiato",
   "decrypted_close": "Chiudi",
-
   "error_title": "Errore",
   "error_fallback": "Si è verificato un errore imprevisto.",
   "error_ok": "OK",
-
   "confirm_default_title": "Conferma",
   "confirm_default_message": "Sei sicuro?",
   "confirm_cancel": "Annulla",
   "confirm_delete": "Elimina",
-
   "qr_title": "Esportazione codice QR",
   "qr_generating": "Generazione del codice QR...",
   "qr_desc": "Scansiona questo codice QR per importare la chiave pubblica.",
   "qr_close": "Chiudi",
-
   "discovery_title": "Cerca chiavi",
   "discovery_placeholder": "Indirizzo e-mail o nome...",
   "discovery_search": "Cerca",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Per importare una chiave trovata, copia la sua chiave pubblica e usa la funzione Importa nella vista Chiavi.",
   "discovery_import_fail": "Impossibile recuperare i dati della chiave per l'importazione.",
   "discovery_close": "Chiudi",
-
   "trust_unknown": "Sconosciuta",
   "trust_imported": "Importata",
   "trust_verified": "Verificata",
-
   "settings_title": "Impostazioni",
   "settings_appearance": "Aspetto",
   "settings_theme_system": "Sistema",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Scuro",
   "settings_close_to_tray_label": "Chiudi nell'area di notifica",
   "settings_close_to_tray_desc": "Mantieni l'app nell'area di notifica quando chiudi la finestra",
-
   "settings_clipboard": "Appunti",
   "settings_auto_clear_label": "Svuota appunti automaticamente",
   "settings_auto_clear_desc": "Rimuovi i dati sensibili dagli appunti dopo la decifrazione",
   "settings_auto_clear_delay_label": "Ritardo svuotamento automatico",
   "settings_auto_clear_delay_desc": "Secondi prima che gli appunti vengano svuotati",
-
   "settings_encryption": "Cifratura",
   "settings_encrypt_to_self_label": "Cifra anche per se stessi",
   "settings_encrypt_to_self_desc": "Includi sempre la propria chiave come destinatario",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "{count} chiavi selezionate.",
   "settings_include_armor_label": "Includi intestazioni armor",
   "settings_include_armor_desc": "Aggiungi metadati di versione e commento all'output PGP",
-
   "settings_security": "Sicurezza",
   "settings_passphrase_cache_label": "Durata della cache delle passphrase",
   "settings_passphrase_cache_desc": "Secondi di memorizzazione delle passphrase (0 = disattivato)",
   "settings_clear_cache": "Cancella passphrase memorizzate",
   "settings_cache_cleared": "Cache delle passphrase cancellata.",
   "settings_cache_clear_failed": "Impossibile cancellare la cache: {error}",
-
   "settings_key_discovery": "Ricerca chiavi",
   "settings_keyserver_label": "URL del server di chiavi",
   "settings_keyserver_desc": "Utilizzato per la ricerca e il caricamento delle chiavi",
-
   "settings_language": "Lingua",
   "settings_language_label": "Lingua dell'interfaccia",
   "settings_language_desc": "Scegli la lingua dell'interfaccia",
-
   "settings_sync": "Sincronizzazione chiavi",
   "settings_sync_desc": "Trasferisci le tue chiavi tra dispositivi in modo sicuro.",
   "settings_sync_export": "Esporta chiavi",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Inserisci la passphrase di sincronizzazione mostrata sul dispositivo di esportazione.",
   "done": "Fatto",
   "cancel": "Annulla",
-
   "settings_opsec": "Modalità OPSEC",
   "settings_opsec_desc": "Modalità rafforzata per ambienti ad alto rischio. Le chiavi sono conservate solo in RAM e cancellate all'uscita.",
   "settings_opsec_enable": "Attiva modalità OPSEC",
@@ -280,7 +248,6 @@
   "settings_proxy_success": "Connessione riuscita!",
   "settings_proxy_failed": "Connessione fallita: {error}",
   "settings_proxy_custom": "Personalizzato",
-
   "settings_about_title": "Informazioni",
   "settings_about": "KeychainPGP {version} — Cifratura PGP dagli appunti per desktop.",
   "settings_portable_badge": "Modalità portatile",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Grazie per il tuo sostegno!",
-
   "unnamed": "(senza nome)",
   "none_value": "(nessuno)",
   "date_na": "N/D",
   "fingerprint_copy": "Copia impronta digitale",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Maiusc"
 }
