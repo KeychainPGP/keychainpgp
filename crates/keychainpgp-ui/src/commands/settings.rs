@@ -60,6 +60,9 @@ pub struct Settings {
     /// OPSEC: view timeout in seconds for decrypted text (0 = no timeout).
     #[serde(default = "default_opsec_view_timeout")]
     pub opsec_view_timeout_secs: u64,
+    /// Automatically upload newly generated public keys to keyservers.
+    #[serde(default)]
+    pub upload_to_keyservers: bool,
 }
 
 fn default_true() -> bool {
@@ -102,6 +105,7 @@ impl Default for Settings {
             opsec_mode: false,
             opsec_window_title: "Notes".into(),
             opsec_view_timeout_secs: 30,
+            upload_to_keyservers: false,
         }
     }
 }

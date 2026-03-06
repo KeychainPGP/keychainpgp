@@ -60,7 +60,7 @@ pub async fn wkd_lookup(email: &str, proxy_url: Option<&str>) -> Result<Vec<u8>,
 
     if let Some(proxy) = proxy_url {
         let proxy = reqwest::Proxy::all(proxy).map_err(|e| format!("Invalid proxy URL: {e}"))?;
-        builder = builder.proxy(proxy);
+        builder = builder.proxy(proxy).no_proxy();
     }
 
     let client = builder

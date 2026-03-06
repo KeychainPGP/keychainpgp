@@ -8,6 +8,7 @@ export type ModalType =
   | "key-import"
   | "key-details"
   | "confirm"
+  | "notice"
   | "error"
   | "verify-result"
   | "qr-export"
@@ -24,6 +25,8 @@ export interface ModalProps {
   /** For confirm dialog */
   title?: string;
   message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm?: () => void;
   /** For error dialog */
   error?: string;

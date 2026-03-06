@@ -32,19 +32,18 @@
   import KeySyncExportModal from "./components/modals/KeySyncExportModal.svelte";
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
   import DonateModal from "./components/modals/DonateModal.svelte";
+  import NoticeDialog from "./components/modals/NoticeDialog.svelte";
 
   let initialized = $state(false);
   let mobile = $state(false);
   let unlistenTray: UnlistenFn | null = null;
+  let unlistenUpload: UnlistenFn | null = null;
 
   onMount(async () => {
     await initPlatform();
     mobile = isMobile();
 
-    await Promise.all([
-      keyStore.refresh(),
-      settingsStore.load(),
-    ]);
+    await Promise.all([keyStore.refresh(), settingsStore.load()]);
     initLocale(settingsStore.settings.locale);
 
     if (isDesktop()) {
@@ -68,6 +67,11 @@
         const action = event.payload as AppAction;
         if (action) appStore.dispatchAction(action);
       });
+
+      // Listen for background auto-upload results
+      unlistenUpload = await listen<string>("auto-upload-result", (event) => {
+        appStore.setStatus(event.payload);
+      });
     } else {
       // On mobile, default to compose mode (no system clipboard monitoring)
       appStore.inputMode = "compose";
@@ -80,6 +84,7 @@
     if (isDesktop()) {
       unregisterHotkeys();
       unlistenTray?.();
+      unlistenUpload?.();
     }
   });
 
@@ -128,6 +133,8 @@
     <ErrorDialog />
   {:else if appStore.activeModal === "confirm"}
     <ConfirmDialog />
+  {:else if appStore.activeModal === "notice"}
+    <NoticeDialog />
   {:else if appStore.activeModal === "verify-result"}
     <VerifyResultModal />
   {:else if appStore.activeModal === "qr-export"}

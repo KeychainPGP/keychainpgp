@@ -18,7 +18,7 @@ fn build_client(timeout_secs: u64, proxy_url: Option<&str>) -> Result<reqwest::C
 
     if let Some(proxy) = proxy_url {
         let proxy = reqwest::Proxy::all(proxy).map_err(|e| format!("Invalid proxy URL: {e}"))?;
-        builder = builder.proxy(proxy);
+        builder = builder.proxy(proxy).no_proxy();
     }
 
     builder

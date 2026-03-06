@@ -10,7 +10,7 @@ const defaults: Settings = {
   encrypt_to_self_keys: [],
   theme: "system",
   passphrase_cache_secs: 600,
-  keyserver_url: "https://keys.openpgp.org",
+  keyserver_url: "https://keys.openpgp.org,https://keyserver.ubuntu.com",
   include_armor_headers: true,
   locale: "auto",
   proxy_url: "socks5://127.0.0.1:9050",
@@ -20,6 +20,7 @@ const defaults: Settings = {
   opsec_mode: false,
   opsec_window_title: "Notes",
   opsec_view_timeout_secs: 30,
+  upload_to_keyservers: false,
 };
 
 let settings: Settings = $state({ ...defaults });
