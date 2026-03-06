@@ -596,6 +596,7 @@ pub async fn fetch_and_import_key(
         validate_keyserver_url(url)?;
         match keyserver_fetch(&fingerprint, url, proxy.as_deref()).await {
             Ok(key_data) => {
+                verify_fetched_key(&state, &key_data, &fingerprint)?;
                 let key_text = String::from_utf8_lossy(&key_data).into_owned();
                 return import_key(state, key_text);
             }
@@ -767,4 +768,68 @@ pub fn import_backup(
         keys: imported_keys,
         skipped_count: skipped,
     })
+}
+
+/// Internal helper to verify a fetched key's fingerprint.
+fn verify_fetched_key(
+    state: &AppState,
+    key_data: &[u8],
+    expected_fingerprint: &str,
+) -> Result<(), String> {
+    let cert_info = state
+        .engine
+        .inspect_key(key_data)
+        .map_err(|e| e.to_string())?;
+    if cert_info.fingerprint.0.to_uppercase() != expected_fingerprint.to_uppercase() {
+        return Err("Fetched key fingerprint does not match requested fingerprint".into());
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use keychainpgp_core::types::{KeyGenOptions, UserId};
+
+    fn setup() -> (AppState, tempfile::TempDir) {
+        let tmp = tempfile::tempdir().unwrap();
+        let state = AppState::initialize_with_dir(tmp.path()).unwrap();
+        (state, tmp)
+    }
+
+    #[test]
+    fn test_verify_fetched_key_success() {
+        let (state, _tmp) = setup();
+
+        // Generate a real key to get valid PGP data and fingerprint
+        let user_id = UserId::new("Test", "test@example.com");
+        let options = KeyGenOptions::new(user_id);
+        let key_pair = state.engine.generate_key_pair(options).unwrap();
+        let fingerprint = key_pair.fingerprint.0.clone();
+
+        // Verification should succeed when fingerprints match
+        let result = verify_fetched_key(&state, &key_pair.public_key, &fingerprint);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_verify_fetched_key_mismatch_fails() {
+        let (state, _tmp) = setup();
+
+        // Generate a real key
+        let user_id = UserId::new("Test", "test@example.com");
+        let options = KeyGenOptions::new(user_id);
+        let key_pair = state.engine.generate_key_pair(options).unwrap();
+
+        // A different fingerprint
+        let fake_fingerprint = "0123456789ABCDEF0123456789ABCDEF01234567";
+
+        // Verification should fail when fingerprints mismatch
+        let result = verify_fetched_key(&state, &key_pair.public_key, fake_fingerprint);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Fetched key fingerprint does not match requested fingerprint"
+        );
+    }
 }
