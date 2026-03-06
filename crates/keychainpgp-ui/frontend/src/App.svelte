@@ -39,6 +39,7 @@
   let mobile = $state(false);
   let unlistenTray: UnlistenFn | null = null;
   let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  let unlistenUpload: UnlistenFn | null = null;
 
   onMount(async () => {
     await initPlatform();
@@ -87,6 +88,11 @@
         const action = event.payload as AppAction;
         if (action) appStore.dispatchAction(action);
       });
+
+      // Listen for background auto-upload results
+      unlistenUpload = await listen<string>("auto-upload-result", (event) => {
+        appStore.setStatus(event.payload);
+      });
     } else {
       // On mobile, default to compose mode (no system clipboard monitoring)
       appStore.inputMode = "compose";
@@ -100,6 +106,7 @@
       unregisterPanicHotkey();
       unlistenTray?.();
       if (keydownHandler) window.removeEventListener("keydown", keydownHandler);
+      unlistenUpload?.();
     }
   });
 

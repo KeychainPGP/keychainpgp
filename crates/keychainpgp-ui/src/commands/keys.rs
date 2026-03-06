@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 
 use serde::Serialize;
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_store::StoreExt;
 
 use keychainpgp_core::CryptoEngine;
@@ -178,8 +178,18 @@ pub async fn generate_key_pair(
                     )
                     .await;
                     match result {
-                        Ok(_) => tracing::info!("automatic upload to {} successful", url),
-                        Err(e) => tracing::warn!("automatic upload to {} failed: {}", url, e),
+                        Ok(_) => {
+                            tracing::info!("automatic upload to {} successful", url);
+                            let _ = app_handle.emit(
+                                "auto-upload-result",
+                                format!("Key uploaded successfully to {url}"),
+                            );
+                        }
+                        Err(e) => {
+                            tracing::warn!("automatic upload to {} failed: {}", url, e);
+                            let _ = app_handle
+                                .emit("auto-upload-result", format!("Upload failed to {url}: {e}"));
+                        }
                     }
                 }
             });
@@ -735,6 +745,7 @@ pub async fn test_proxy_connection(proxy_url: String) -> Result<String, String> 
     let proxy = reqwest::Proxy::all(&proxy_url).map_err(|e| format!("Invalid proxy URL: {e}"))?;
     let client = reqwest::Client::builder()
         .proxy(proxy)
+        .no_proxy()
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .map_err(|e| format!("Failed to create client: {e}"))?;
