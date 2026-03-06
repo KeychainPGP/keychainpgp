@@ -16,8 +16,12 @@
   let showContacts = $state(localStorage.getItem("recipient-show-contacts") !== "false");
 
   // Persist collapse state
-  $effect(() => { localStorage.setItem("recipient-show-my-keys", String(showMyKeys)); });
-  $effect(() => { localStorage.setItem("recipient-show-contacts", String(showContacts)); });
+  $effect(() => {
+    localStorage.setItem("recipient-show-my-keys", String(showMyKeys));
+  });
+  $effect(() => {
+    localStorage.setItem("recipient-show-contacts", String(showContacts));
+  });
 
   // If text is provided via modal props, encrypt that instead of clipboard
   let textToEncrypt = appStore.modalProps.text ?? null;
@@ -41,9 +45,11 @@
   function matchesSearch(k: KeyInfo): boolean {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return (k.name?.toLowerCase().includes(q) ?? false)
-      || (k.email?.toLowerCase().includes(q) ?? false)
-      || k.fingerprint.toLowerCase().includes(q);
+    return (
+      (k.name?.toLowerCase().includes(q) ?? false) ||
+      (k.email?.toLowerCase().includes(q) ?? false) ||
+      k.fingerprint.toLowerCase().includes(q)
+    );
   }
 
   let filteredOwnKeys = $derived(keyStore.ownKeys.filter(matchesSearch));
@@ -59,7 +65,7 @@
   }
 
   function selectedInGroup(keys: KeyInfo[]): number {
-    return keys.filter(k => selected.has(k.fingerprint)).length;
+    return keys.filter((k) => selected.has(k.fingerprint)).length;
   }
 
   function encryptButtonLabel(count: number): string {
@@ -77,7 +83,10 @@
           await writeClipboard(result.message);
           appStore.setStatus(m.recipient_encrypt_success());
           appStore.closeModal();
-          if (settingsStore.settings.auto_clear_after_encrypt || settingsStore.settings.opsec_mode) {
+          if (
+            settingsStore.settings.auto_clear_after_encrypt ||
+            settingsStore.settings.opsec_mode
+          ) {
             clipboardStore.scheduleAutoClear();
           }
         } else {
@@ -89,7 +98,10 @@
           appStore.setStatus(result.message);
           appStore.closeModal();
           clipboardStore.refresh();
-          if (settingsStore.settings.auto_clear_after_encrypt || settingsStore.settings.opsec_mode) {
+          if (
+            settingsStore.settings.auto_clear_after_encrypt ||
+            settingsStore.settings.opsec_mode
+          ) {
             clipboardStore.scheduleAutoClear();
           }
         } else {
@@ -108,29 +120,32 @@
   <div class="space-y-3">
     <!-- Search bar -->
     <div class="relative">
-      <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+      <Search
+        size={14}
+        class="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--color-text-secondary)]"
+      />
       <input
         type="text"
         placeholder={m.recipient_search_placeholder()}
         bind:value={searchQuery}
-        class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
-               bg-[var(--color-bg)] text-[var(--color-text)]
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pr-3 pl-9
+               text-sm text-[var(--color-text)]
                placeholder-[var(--color-text-secondary)]
-               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+               focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       />
     </div>
 
     {#if keyStore.keys.length === 0}
       <p class="text-sm text-[var(--color-text-secondary)]">{m.recipient_no_keys()}</p>
     {:else}
-      <div class="max-h-72 overflow-auto space-y-2">
+      <div class="max-h-72 space-y-2 overflow-auto">
         <!-- My Keys -->
         {#if keyStore.ownKeys.length > 0}
           <div>
             <button
-              class="flex items-center gap-1.5 w-full py-1 text-xs font-semibold
-                     text-[var(--color-text-secondary)] uppercase tracking-wide hover:text-[var(--color-text)]"
-              onclick={() => showMyKeys = !showMyKeys}
+              class="flex w-full items-center gap-1.5 py-1 text-xs font-semibold
+                     tracking-wide text-[var(--color-text-secondary)] uppercase hover:text-[var(--color-text)]"
+              onclick={() => (showMyKeys = !showMyKeys)}
             >
               {#if showMyKeys}
                 <ChevronDown size={14} />
@@ -139,22 +154,23 @@
               {/if}
               {m.recipient_my_keys()}
               {#if selectedInGroup(keyStore.ownKeys) > 0}
-                <span class="text-[var(--color-primary)] normal-case tracking-normal">
+                <span class="tracking-normal text-[var(--color-primary)] normal-case">
                   ({selectedInGroup(keyStore.ownKeys)})
                 </span>
               {/if}
             </button>
             {#if showMyKeys}
-              <div class="space-y-1 mt-1">
+              <div class="mt-1 space-y-1">
                 {#each filteredOwnKeys as k (k.fingerprint)}
                   <button
-                    class="w-full flex items-center gap-3 p-2.5 rounded-lg border transition-colors text-left"
+                    class="flex w-full items-center gap-3 rounded-lg border p-2.5 text-left transition-colors"
                     class:border-[var(--color-primary)]={selected.has(k.fingerprint)}
                     class:bg-[var(--color-bg-secondary)]={selected.has(k.fingerprint)}
                     class:border-[var(--color-border)]={!selected.has(k.fingerprint)}
                     onclick={() => toggleKey(k.fingerprint)}
                   >
-                    <div class="w-5 h-5 rounded border flex items-center justify-center shrink-0"
+                    <div
+                      class="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
                       class:bg-[var(--color-primary)]={selected.has(k.fingerprint)}
                       class:border-[var(--color-primary)]={selected.has(k.fingerprint)}
                       class:border-[var(--color-border)]={!selected.has(k.fingerprint)}
@@ -164,15 +180,17 @@
                       {/if}
                     </div>
                     <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium truncate">{k.name ?? m.unnamed()}</p>
-                      <p class="text-xs text-[var(--color-text-secondary)] truncate">
+                      <p class="truncate text-sm font-medium">{k.name ?? m.unnamed()}</p>
+                      <p class="truncate text-xs text-[var(--color-text-secondary)]">
                         {k.email ?? shortFingerprint(k.fingerprint)}
                       </p>
                     </div>
                   </button>
                 {/each}
                 {#if filteredOwnKeys.length === 0 && searchQuery}
-                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">{m.recipient_no_match()}</p>
+                  <p class="px-2 py-1 text-xs text-[var(--color-text-secondary)] italic">
+                    {m.recipient_no_match()}
+                  </p>
                 {/if}
               </div>
             {/if}
@@ -183,9 +201,9 @@
         {#if keyStore.contactKeys.length > 0}
           <div>
             <button
-              class="flex items-center gap-1.5 w-full py-1 text-xs font-semibold
-                     text-[var(--color-text-secondary)] uppercase tracking-wide hover:text-[var(--color-text)]"
-              onclick={() => showContacts = !showContacts}
+              class="flex w-full items-center gap-1.5 py-1 text-xs font-semibold
+                     tracking-wide text-[var(--color-text-secondary)] uppercase hover:text-[var(--color-text)]"
+              onclick={() => (showContacts = !showContacts)}
             >
               {#if showContacts}
                 <ChevronDown size={14} />
@@ -194,22 +212,23 @@
               {/if}
               {m.recipient_contacts()}
               {#if selectedInGroup(keyStore.contactKeys) > 0}
-                <span class="text-[var(--color-primary)] normal-case tracking-normal">
+                <span class="tracking-normal text-[var(--color-primary)] normal-case">
                   ({selectedInGroup(keyStore.contactKeys)})
                 </span>
               {/if}
             </button>
             {#if showContacts}
-              <div class="space-y-1 mt-1">
+              <div class="mt-1 space-y-1">
                 {#each filteredContactKeys as k (k.fingerprint)}
                   <button
-                    class="w-full flex items-center gap-3 p-2.5 rounded-lg border transition-colors text-left"
+                    class="flex w-full items-center gap-3 rounded-lg border p-2.5 text-left transition-colors"
                     class:border-[var(--color-primary)]={selected.has(k.fingerprint)}
                     class:bg-[var(--color-bg-secondary)]={selected.has(k.fingerprint)}
                     class:border-[var(--color-border)]={!selected.has(k.fingerprint)}
                     onclick={() => toggleKey(k.fingerprint)}
                   >
-                    <div class="w-5 h-5 rounded border flex items-center justify-center shrink-0"
+                    <div
+                      class="flex h-5 w-5 shrink-0 items-center justify-center rounded border"
                       class:bg-[var(--color-primary)]={selected.has(k.fingerprint)}
                       class:border-[var(--color-primary)]={selected.has(k.fingerprint)}
                       class:border-[var(--color-border)]={!selected.has(k.fingerprint)}
@@ -219,15 +238,17 @@
                       {/if}
                     </div>
                     <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium truncate">{k.name ?? m.unnamed()}</p>
-                      <p class="text-xs text-[var(--color-text-secondary)] truncate">
+                      <p class="truncate text-sm font-medium">{k.name ?? m.unnamed()}</p>
+                      <p class="truncate text-xs text-[var(--color-text-secondary)]">
                         {k.email ?? shortFingerprint(k.fingerprint)}
                       </p>
                     </div>
                   </button>
                 {/each}
                 {#if filteredContactKeys.length === 0 && searchQuery}
-                  <p class="text-xs text-[var(--color-text-secondary)] px-2 py-1 italic">{m.recipient_no_match()}</p>
+                  <p class="px-2 py-1 text-xs text-[var(--color-text-secondary)] italic">
+                    {m.recipient_no_match()}
+                  </p>
                 {/if}
               </div>
             {/if}
@@ -235,22 +256,24 @@
         {/if}
 
         {#if filteredOwnKeys.length === 0 && filteredContactKeys.length === 0 && searchQuery}
-          <p class="text-sm text-[var(--color-text-secondary)] text-center py-2">{m.recipient_no_match_global({ query: searchQuery })}</p>
+          <p class="py-2 text-center text-sm text-[var(--color-text-secondary)]">
+            {m.recipient_no_match_global({ query: searchQuery })}
+          </p>
         {/if}
       </div>
     {/if}
 
-    <div class="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
+    <div class="flex justify-end gap-2 border-t border-[var(--color-border)] pt-2">
       <button
-        class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)]
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.closeModal()}
       >
         {m.recipient_cancel()}
       </button>
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         onclick={handleEncrypt}
         disabled={selected.size === 0 || encrypting}
       >

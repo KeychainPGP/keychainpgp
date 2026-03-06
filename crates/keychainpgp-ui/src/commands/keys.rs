@@ -1,5 +1,6 @@
 //! Tauri commands for key management.
 
+use std::sync::Arc;
 use std::sync::atomic::Ordering;
 
 use serde::Serialize;
@@ -8,19 +9,14 @@ use tauri_plugin_store::StoreExt;
 
 use keychainpgp_core::CryptoEngine;
 use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
+use keychainpgp_keys::network::keyserver::{
+    keyserver_fetch, keyserver_search as ks_search, validate_keyserver_url,
+};
 use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
+use tokio::sync::Semaphore;
 
 use crate::state::AppState;
-
-/// Validate that a keyserver URL uses an allowed protocol.
-fn validate_keyserver_url(url: &str) -> Result<(), String> {
-    if url.starts_with("https://") || url.starts_with("http://") {
-        Ok(())
-    } else {
-        Err("Keyserver URL must use https:// or http:// protocol".into())
-    }
-}
 
 /// Validate that a proxy URL uses an allowed SOCKS5 protocol.
 fn validate_proxy_url(url: &str) -> Result<(), String> {
@@ -201,6 +197,18 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
 
+    // Check if key already exists to avoid UNIQUE constraint error
+    if keyring
+        .get_key(&record.fingerprint)
+        .map_err(|e| e.to_string())?
+        .is_some()
+    {
+        return Err(format!(
+            "Key already exists in keyring: {}",
+            record.fingerprint
+        ));
+    }
+
     if cert_info.has_secret_key && state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
         keyring
@@ -333,7 +341,6 @@ pub struct KeyDetailedInfo {
     pub expires_at: Option<String>,
     pub trust_level: i32,
     pub is_own_key: bool,
-    pub is_revoked: bool,
     pub user_ids: Vec<UserIdDto>,
     pub subkeys: Vec<SubkeyInfoDto>,
 }
@@ -389,7 +396,6 @@ pub fn inspect_key_detailed(
         expires_at: record.expires_at,
         trust_level: record.trust_level,
         is_own_key: record.is_own_key,
-        is_revoked: record.is_revoked,
         user_ids,
         subkeys,
     })
@@ -466,50 +472,160 @@ pub async fn wkd_lookup(
     }))
 }
 
-/// Search for keys on a keyserver.
+/// Search for keys on one or more keyservers.
+///
+/// If `keyserver_url` contains commas, it is treated as a list of servers to query in parallel.
 #[tauri::command]
 pub async fn keyserver_search(
     app: AppHandle,
-    state: State<'_, AppState>,
+    _state: State<'_, AppState>,
     query: String,
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
-    let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
-    validate_keyserver_url(&url)?;
-    let proxy = get_proxy_url(&app);
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
+        settings
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    };
 
-    let results =
-        keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
-            .await
-            .map_err(|e| e.to_string())?;
-
-    let mut keys = Vec::new();
-    for result in results {
-        match state.engine.inspect_key(&result.key_data) {
-            Ok(cert_info) => {
-                let name = cert_info.name().map(String::from);
-                let email_val = cert_info.email().map(String::from).or(result.email);
-                let fp = cert_info.fingerprint.0.clone();
-                keys.push(KeyInfo {
-                    fingerprint: fp,
-                    name,
-                    email: email_val,
-                    algorithm: cert_info.algorithm.to_string(),
-                    created_at: cert_info.created_at,
-                    expires_at: cert_info.expires_at,
-                    trust_level: 0,
-                    is_own_key: false,
-                    is_revoked: cert_info.is_revoked,
-                });
+    let url_string = keyserver_url.unwrap_or(settings_url);
+    let urls: Vec<String> = url_string
+        .split(',')
+        .map(|s| {
+            let mut s = s.trim().to_string();
+            if !s.is_empty() && !s.contains("://") {
+                s = format!("https://{s}");
             }
-            Err(_) => continue,
+            s
+        })
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if urls.is_empty() {
+        return Err("No keyservers configured".into());
+    }
+
+    for url in &urls {
+        validate_keyserver_url(url)?;
+    }
+
+    let proxy = get_proxy_url(&app);
+    let query_clone = query.clone();
+
+    // Limit concurrency to avoid spawning an unbounded number of network requests.
+    // 10 is a reasonable default for standard use cases.
+    let semaphore = Arc::new(Semaphore::new(10));
+
+    let mut futures = Vec::new();
+    for url in urls {
+        let u = url.to_string();
+        let q = query_clone.clone();
+        let p = proxy.clone();
+        let sem = semaphore.clone();
+        futures.push(tokio::spawn(async move {
+            let _permit = sem.acquire().await.map_err(|e| e.to_string())?;
+            ks_search(&q, &u, p.as_deref()).await
+        }));
+    }
+
+    let mut all_matches = Vec::new();
+
+    for handle in futures {
+        if let Ok(Ok(ks_matches)) = handle.await {
+            for m in ks_matches {
+                all_matches.push(m);
+            }
         }
     }
 
-    Ok(keys)
+    // Deduplicate by fingerprint (or KeyID if fingerprint is missing)
+    let mut unique_keys = std::collections::HashMap::new();
+    for m in all_matches {
+        let id = if m.fingerprint.is_empty() {
+            &m.key_id
+        } else {
+            &m.fingerprint
+        };
+        unique_keys.entry(id.clone()).or_insert(m);
+    }
+
+    let infos = unique_keys
+        .into_values()
+        .map(|m| {
+            // Parse "Name <email>" if possible
+            let (name, email) = if let Some(uid) = m.user_ids.first() {
+                if let Some(pos) = uid.find('<') {
+                    let name = uid[..pos].trim().to_string();
+                    let email = uid[pos + 1..].trim_matches('>').to_string();
+                    (Some(name), Some(email))
+                } else {
+                    (Some(uid.clone()), None)
+                }
+            } else {
+                (None, None)
+            };
+
+            KeyInfo {
+                fingerprint: m.fingerprint,
+                name,
+                email,
+                algorithm: String::new(), // Algorithm not always in index
+                created_at: m
+                    .created_at
+                    .as_ref()
+                    .map(|t| t.to_string())
+                    .unwrap_or_default(),
+                expires_at: m.expires_at.as_ref().map(|t| t.to_string()),
+                trust_level: 0,
+                is_own_key: false,
+                is_revoked: false,
+            }
+        })
+        .collect();
+
+    Ok(infos)
 }
 
-/// Upload a public key to all configured keyservers.
+/// Fetch a key from one or more keyservers and import it.
+#[tauri::command]
+pub async fn fetch_and_import_key(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    fingerprint: String,
+    keyserver_url: String,
+) -> Result<KeyInfo, String> {
+    let urls: Vec<&str> = keyserver_url
+        .split(',')
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let proxy = get_proxy_url(&app);
+
+    let mut last_error = String::new();
+    for url in urls {
+        validate_keyserver_url(url)?;
+        match keyserver_fetch(&fingerprint, url, proxy.as_deref()).await {
+            Ok(key_data) => {
+                verify_fetched_key(&state, &key_data, &fingerprint)?;
+                let key_text = String::from_utf8_lossy(&key_data).into_owned();
+                return import_key(state, key_text);
+            }
+            Err(e) => last_error = e,
+        }
+    }
+
+    Err(if last_error.is_empty() {
+        "No keyservers available to fetch from".into()
+    } else {
+        format!("Failed to fetch key from any server. Last error: {last_error}")
+    })
+}
+
+/// Upload a public key to one or more keyservers.
 #[tauri::command]
 pub async fn keyserver_upload(
     app: AppHandle,
@@ -517,23 +633,33 @@ pub async fn keyserver_upload(
     fingerprint: String,
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
-    let urls = if let Some(url) = keyserver_url {
-        vec![url]
-    } else {
-        let settings = super::settings::get_settings(app.clone(), state.clone());
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
         settings
-            .keyserver_url
-            .split(',')
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty())
-            .collect()
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
     };
 
+    let url_string = keyserver_url.unwrap_or(settings_url);
+    let urls: Vec<String> = url_string
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
     if urls.is_empty() {
-        return Err("No keyservers configured.".into());
+        return Err("No keyservers configured".into());
+    }
+
+    for url in &urls {
+        validate_keyserver_url(url)?;
     }
 
     let proxy = get_proxy_url(&app);
+
     let key_data = {
         let keyring = state
             .keyring
@@ -549,39 +675,33 @@ pub async fn keyserver_upload(
     let mut successes = Vec::new();
     let mut failures = Vec::new();
 
-    for url in urls {
-        if let Err(e) = validate_keyserver_url(&url) {
-            failures.push(format!("{url}: {e}"));
-            continue;
-        }
-
+    for url in &urls {
         match keychainpgp_keys::network::keyserver::keyserver_upload(
             &key_data,
-            &url,
+            url,
             proxy.as_deref(),
         )
         .await
         {
-            Ok(_) => successes.push(url),
+            Ok(msg) => successes.push(format!("{url}: {msg}")),
             Err(e) => failures.push(format!("{url}: {e}")),
         }
     }
 
     if successes.is_empty() {
         Err(format!(
-            "Upload failed for all keyservers: {}",
+            "Failed to upload to all keyservers: {}",
             failures.join("; ")
         ))
     } else if failures.is_empty() {
-        Ok(format!(
-            "Key uploaded successfully to: {}",
-            successes.join(", ")
-        ))
+        Ok(successes.join("\n"))
     } else {
         Ok(format!(
-            "Partial success. Uploaded to: {}. Failed for: {}",
-            successes.join(", "),
-            failures.join("; ")
+            "Uploaded to {} server(s):\n{}\nFailed on {} server(s):\n{}",
+            successes.len(),
+            successes.join("\n"),
+            failures.len(),
+            failures.join("\n")
         ))
     }
 }
@@ -718,48 +838,78 @@ pub fn import_backup(
     })
 }
 
-/// Export a private key to a file.
+/// Internal helper to verify a fetched key's fingerprint.
+fn verify_fetched_key(
+    state: &AppState,
+    key_data: &[u8],
+    expected_fingerprint: &str,
+) -> Result<(), String> {
+    let cert_info = state
+        .engine
+        .inspect_key(key_data)
+        .map_err(|e| e.to_string())?;
+    if cert_info.fingerprint.0.to_uppercase() != expected_fingerprint.to_uppercase() {
+        return Err("Fetched key fingerprint does not match requested fingerprint".into());
+    }
+    Ok(())
+}
+
+/// Export a private key to a file path.
 #[tauri::command]
 pub fn export_private_key(
     state: State<'_, AppState>,
     fingerprint: String,
     path: String,
-) -> Result<(), String> {
-    let secret_data = if state.opsec_mode.load(Ordering::SeqCst) {
+) -> Result<String, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
+
+    // Verify the key exists and is an own key
+    let record = keyring
+        .get_key(&fingerprint)
+        .map_err(|e| format!("Failed to look up key: {e}"))?
+        .ok_or_else(|| format!("Key not found: {fingerprint}"))?;
+
+    if !record.is_own_key {
+        return Err("Cannot export private key: this is not your own key".into());
+    }
+
+    // Check OPSEC mode — secret key might be in RAM
+    let secret_key_bytes = if state.opsec_mode.load(Ordering::SeqCst) {
         let opsec_keys = state
             .opsec_secret_keys
             .lock()
             .map_err(|e| format!("Internal error: {e}"))?;
         opsec_keys
             .get(&fingerprint)
-            .ok_or_else(|| "Key not found in OPSEC session".to_string())?
-            .to_vec()
+            .map(|z| (**z).clone())
+            .ok_or_else(|| "Secret key not found in OPSEC session".to_string())?
     } else {
-        let keyring = state
-            .keyring
-            .lock()
-            .map_err(|e| format!("Internal error: {e}"))?;
-        let record = keyring
-            .get_key(&fingerprint)
-            .map_err(|e| format!("Failed to look up key: {e}"))?
-            .ok_or_else(|| format!("Key not found: {fingerprint}"))?;
-
-        if !record.is_own_key {
-            return Err("Cannot export private key for a contact".to_string());
-        }
-
-        let secret_box = keyring
+        let sk = keyring
             .get_secret_key(&fingerprint)
             .map_err(|e| format!("Failed to retrieve secret key: {e}"))?;
-        secret_box.expose_secret().clone()
+        sk.expose_secret().clone()
     };
 
-    std::fs::write(&path, secret_data).map_err(|e| format!("Failed to write file: {e}"))?;
+    // Armor the secret key
+    let armored = state
+        .engine
+        .armor_key(&secret_key_bytes)
+        .map_err(|e| format!("Failed to armor private key: {e}"))?;
 
-    Ok(())
+    std::fs::write(&path, armored.as_bytes()).map_err(|e| format!("Failed to write file: {e}"))?;
+
+    Ok(format!("Private key exported to {path}"))
 }
 
 /// Publish a revocation certificate to all configured keyservers.
+///
+/// This retrieves the stored revocation certificate, which is already a full
+/// revoked certificate (public key merged with revocation signature), and
+/// uploads it to every configured keyserver. The local key is then marked
+/// as revoked in the database and its PGP data is updated.
 #[tauri::command]
 pub async fn publish_revocation_cert(
     app: AppHandle,
@@ -773,119 +923,131 @@ pub async fn publish_revocation_cert(
             .map_err(|e| format!("Internal error: {e}"))?;
         keyring
             .get_revocation_cert(&fingerprint)
-            .map_err(|e| format!("Failed to look up revocation cert: {e}"))?
-            .ok_or_else(|| format!("Revocation certificate not found for: {fingerprint}"))?
+            .map_err(|e| format!("Failed to get revocation certificate: {e}"))?
+            .ok_or_else(|| {
+                "No revocation certificate found for this key. Only keys generated by KeychainPGP have revocation certificates.".to_string()
+            })?
     };
 
-    let settings = super::settings::get_settings(app.clone(), state.clone());
-    let urls: Vec<String> = settings
-        .keyserver_url
+    // Read keyserver URLs from settings
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
+        settings
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    };
+
+    let urls: Vec<String> = settings_url
         .split(',')
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .collect();
 
     if urls.is_empty() {
-        return Err("No keyservers configured in settings.".into());
+        return Err("No keyservers configured".into());
     }
 
     let proxy = get_proxy_url(&app);
+
     let mut successes = Vec::new();
     let mut failures = Vec::new();
 
-    // Prepare the merged "revoked certificate" for upload.
-    let (merged_cert_armored, is_now_revoked) = {
-        let keyring = state
-            .keyring
-            .lock()
-            .map_err(|e| format!("Internal error: {e}"))?;
-
-        if let Ok(Some(record)) = keyring.get_key(&fingerprint) {
-            // Check if rev_cert is already a full revoked cert
-            let rev_info = state.engine.inspect_key(&rev_cert).ok();
-
-            let merged_data = if let Some(info) = rev_info {
-                if info.is_revoked {
-                    // It's already a full revoked cert, use it as is.
-                    rev_cert.clone()
-                } else {
-                    // It's a certificate but not revoked? This shouldn't happen with our generator.
-                    // Fall back to merging packets.
-                    let mut data = record.pgp_data.clone();
-                    data.extend_from_slice(&rev_cert);
-                    data
-                }
-            } else {
-                // Not a full cert, probably a standalone signature packet. Append it.
-                let mut data = record.pgp_data.clone();
-                data.extend_from_slice(&rev_cert);
-                data
-            };
-
-            let info = state
-                .engine
-                .inspect_key(&merged_data)
-                .map_err(|e| format!("Failed to inspect merged key: {e}"))?;
-
-            // Re-armor the merged data to ensure it's a single clean block
-            let armored = state
-                .engine
-                .armor_key(&merged_data)
-                .map_err(|e| format!("Failed to armor merged key: {e}"))?;
-
-            (armored, info.is_revoked)
-        } else {
-            return Err("Key not found in local keyring.".into());
-        }
-    };
-
-    for url in urls {
-        if let Err(e) = validate_keyserver_url(&url) {
+    for url in &urls {
+        if let Err(e) = validate_keyserver_url(url) {
             failures.push(format!("{url}: {e}"));
             continue;
         }
-
         match keychainpgp_keys::network::keyserver::keyserver_upload(
-            merged_cert_armored.as_bytes(),
-            &url,
+            &rev_cert,
+            url,
             proxy.as_deref(),
         )
         .await
         {
-            Ok(_) => successes.push(url),
+            Ok(_) => successes.push(url.clone()),
             Err(e) => failures.push(format!("{url}: {e}")),
         }
     }
 
-    // Apply revocation locally
-    let keyring = state
-        .keyring
-        .lock()
-        .map_err(|e| format!("Internal error: {e}"))?;
-
-    if let Ok(Some(mut record)) = keyring.get_key(&fingerprint) {
-        let mut merged_data = record.pgp_data.clone();
-        merged_data.extend_from_slice(&rev_cert);
-
-        record.pgp_data = merged_data;
-        record.is_revoked = is_now_revoked;
-
-        let _ = keyring.delete_key(&fingerprint);
-        let _ = keyring.import_public_key(record);
+    if successes.is_empty() {
+        return Err(format!(
+            "Failed to publish revocation to any keyserver: {}",
+            failures.join("; ")
+        ));
     }
 
-    if successes.is_empty() {
-        Err(format!(
-            "Revocation failed for all keyservers: {}",
-            failures.join("; ")
+    // Update local database: mark as revoked and update PGP data with revoked cert
+    {
+        let keyring = state
+            .keyring
+            .lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        let _ = keyring.set_revoked(&fingerprint, true);
+        let _ = keyring.update_pgp_data(&fingerprint, &rev_cert);
+    }
+
+    if failures.is_empty() {
+        Ok(format!(
+            "Revocation published to {} keyserver(s)",
+            successes.len()
         ))
-    } else if failures.is_empty() {
-        Ok(format!("Revocation published to: {}", successes.join(", ")))
     } else {
         Ok(format!(
-            "Partial success. Published to: {}. Failed for: {}",
-            successes.join(", "),
+            "Revocation published to {} keyserver(s). Failed on {}: {}",
+            successes.len(),
+            failures.len(),
             failures.join("; ")
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use keychainpgp_core::types::{KeyGenOptions, UserId};
+
+    fn setup() -> (AppState, tempfile::TempDir) {
+        let tmp = tempfile::tempdir().unwrap();
+        let state = AppState::initialize_with_dir(tmp.path()).unwrap();
+        (state, tmp)
+    }
+
+    #[test]
+    fn test_verify_fetched_key_success() {
+        let (state, _tmp) = setup();
+
+        // Generate a real key to get valid PGP data and fingerprint
+        let user_id = UserId::new("Test", "test@example.com");
+        let options = KeyGenOptions::new(user_id);
+        let key_pair = state.engine.generate_key_pair(options).unwrap();
+        let fingerprint = key_pair.fingerprint.0.clone();
+
+        // Verification should succeed when fingerprints match
+        let result = verify_fetched_key(&state, &key_pair.public_key, &fingerprint);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_verify_fetched_key_mismatch_fails() {
+        let (state, _tmp) = setup();
+
+        // Generate a real key
+        let user_id = UserId::new("Test", "test@example.com");
+        let options = KeyGenOptions::new(user_id);
+        let key_pair = state.engine.generate_key_pair(options).unwrap();
+
+        // A different fingerprint
+        let fake_fingerprint = "0123456789ABCDEF0123456789ABCDEF01234567";
+
+        // Verification should fail when fingerprints mismatch
+        let result = verify_fetched_key(&state, &key_pair.public_key, fake_fingerprint);
+        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err(),
+            "Fetched key fingerprint does not match requested fingerprint"
+        );
     }
 }

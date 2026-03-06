@@ -14,7 +14,7 @@
   <div class="space-y-4">
     <div class="flex items-center gap-3">
       {#if valid && trustLevel >= 2}
-        <div class="p-2 rounded-full bg-green-100">
+        <div class="rounded-full bg-green-100 p-2">
           <ShieldCheck size={28} class="text-green-600" />
         </div>
         <div>
@@ -24,7 +24,7 @@
           </p>
         </div>
       {:else if valid}
-        <div class="p-2 rounded-full bg-yellow-100">
+        <div class="rounded-full bg-yellow-100 p-2">
           <ShieldAlert size={28} class="text-yellow-600" />
         </div>
         <div>
@@ -34,7 +34,7 @@
           </p>
         </div>
       {:else}
-        <div class="p-2 rounded-full bg-red-100">
+        <div class="rounded-full bg-red-100 p-2">
           <ShieldX size={28} class="text-red-600" />
         </div>
         <div>
@@ -47,7 +47,9 @@
     </div>
 
     {#if valid && result}
-      <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-2">
+      <div
+        class="space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
+      >
         {#if result.signer_name}
           <div class="flex justify-between text-sm">
             <span class="text-[var(--color-text-secondary)]">{m.verify_signer_label()}</span>
@@ -61,7 +63,7 @@
           </div>
         {/if}
         {#if result.signer_fingerprint}
-          <div class="flex justify-between items-center text-sm">
+          <div class="flex items-center justify-between text-sm">
             <span class="text-[var(--color-text-secondary)]">{m.verify_fingerprint_label()}</span>
             <FingerprintDisplay fingerprint={result.signer_fingerprint} short />
           </div>
@@ -71,8 +73,8 @@
 
     <div class="flex justify-end">
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
         onclick={() => appStore.closeModal()}
       >
         {m.qr_close()}

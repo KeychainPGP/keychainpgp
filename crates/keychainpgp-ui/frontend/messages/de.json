@@ -173,7 +173,7 @@
   "discovery_searching": "Suche läuft...",
   "discovery_not_found": "Keine Schlüssel gefunden.",
   "discovery_found": "Gefunden",
-  "discovery_import_hint": "Um einen gefundenen Schlüssel zu importieren, kopieren Sie seinen öffentlichen Schlüssel und verwenden Sie die Importfunktion in der Schlüsselansicht.",
+  "discovery_import_hint": "Klicken Sie auf Importieren, um einen Schlüssel zu Ihrem Schlüsselbund hinzuzufügen. Überprüfen Sie den Fingerabdruck immer mit dem Schlüsselbesitzer.",
   "discovery_import_fail": "Schlüsseldaten konnten nicht zum Import abgerufen werden.",
   "discovery_close": "Schließen",
   "trust_unknown": "Unbekannt",
@@ -275,5 +275,14 @@
   "date_na": "k. A.",
   "fingerprint_copy": "Fingerabdruck kopieren",
   "kbd_ctrl": "Strg",
-  "kbd_shift": "Umschalt"
+  "kbd_shift": "Umschalt",
+  "settings_locale_auto": "Automatisch",
+  "settings_opsec_title_placeholder": "Notizen",
+  "sync_copy_btn": "Kopieren",
+  "sync_pause": "Pause",
+  "sync_play": "Abspielen",
+  "qr_code_alt": "QR-Code",
+  "error_sync_qr_wrong_context": "Dies ist ein Sync-QR-Code. Verwende Einstellungen → Schlüssel-Synchronisation → Schlüssel importieren.",
+  "error_sync_qr_use_sync": "Dies ist ein Sync-QR-Code. Verwende stattdessen die Sync-Funktion.",
+  "error_not_sync_qr": "Kein Sync-QR-Code. Verwende die Schlüssel-Import-Funktion für einzelne Schlüssel."
 }

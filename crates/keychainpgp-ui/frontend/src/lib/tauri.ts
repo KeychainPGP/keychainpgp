@@ -93,9 +93,7 @@ export interface Settings {
 
 // --- Crypto ---
 
-export async function encryptClipboard(
-  recipientFingerprints: string[]
-): Promise<EncryptResult> {
+export async function encryptClipboard(recipientFingerprints: string[]): Promise<EncryptResult> {
   return invoke("encrypt_clipboard", {
     recipientFingerprints: recipientFingerprints,
   });
@@ -103,34 +101,24 @@ export async function encryptClipboard(
 
 export async function encryptText(
   text: string,
-  recipientFingerprints: string[]
+  recipientFingerprints: string[],
 ): Promise<EncryptResult> {
   return invoke("encrypt_text", { text, recipientFingerprints });
 }
 
-export async function decryptClipboard(
-  passphrase?: string
-): Promise<DecryptResult> {
+export async function decryptClipboard(passphrase?: string): Promise<DecryptResult> {
   return invoke("decrypt_clipboard", { passphrase: passphrase ?? null });
 }
 
-export async function decryptText(
-  text: string,
-  passphrase?: string
-): Promise<DecryptResult> {
+export async function decryptText(text: string, passphrase?: string): Promise<DecryptResult> {
   return invoke("decrypt_text", { text, passphrase: passphrase ?? null });
 }
 
-export async function signClipboard(
-  passphrase?: string
-): Promise<SignResult> {
+export async function signClipboard(passphrase?: string): Promise<SignResult> {
   return invoke("sign_clipboard", { passphrase: passphrase ?? null });
 }
 
-export async function signText(
-  text: string,
-  passphrase?: string
-): Promise<SignResult> {
+export async function signText(text: string, passphrase?: string): Promise<SignResult> {
   return invoke("sign_text", { text, passphrase: passphrase ?? null });
 }
 
@@ -147,7 +135,7 @@ export async function verifyText(text: string): Promise<VerifyResultInfo> {
 export async function generateKeyPair(
   name: string,
   email: string,
-  passphrase?: string
+  passphrase?: string,
 ): Promise<KeyInfo> {
   return invoke("generate_key_pair", {
     name,
@@ -171,7 +159,6 @@ export async function exportKey(fingerprint: string): Promise<string> {
 export async function exportPrivateKey(fingerprint: string, path: string): Promise<void> {
   return invoke("export_private_key", { fingerprint, path });
 }
-
 
 export async function publishRevocationCert(fingerprint: string): Promise<string> {
   return invoke("publish_revocation_cert", { fingerprint });
@@ -217,6 +204,13 @@ export async function keyserverUpload(fingerprint: string, keyserverUrl?: string
   return invoke("keyserver_upload", { fingerprint, keyserverUrl: keyserverUrl ?? null });
 }
 
+export async function fetchAndImportKey(
+  fingerprint: string,
+  keyserverUrl: string,
+): Promise<KeyInfo> {
+  return invoke("fetch_and_import_key", { fingerprint, keyserverUrl });
+}
+
 export interface BackupImportResult {
   imported_count: number;
   keys: KeyInfo[];
@@ -225,7 +219,7 @@ export interface BackupImportResult {
 
 export async function importBackup(
   backupData: string,
-  transferCode: string
+  transferCode: string,
 ): Promise<BackupImportResult> {
   return invoke("import_backup", { backupData, transferCode });
 }
@@ -256,10 +250,7 @@ export async function exportKeyBundle(): Promise<SyncBundle> {
   return invoke("export_key_bundle");
 }
 
-export async function importKeyBundle(
-  encryptedData: string,
-  passphrase: string
-): Promise<number> {
+export async function importKeyBundle(encryptedData: string, passphrase: string): Promise<number> {
   return invoke("import_key_bundle", { encryptedData, passphrase });
 }
 

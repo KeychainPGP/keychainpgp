@@ -173,7 +173,7 @@
   "discovery_searching": "正在搜尋...",
   "discovery_not_found": "未找到金鑰。",
   "discovery_found": "已找到",
-  "discovery_import_hint": "若要匯入探索到的金鑰，請複製其公鑰，然後在金鑰檢視中使用匯入功能。",
+  "discovery_import_hint": "點擊匯入將金鑰新增至您的金鑰環。請務必與金鑰擁有者確認指紋。",
   "discovery_import_fail": "無法取得金鑰資料以進行匯入。",
   "discovery_close": "關閉",
   "trust_unknown": "未知",
@@ -275,5 +275,14 @@
   "date_na": "不適用",
   "fingerprint_copy": "複製指紋",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "自動",
+  "settings_opsec_title_placeholder": "備忘錄",
+  "sync_copy_btn": "複製",
+  "sync_pause": "暫停",
+  "sync_play": "播放",
+  "qr_code_alt": "QR碼",
+  "error_sync_qr_wrong_context": "這是同步QR碼，請使用設定 → 金鑰同步 → 匯入金鑰。",
+  "error_sync_qr_use_sync": "這是同步QR碼，請改用同步功能。",
+  "error_not_sync_qr": "這不是同步QR碼，請使用匯入金鑰功能匯入個別金鑰。"
 }

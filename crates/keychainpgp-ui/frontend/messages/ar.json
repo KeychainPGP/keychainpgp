@@ -173,7 +173,7 @@
   "discovery_searching": "جارٍ البحث...",
   "discovery_not_found": "لم يتم العثور على مفاتيح.",
   "discovery_found": "تم العثور على",
-  "discovery_import_hint": "لاستيراد مفتاح مكتشف، انسخ مفتاحه العام واستخدم وظيفة الاستيراد في عرض المفاتيح.",
+  "discovery_import_hint": "انقر على استيراد لإضافة مفتاح إلى حلقة مفاتيحك. تحقق دائمًا من البصمة مع مالك المفتاح.",
   "discovery_import_fail": "تعذّر استرداد بيانات المفتاح للاستيراد.",
   "discovery_close": "إغلاق",
   "trust_unknown": "غير معروف",
@@ -275,5 +275,14 @@
   "date_na": "غير متاح",
   "fingerprint_copy": "نسخ البصمة",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "تلقائي",
+  "settings_opsec_title_placeholder": "ملاحظات",
+  "sync_copy_btn": "نسخ",
+  "sync_pause": "إيقاف مؤقت",
+  "sync_play": "تشغيل",
+  "qr_code_alt": "رمز QR",
+  "error_sync_qr_wrong_context": "هذا رمز QR للمزامنة. استخدم الإعدادات → مزامنة المفاتيح → استيراد المفاتيح.",
+  "error_sync_qr_use_sync": "هذا رمز QR للمزامنة. استخدم وظيفة المزامنة بدلاً من ذلك.",
+  "error_not_sync_qr": "ليس رمز QR للمزامنة. استخدم وظيفة استيراد المفتاح للمفاتيح الفردية."
 }

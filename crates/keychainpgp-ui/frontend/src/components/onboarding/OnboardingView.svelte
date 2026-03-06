@@ -37,7 +37,7 @@
 
   function handleScanResult(content: string): boolean {
     if (content.startsWith("KCPGP:")) {
-      error = "This is a sync QR code. Use the Sync function instead.";
+      error = m.error_sync_qr_use_sync();
       return true;
     }
     importKey(content)
@@ -67,14 +67,14 @@
   />
 {/if}
 
-<div class="flex flex-col items-center justify-center h-full px-6">
-  <div class="max-w-md w-full space-y-6">
-    <div class="text-center space-y-2">
-      <div class="inline-flex p-3 rounded-full bg-[var(--color-primary)]/10 mb-2">
+<div class="flex h-full flex-col items-center justify-center px-6">
+  <div class="w-full max-w-md space-y-6">
+    <div class="space-y-2 text-center">
+      <div class="mb-2 inline-flex rounded-full bg-[var(--color-primary)]/10 p-3">
         <KeyRound size={32} class="text-[var(--color-primary)]" />
       </div>
       <h1 class="text-2xl font-bold">{m.onboarding_title()}</h1>
-      <p class="text-[var(--color-text-secondary)] text-sm">
+      <p class="text-sm text-[var(--color-text-secondary)]">
         {m.onboarding_subtitle()}
       </p>
     </div>
@@ -84,25 +84,25 @@
         type="text"
         placeholder={m.onboarding_name_placeholder()}
         bind:value={name}
-        class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
-               bg-[var(--color-bg)] text-[var(--color-text)]
-               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5
+               text-sm text-[var(--color-text)]
+               focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       />
       <input
         type="email"
         placeholder={m.onboarding_email_placeholder()}
         bind:value={email}
-        class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
-               bg-[var(--color-bg)] text-[var(--color-text)]
-               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5
+               text-sm text-[var(--color-text)]
+               focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       />
       <input
         type="password"
         placeholder={m.onboarding_passphrase_placeholder()}
         bind:value={passphrase}
-        class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
-               bg-[var(--color-bg)] text-[var(--color-text)]
-               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5
+               text-sm text-[var(--color-text)]
+               focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       />
     </div>
 
@@ -112,18 +112,18 @@
 
     <div class="space-y-2">
       <button
-        class="w-full py-3 rounded-lg bg-[var(--color-primary)] text-white font-semibold
-               hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+        class="w-full rounded-lg bg-[var(--color-primary)] py-3 font-semibold text-white
+               transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         onclick={handleGenerate}
         disabled={generating}
       >
         {generating ? m.onboarding_creating() : m.onboarding_create()}
       </button>
       <button
-        class="w-full py-3 rounded-lg border border-[var(--color-border)]
-               text-[var(--color-text)] font-medium
-               hover:bg-[var(--color-bg-secondary)] transition-colors
-               flex items-center justify-center gap-2"
+        class="flex w-full items-center justify-center gap-2
+               rounded-lg border
+               border-[var(--color-border)] py-3
+               font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.openModal("key-import")}
       >
         <Upload size={16} />
@@ -131,21 +131,24 @@
       </button>
       {#if mobile}
         <button
-          class="w-full py-3 rounded-lg border border-[var(--color-border)]
-                 text-[var(--color-text)] font-medium
-                 hover:bg-[var(--color-bg-secondary)] transition-colors
-                 flex items-center justify-center gap-2"
-          onclick={() => { error = ""; scanning = true; }}
+          class="flex w-full items-center justify-center gap-2
+                 rounded-lg border
+                 border-[var(--color-border)] py-3
+                 font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-secondary)]"
+          onclick={() => {
+            error = "";
+            scanning = true;
+          }}
         >
           <Camera size={16} />
           {m.onboarding_scan_qr()}
         </button>
       {/if}
       <button
-        class="w-full py-3 rounded-lg border border-[var(--color-border)]
-               text-[var(--color-text)] font-medium
-               hover:bg-[var(--color-bg-secondary)] transition-colors
-               flex items-center justify-center gap-2"
+        class="flex w-full items-center justify-center gap-2
+               rounded-lg border
+               border-[var(--color-border)] py-3
+               font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.openModal("key-sync-import")}
       >
         <RefreshCw size={16} />

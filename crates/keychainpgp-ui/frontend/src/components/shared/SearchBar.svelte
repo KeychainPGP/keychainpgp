@@ -12,15 +12,15 @@
 <div class="relative">
   <Search
     size={16}
-    class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+    class="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--color-text-secondary)]"
   />
   <input
     type="text"
     {placeholder}
     {value}
     oninput={(e) => oninput(e.currentTarget.value)}
-    class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
-           bg-[var(--color-bg)] text-[var(--color-text)]
-           focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+    class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pr-3 pl-9
+           text-sm text-[var(--color-text)]
+           focus:border-transparent focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
   />
 </div>

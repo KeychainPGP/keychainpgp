@@ -173,7 +173,7 @@
   "discovery_searching": "מחפש...",
   "discovery_not_found": "לא נמצאו מפתחות.",
   "discovery_found": "נמצא",
-  "discovery_import_hint": "כדי לייבא מפתח שנמצא, העתק את המפתח הציבורי שלו והשתמש בפונקציית הייבוא בתצוגת המפתחות.",
+  "discovery_import_hint": "לחצו על ייבוא כדי להוסיף מפתח לחבילת המפתחות שלכם. תמיד אמתו את טביעת האצבע מול בעל המפתח.",
   "discovery_import_fail": "לא ניתן לאחזר נתוני מפתח לייבוא.",
   "discovery_close": "סגור",
   "trust_unknown": "לא ידוע",
@@ -275,5 +275,14 @@
   "date_na": "לא זמין",
   "fingerprint_copy": "העתק טביעת אצבע",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "אוטומטי",
+  "settings_opsec_title_placeholder": "פתקים",
+  "sync_copy_btn": "העתק",
+  "sync_pause": "השהה",
+  "sync_play": "הפעל",
+  "qr_code_alt": "קוד QR",
+  "error_sync_qr_wrong_context": "זהו קוד QR לסנכרון. השתמש בהגדרות → סנכרון מפתחות → ייבא מפתחות.",
+  "error_sync_qr_use_sync": "זהו קוד QR לסנכרון. השתמש בפונקציית הסנכרון במקום.",
+  "error_not_sync_qr": "זה לא קוד QR לסנכרון. השתמש בפונקציית ייבוא מפתח למפתחות בודדים."
 }

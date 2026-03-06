@@ -173,7 +173,7 @@
   "discovery_searching": "正在搜索...",
   "discovery_not_found": "未找到密钥。",
   "discovery_found": "已找到",
-  "discovery_import_hint": "要导入发现的密钥，请复制其公钥，然后在密钥视图中使用导入功能。",
+  "discovery_import_hint": "点击导入将密钥添加到您的密钥环。请务必与密钥所有者核实指纹。",
   "discovery_import_fail": "无法获取密钥数据以进行导入。",
   "discovery_close": "关闭",
   "trust_unknown": "未知",
@@ -275,5 +275,14 @@
   "date_na": "不适用",
   "fingerprint_copy": "复制指纹",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "自动",
+  "settings_opsec_title_placeholder": "便签",
+  "sync_copy_btn": "复制",
+  "sync_pause": "暂停",
+  "sync_play": "播放",
+  "qr_code_alt": "二维码",
+  "error_sync_qr_wrong_context": "这是同步二维码，请使用设置 → 密钥同步 → 导入密钥。",
+  "error_sync_qr_use_sync": "这是同步二维码，请改用同步功能。",
+  "error_not_sync_qr": "这不是同步二维码，请使用导入密钥功能导入单个密钥。"
 }

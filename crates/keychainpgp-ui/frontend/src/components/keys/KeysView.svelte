@@ -35,12 +35,12 @@
       .finally(() => (searching = false));
   });
 
-  const ownKeys = $derived(filteredKeys.filter(k => k.is_own_key));
-  const contactKeys = $derived(filteredKeys.filter(k => !k.is_own_key));
+  const ownKeys = $derived(filteredKeys.filter((k) => k.is_own_key));
+  const contactKeys = $derived(filteredKeys.filter((k) => !k.is_own_key));
 
   function handleScanResult(content: string): boolean {
     if (content.startsWith("KCPGP:")) {
-      appStore.setStatus("This is a sync QR code. Use Settings → Key Sync → Import Keys.");
+      appStore.setStatus(m.error_sync_qr_wrong_context());
       return true;
     }
     importKey(content)
@@ -71,23 +71,27 @@
   />
 {/if}
 
-<div class="max-w-2xl mx-auto space-y-4">
-  <div class="flex items-center justify-between gap-3" class:flex-col={mobile} class:items-start={mobile}>
+<div class="mx-auto max-w-2xl space-y-4">
+  <div
+    class="flex items-center justify-between gap-3"
+    class:flex-col={mobile}
+    class:items-start={mobile}
+  >
     <h2 class="text-xl font-bold">{m.keys_title()}</h2>
-    <div class="flex items-center gap-2 flex-wrap">
+    <div class="flex flex-wrap items-center gap-2">
       <button
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
-               bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5
+               text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
         onclick={() => (showGenerateForm = !showGenerateForm)}
       >
         <Plus size={16} />
         {m.keys_generate()}
       </button>
       <button
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
-               border border-[var(--color-border)] font-medium
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3
+               py-1.5 text-sm font-medium
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.openModal("key-import")}
       >
         <Upload size={16} />
@@ -95,9 +99,9 @@
       </button>
       {#if mobile}
         <button
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
-                 border border-[var(--color-border)] font-medium
-                 hover:bg-[var(--color-bg-secondary)] transition-colors"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3
+                 py-1.5 text-sm font-medium
+                 transition-colors hover:bg-[var(--color-bg-secondary)]"
           onclick={() => (scanning = true)}
         >
           <Camera size={16} />
@@ -105,9 +109,9 @@
         </button>
       {/if}
       <button
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg
-               border border-[var(--color-border)] font-medium
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3
+               py-1.5 text-sm font-medium
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.openModal("key-discovery")}
       >
         <Search size={16} />
@@ -125,13 +129,15 @@
   {#if keyStore.loading}
     <LoadingSpinner />
   {:else if filteredKeys.length === 0}
-    <p class="text-center text-[var(--color-text-secondary)] py-8">
+    <p class="py-8 text-center text-[var(--color-text-secondary)]">
       {query ? m.keys_empty_search() : m.keys_empty_all()}
     </p>
   {:else}
     {#if ownKeys.length > 0}
       <div>
-        <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+        <h3
+          class="mb-2 text-sm font-semibold tracking-wide text-[var(--color-text-secondary)] uppercase"
+        >
           {m.keys_section_own()}
         </h3>
         <div class="space-y-2">
@@ -144,7 +150,9 @@
 
     {#if contactKeys.length > 0}
       <div>
-        <h3 class="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+        <h3
+          class="mb-2 text-sm font-semibold tracking-wide text-[var(--color-text-secondary)] uppercase"
+        >
           {m.keys_section_contacts()}
         </h3>
         <div class="space-y-2">

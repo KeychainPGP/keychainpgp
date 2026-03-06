@@ -2,7 +2,8 @@
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
-  import { wkdLookup, keyserverSearch, importKey, exportKey, type KeyInfo } from "$lib/tauri";
+  import { settingsStore } from "$lib/stores/settings.svelte";
+  import { wkdLookup, keyserverSearch, fetchAndImportKey, type KeyInfo } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
   let query = $state("");
@@ -17,20 +18,39 @@
     error = null;
     results = [];
 
+    const isEmail = query.includes("@");
+
     try {
-      // If it looks like an email, try WKD first
-      if (query.includes("@")) {
-        const wkdResult = await wkdLookup(query.trim());
-        if (wkdResult) {
-          results = [wkdResult];
-          searching = false;
-          return;
+      // Run WKD and Keyserver search in parallel
+      // Resilience: Wrap each promise in a .catch to prevent one failure from blocking everything
+      const searchPromises: Promise<any>[] = [
+        keyserverSearch(query.trim()).catch((e) => {
+          console.error("Keyserver search failed:", e);
+          return [];
+        }),
+      ];
+
+      if (isEmail) {
+        searchPromises.push(
+          wkdLookup(query.trim()).catch((e) => {
+            console.error("WKD lookup failed:", e);
+            return null;
+          }),
+        );
+      }
+
+      const [ksResults, wkdResult] = await Promise.all(searchPromises);
+
+      let allResults = [...(ksResults || [])];
+      if (wkdResult) {
+        // De-duplicate if WKD finds the same key
+        const exists = allResults.some((r) => r.fingerprint === wkdResult.fingerprint);
+        if (!exists) {
+          allResults.unshift(wkdResult);
         }
       }
 
-      // Fall back to keyserver search
-      const ksResults = await keyserverSearch(query.trim());
-      results = ksResults;
+      results = allResults;
 
       if (results.length === 0) {
         error = m.discovery_not_found();
@@ -44,16 +64,27 @@
 
   async function handleImport(key: KeyInfo) {
     try {
-      const ksResults = await keyserverSearch(
-        key.email ?? key.fingerprint
+      searching = true;
+      appStore.setStatus(m.discovery_searching());
+
+      const importedKey = await fetchAndImportKey(
+        key.fingerprint,
+        settingsStore.settings.keyserver_url,
       );
-      if (ksResults.length === 0) {
-        appStore.setStatus(m.discovery_import_fail());
-        return;
-      }
-      appStore.setStatus(m.discovery_import_hint());
+
+      await keyStore.refresh();
+      importedFps.add(key.fingerprint);
+      appStore.setStatus(
+        m.import_success_key({
+          name: (importedKey.name ?? importedKey.email ?? importedKey.fingerprint) || "",
+        }),
+      );
+      appStore.closeModal();
     } catch (e) {
+      error = String(e);
       appStore.setStatus(`${e}`);
+    } finally {
+      searching = false;
     }
   }
 
@@ -70,12 +101,12 @@
         bind:value={query}
         onkeydown={handleKeydown}
         placeholder={m.discovery_placeholder()}
-        class="flex-1 px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        class="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm
+               focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       />
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         onclick={handleSearch}
         disabled={searching || !query.trim()}
       >
@@ -88,15 +119,30 @@
     {/if}
 
     {#if results.length > 0}
-      <div class="space-y-2 max-h-64 overflow-auto">
+      <div class="max-h-64 space-y-2 overflow-auto">
         {#each results as key}
-          <div class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+          <div
+            class="flex items-center justify-between rounded-lg border border-[var(--color-border)] p-3"
+          >
             <div class="text-sm">
               <p class="font-medium">{key.name ?? m.unnamed()}</p>
               <p class="text-[var(--color-text-secondary)]">{key.email ?? ""}</p>
-              <p class="text-xs font-mono text-[var(--color-text-secondary)]">{key.fingerprint.slice(-16)}</p>
+              <p class="font-mono text-xs text-[var(--color-text-secondary)]">
+                {key.fingerprint.slice(-16)}
+              </p>
             </div>
-            <span class="text-xs text-green-600 font-medium">{m.discovery_found()}</span>
+            {#if importedFps.has(key.fingerprint)}
+              <span class="text-xs font-medium text-green-600">{m.discovery_found()}</span>
+            {:else}
+              <button
+                class="rounded-md bg-[var(--color-primary)] px-3 py-1 text-xs font-medium text-white
+                       transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+                onclick={() => handleImport(key)}
+                disabled={searching}
+              >
+                {searching ? m.discovery_searching() : m.keys_import_btn()}
+              </button>
+            {/if}
           </div>
         {/each}
       </div>
@@ -107,8 +153,8 @@
 
     <div class="flex justify-end">
       <button
-        class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)]
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.closeModal()}
       >
         {m.discovery_close()}

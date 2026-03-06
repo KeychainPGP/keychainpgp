@@ -20,14 +20,37 @@ Thank you for your interest in contributing to KeychainPGP!
 - Rust 1.85+ (via [rustup](https://rustup.rs/))
 - Node.js 20+ and npm
 - Platform-specific Tauri dependencies
+### Git Hooks
+
+Set up the shared pre-commit hook (runs `cargo fmt`, `clippy`, and `prettier` automatically):
+
+```bash
+git config core.hooksPath .githooks
+```
+
+### Frontend Dependencies
+
+```bash
+cd crates/keychainpgp-ui/frontend && npm install
+```
 
 ### Build & Test
 
 ```bash
 cargo build --workspace
 cargo test --workspace
-cargo clippy --workspace -- -D warnings
-cargo fmt --all -- --check
+```
+
+### Formatting
+
+All formatting (Rust via `rustfmt`, frontend via Prettier) is applied **automatically** on every commit by the pre-commit hook. No manual step needed.
+
+To format manually:
+
+```bash
+cargo fmt --all                   # Rust
+cd crates/keychainpgp-ui/frontend
+npm run format                    # Frontend
 ```
 
 ## Pull Request Requirements
@@ -44,6 +67,15 @@ New crate dependencies require justification in the PR description:
 - What alternatives were considered?
 - Is the crate well-maintained and audited?
 - Does its license comply with MIT/Apache-2.0?
+
+## Internationalization (i18n)
+
+The frontend supports 20 locales via [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). When adding new UI strings:
+
+- **Only add your keys to `messages/en.json`** — you don't need to touch the other 19 locale files.
+- A pre-build script (`scripts/sync-translations.js`) automatically copies missing keys from `en.json` into all other locales as fallback.
+- Proper translations are handled separately by maintainers after merge.
+- Use the `m.your_key()` pattern in Svelte components (see existing code for examples).
 
 ## Security
 

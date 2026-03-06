@@ -9,7 +9,7 @@
   import * as m from "$lib/paraglide/messages.js";
 
   const fp = appStore.modalProps.fingerprint ?? "";
-  const keyInfo = $derived(keyStore.keys.find(k => k.fingerprint === fp));
+  const keyInfo = $derived(keyStore.keys.find((k) => k.fingerprint === fp));
 
   let detailed: KeyDetailedInfo | null = $state(null);
   let updating = $state(false);
@@ -18,7 +18,11 @@
   // Load detailed info on mount
   $effect(() => {
     if (fp) {
-      inspectKeyDetailed(fp).then(d => { detailed = d; }).catch(() => {});
+      inspectKeyDetailed(fp)
+        .then((d) => {
+          detailed = d;
+        })
+        .catch(() => {});
     }
   });
 
@@ -57,7 +61,11 @@
         <span>{formatDate(keyInfo.created_at)}</span>
 
         <span class="text-[var(--color-text-secondary)]">{m.key_details_expires()}</span>
-        <span>{keyInfo.expires_at ? formatDate(keyInfo.expires_at) : m.key_details_expires_never()}</span>
+        <span
+          >{keyInfo.expires_at
+            ? formatDate(keyInfo.expires_at)
+            : m.key_details_expires_never()}</span
+        >
 
         <span class="text-[var(--color-text-secondary)]">{m.key_details_trust()}</span>
         <TrustBadge level={keyInfo.trust_level} />
@@ -67,12 +75,16 @@
       </div>
 
       {#if detailed && detailed.user_ids.length > 1}
-        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3">
-          <p class="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide mb-2">
+        <div
+          class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3"
+        >
+          <p
+            class="mb-2 text-xs font-medium tracking-wide text-[var(--color-text-secondary)] uppercase"
+          >
             {m.key_details_user_ids()}
           </p>
           {#each detailed.user_ids as uid}
-            <div class="text-sm py-0.5">
+            <div class="py-0.5 text-sm">
               {uid.name ?? ""}{uid.email ? ` <${uid.email}>` : ""}
             </div>
           {/each}
@@ -80,10 +92,12 @@
       {/if}
 
       {#if detailed && detailed.subkeys.length > 0}
-        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3">
+        <div
+          class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3"
+        >
           <button
-            class="w-full flex items-center justify-between text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide"
-            onclick={() => showSubkeys = !showSubkeys}
+            class="flex w-full items-center justify-between text-xs font-medium tracking-wide text-[var(--color-text-secondary)] uppercase"
+            onclick={() => (showSubkeys = !showSubkeys)}
           >
             <span>{m.key_details_subkeys({ count: detailed.subkeys.length })}</span>
             <span class="text-base">{showSubkeys ? "\u2212" : "+"}</span>
@@ -91,22 +105,27 @@
           {#if showSubkeys}
             <div class="mt-2 space-y-2">
               {#each detailed.subkeys as subkey}
-                <div class="text-sm border-t border-[var(--color-border)] pt-2">
+                <div class="border-t border-[var(--color-border)] pt-2 text-sm">
                   <div class="flex items-center gap-2">
                     <span class="font-mono text-xs text-[var(--color-text-secondary)]">
                       {subkey.fingerprint.slice(-16)}
                     </span>
                     {#if subkey.is_revoked}
-                      <span class="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-600">{m.key_details_revoked()}</span>
+                      <span class="rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-600"
+                        >{m.key_details_revoked()}</span
+                      >
                     {/if}
                   </div>
-                  <div class="flex gap-2 mt-1 flex-wrap">
+                  <div class="mt-1 flex flex-wrap gap-2">
                     {#each subkey.capabilities as cap}
-                      <span class="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">{cap}</span>
+                      <span class="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-700"
+                        >{cap}</span
+                      >
                     {/each}
                   </div>
-                  <div class="text-xs text-[var(--color-text-secondary)] mt-1">
-                    {subkey.algorithm} · {m.key_details_created_prefix()} {formatDate(subkey.created_at)}
+                  <div class="mt-1 text-xs text-[var(--color-text-secondary)]">
+                    {subkey.algorithm} · {m.key_details_created_prefix()}
+                    {formatDate(subkey.created_at)}
                     {#if subkey.expires_at}
                       · {m.key_details_expires_prefix()} {formatDate(subkey.expires_at)}
                     {/if}
@@ -118,14 +137,14 @@
         </div>
       {/if}
 
-      <div class="flex justify-between items-center pt-2">
+      <div class="flex items-center justify-between pt-2">
         <div class="flex gap-2">
           {#if !keyInfo.is_own_key}
             <button
-              class="px-3 py-1.5 text-sm rounded-lg border transition-colors
+              class="rounded-lg border px-3 py-1.5 text-sm transition-colors
                      {keyInfo.trust_level >= 2
-                       ? 'border-red-300 text-red-600 hover:bg-red-50'
-                       : 'border-green-300 text-green-600 hover:bg-green-50'}"
+                ? 'border-red-300 text-red-600 hover:bg-red-50'
+                : 'border-green-300 text-green-600 hover:bg-green-50'}"
               onclick={toggleTrust}
               disabled={updating}
             >
@@ -133,15 +152,15 @@
             </button>
           {/if}
           <button
-            class="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+            class="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm transition-colors hover:bg-[var(--color-bg-secondary)]"
             onclick={() => appStore.openModal("qr-export", { fingerprint: keyInfo.fingerprint })}
           >
             {m.key_details_qr_btn()}
           </button>
         </div>
         <button
-          class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-                 hover:bg-[var(--color-primary-hover)] transition-colors"
+          class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+                 transition-colors hover:bg-[var(--color-primary-hover)]"
           onclick={() => appStore.closeModal()}
         >
           {m.qr_close()}

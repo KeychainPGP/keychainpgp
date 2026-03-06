@@ -207,6 +207,24 @@ impl KeyStorage {
         Ok(rows > 0)
     }
 
+    /// Mark a key as revoked.
+    pub fn set_revoked(&self, fingerprint: &str, revoked: bool) -> Result<bool> {
+        let rows = self.conn.execute(
+            "UPDATE keys SET is_revoked = ?1 WHERE fingerprint = ?2",
+            params![revoked as i32, fingerprint],
+        )?;
+        Ok(rows > 0)
+    }
+
+    /// Update the PGP data for a key.
+    pub fn update_pgp_data(&self, fingerprint: &str, pgp_data: &[u8]) -> Result<bool> {
+        let rows = self.conn.execute(
+            "UPDATE keys SET pgp_data = ?1 WHERE fingerprint = ?2",
+            params![pgp_data, fingerprint],
+        )?;
+        Ok(rows > 0)
+    }
+
     /// Update the trust level for a key.
     pub fn set_trust(&self, fingerprint: &str, trust_level: TrustLevel) -> Result<bool> {
         let level: i32 = match trust_level {

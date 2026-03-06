@@ -12,8 +12,12 @@
   $effect(() => {
     if (fp) {
       exportKeyQr(fp)
-        .then(svg => { svgData = svg; })
-        .catch(e => { error = String(e); });
+        .then((svg) => {
+          svgData = svg;
+        })
+        .catch((e) => {
+          error = String(e);
+        });
     }
   });
 </script>
@@ -23,10 +27,10 @@
     {#if error}
       <p class="text-sm text-red-600">{error}</p>
     {:else if svgData}
-      <div class="flex justify-center p-4 bg-white rounded-lg">
-        <img src="data:image/svg+xml;base64,{btoa(svgData)}" alt="QR Code" />
+      <div class="flex justify-center rounded-lg bg-white p-4">
+        <img src="data:image/svg+xml;base64,{btoa(svgData)}" alt={m.qr_code_alt()} />
       </div>
-      <p class="text-xs text-center text-[var(--color-text-secondary)]">
+      <p class="text-center text-xs text-[var(--color-text-secondary)]">
         {m.qr_desc()}
       </p>
     {:else}
@@ -35,8 +39,8 @@
 
     <div class="flex justify-end">
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
         onclick={() => appStore.closeModal()}
       >
         {m.qr_close()}

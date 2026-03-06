@@ -5,7 +5,7 @@
   import { keyStore } from "$lib/stores/keys.svelte";
   import { clipboardStore } from "$lib/stores/clipboard.svelte";
   import { settingsStore } from "$lib/stores/settings.svelte";
-  import { registerHotkeys, unregisterHotkeys } from "$lib/hotkeys";
+  import { registerPanicHotkey, unregisterPanicHotkey } from "$lib/hotkeys";
   import { initLocale, localeStore } from "$lib/stores/locale.svelte";
   import { initPlatform, isDesktop, isMobile } from "$lib/platform";
   import { panicWipe } from "$lib/tauri";
@@ -37,6 +37,7 @@
   let initialized = $state(false);
   let mobile = $state(false);
   let unlistenTray: UnlistenFn | null = null;
+  let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   onMount(async () => {
     await initPlatform();
@@ -48,18 +49,37 @@
     if (isDesktop()) {
       clipboardStore.startPolling();
 
-      // Register global hotkeys (desktop only)
-      await registerHotkeys({
-        onEncrypt: () => appStore.dispatchAction("encrypt"),
-        onDecrypt: () => appStore.dispatchAction("decrypt"),
-        onSign: () => appStore.dispatchAction("sign"),
-        onVerify: () => appStore.dispatchAction("verify"),
-        onPanic: async () => {
-          if (settingsStore.settings.opsec_mode) {
-            await panicWipe();
-          }
-        },
+      // Register panic wipe as global hotkey (works even when app is in background)
+      await registerPanicHotkey(async () => {
+        if (settingsStore.settings.opsec_mode) {
+          await panicWipe();
+        }
       });
+
+      // Window-scoped keyboard shortcuts (only active when app has focus)
+      keydownHandler = (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.shiftKey) {
+          switch (e.key.toUpperCase()) {
+            case "E":
+              e.preventDefault();
+              appStore.dispatchAction("encrypt");
+              break;
+            case "D":
+              e.preventDefault();
+              appStore.dispatchAction("decrypt");
+              break;
+            case "S":
+              e.preventDefault();
+              appStore.dispatchAction("sign");
+              break;
+            case "V":
+              e.preventDefault();
+              appStore.dispatchAction("verify");
+              break;
+          }
+        }
+      };
+      window.addEventListener("keydown", keydownHandler);
 
       // Listen for tray menu actions (desktop only)
       unlistenTray = await listen<string>("tray-action", (event) => {
@@ -76,17 +96,18 @@
 
   onDestroy(() => {
     if (isDesktop()) {
-      unregisterHotkeys();
+      unregisterPanicHotkey();
       unlistenTray?.();
+      if (keydownHandler) window.removeEventListener("keydown", keydownHandler);
     }
   });
 
   const showOnboarding = $derived(initialized && !keyStore.hasOwnKey);
 </script>
 
-<main class="flex flex-col h-screen" class:safe-area-top={mobile}>
+<main class="flex h-screen flex-col" class:safe-area-top={mobile}>
   {#if !initialized}
-    <div class="flex items-center justify-center h-full">
+    <div class="flex h-full items-center justify-center">
       <p class="text-[var(--color-text-secondary)]">{m.loading()}</p>
     </div>
   {:else}

@@ -173,7 +173,7 @@
   "discovery_searching": "검색 중...",
   "discovery_not_found": "키를 찾을 수 없습니다.",
   "discovery_found": "발견됨",
-  "discovery_import_hint": "검색된 키를 가져오려면 공개 키를 복사한 후 키 보기에서 가져오기 기능을 사용하세요.",
+  "discovery_import_hint": "가져오기를 클릭하여 키링에 키를 추가합니다. 항상 키 소유자와 지문을 확인하세요.",
   "discovery_import_fail": "가져올 키 데이터를 검색할 수 없습니다.",
   "discovery_close": "닫기",
   "trust_unknown": "알 수 없음",
@@ -275,5 +275,14 @@
   "date_na": "해당 없음",
   "fingerprint_copy": "지문 복사",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "자동",
+  "settings_opsec_title_placeholder": "메모",
+  "sync_copy_btn": "복사",
+  "sync_pause": "일시정지",
+  "sync_play": "재생",
+  "qr_code_alt": "QR 코드",
+  "error_sync_qr_wrong_context": "동기화 QR 코드입니다. 설정 → 키 동기화 → 키 가져오기를 사용하세요.",
+  "error_sync_qr_use_sync": "동기화 QR 코드입니다. 대신 동기화 기능을 사용하세요.",
+  "error_not_sync_qr": "동기화 QR 코드가 아닙니다. 단일 키에는 키 가져오기 기능을 사용하세요."
 }

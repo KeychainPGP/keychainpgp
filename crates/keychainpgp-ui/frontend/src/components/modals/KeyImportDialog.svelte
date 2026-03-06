@@ -18,9 +18,7 @@
   let transferCode = $state("");
 
   // Detect OpenKeychain backup format
-  const isBackup = $derived(
-    keyData.includes("Passphrase-Format: numeric9x4")
-  );
+  const isBackup = $derived(keyData.includes("Passphrase-Format: numeric9x4"));
 
   // Extract Passphrase-Begin hint
   const passphraseBegin = $derived.by(() => {
@@ -46,9 +44,11 @@
         await keyStore.refresh();
         const parts = [];
         if (result.imported_count > 0) {
-          parts.push(result.imported_count === 1
-            ? m.import_backup_success_one()
-            : m.import_backup_success_other({ count: result.imported_count }));
+          parts.push(
+            result.imported_count === 1
+              ? m.import_backup_success_one()
+              : m.import_backup_success_other({ count: result.imported_count }),
+          );
         }
         if (result.skipped_count > 0) {
           parts.push(m.import_backup_skipped({ count: result.skipped_count }));
@@ -88,14 +88,16 @@
   <QrScanOverlay
     onscan={(content) => {
       if (content.startsWith("KCPGP:")) {
-        error = "This is a sync QR code. Use Settings → Key Sync → Import Keys.";
+        error = m.error_sync_qr_wrong_context();
         scanning = false;
         return true;
       }
       importKey(content)
         .then(async (result) => {
           await keyStore.refresh();
-          appStore.setStatus(m.import_success_key({ name: result.name ?? result.fingerprint.slice(-8) }));
+          appStore.setStatus(
+            m.import_success_key({ name: result.name ?? result.fingerprint.slice(-8) }),
+          );
           appStore.closeModal();
         })
         .catch((e) => {
@@ -104,7 +106,10 @@
       scanning = false;
       return true;
     }}
-    oncancel={() => { cancelScan(); scanning = false; }}
+    oncancel={() => {
+      cancelScan();
+      scanning = false;
+    }}
   />
 {/if}
 
@@ -112,10 +117,13 @@
   <div class="space-y-3">
     {#if mobile}
       <button
-        class="w-full flex items-center justify-center gap-2 py-3 text-sm rounded-lg
-               bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
-        onclick={() => { error = ""; scanning = true; }}
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] py-3
+               text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
+        onclick={() => {
+          error = "";
+          scanning = true;
+        }}
       >
         <Camera size={16} />
         {m.onboarding_scan_qr()}
@@ -128,9 +136,9 @@
       placeholder={m.import_textarea_placeholder()}
       bind:value={keyData}
       rows={8}
-      class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
-             bg-[var(--color-bg)] font-mono resize-none
-             focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+      class="w-full resize-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3
+             py-2.5 font-mono text-sm
+             focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
     ></textarea>
 
     <div class="text-center text-xs text-[var(--color-text-secondary)]">
@@ -138,15 +146,22 @@
     </div>
 
     <label
-      class="block w-full py-3 text-center text-sm rounded-lg border-2 border-dashed
-             border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+      class="block w-full cursor-pointer rounded-lg border-2 border-dashed border-[var(--color-border)] py-3
+             text-center text-sm transition-colors hover:border-[var(--color-primary)]"
     >
       {m.import_choose_file()}
-      <input type="file" accept=".asc,.gpg,.pgp,.pub,.key,.sec.pgp" class="hidden" onchange={handleFileInput} />
+      <input
+        type="file"
+        accept=".asc,.gpg,.pgp,.pub,.key,.sec.pgp"
+        class="hidden"
+        onchange={handleFileInput}
+      />
     </label>
 
     {#if isBackup}
-      <div class="p-3 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border)] space-y-2">
+      <div
+        class="space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3"
+      >
         <p class="text-sm font-medium">{m.import_backup_detected()}</p>
         <p class="text-xs text-[var(--color-text-secondary)]">
           {m.import_backup_desc()}
@@ -158,9 +173,9 @@
           type="text"
           placeholder={m.import_backup_placeholder()}
           bind:value={transferCode}
-          class="w-full px-3 py-2.5 text-sm rounded-lg border border-[var(--color-border)]
-                 bg-[var(--color-bg)] font-mono tracking-wider text-center
-                 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2.5
+                 text-center font-mono text-sm tracking-wider
+                 focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
         />
       </div>
     {/if}
@@ -171,15 +186,15 @@
 
     <div class="flex justify-end gap-2 pt-2">
       <button
-        class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)]
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.closeModal()}
       >
         {m.import_cancel()}
       </button>
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         onclick={handleImport}
         disabled={!keyData.trim() || (isBackup && !transferCode.trim()) || importing}
       >

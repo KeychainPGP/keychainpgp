@@ -64,7 +64,7 @@
   "keys_deleted": "Key deleted.",
   "key_details_title": "Key Details",
   "key_details_btn": "Details",
-  "key_export_btn": "Share public key",
+  "key_export_btn": "Export public key",
   "key_backup_btn": "Backup private key to file",
   "key_revocation_publish_btn": "Publish revocation to keyserver",
   "keys_export_private_success": "Private key saved successfully. Keep this file in a secure, offline location!",
@@ -173,7 +173,7 @@
   "discovery_searching": "Searching...",
   "discovery_not_found": "No keys found.",
   "discovery_found": "Found",
-  "discovery_import_hint": "To import a discovered key, copy its public key and use the Import function in the Keys view.",
+  "discovery_import_hint": "Click Import to add a key to your keyring. Always verify the fingerprint with the key owner.",
   "discovery_import_fail": "Could not retrieve key data for import.",
   "discovery_close": "Close",
   "trust_unknown": "Unknown",
@@ -275,5 +275,14 @@
   "date_na": "N/A",
   "fingerprint_copy": "Copy fingerprint",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "Auto",
+  "settings_opsec_title_placeholder": "Notes",
+  "sync_copy_btn": "Copy",
+  "sync_pause": "Pause",
+  "sync_play": "Play",
+  "qr_code_alt": "QR Code",
+  "error_sync_qr_wrong_context": "This is a sync QR code. Use Settings → Key Sync → Import Keys.",
+  "error_sync_qr_use_sync": "This is a sync QR code. Use the Sync function instead.",
+  "error_not_sync_qr": "Not a sync QR code. Use the Import Key function for single keys."
 }
