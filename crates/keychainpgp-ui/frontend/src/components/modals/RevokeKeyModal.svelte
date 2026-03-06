@@ -24,17 +24,17 @@
 <ModalContainer title={m.key_revoke_warning_title()}>
     <div class="space-y-6">
         <div
-            class="flex items-start gap-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50"
+            class="flex items-start gap-4 p-4 rounded-lg bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/30"
         >
             <ShieldAlert
-                class="w-6 h-6 text-red-600 dark:text-red-400 shrink-0 mt-0.5"
+                class="w-6 h-6 text-[var(--color-danger)] shrink-0 mt-0.5"
             />
             <div class="space-y-1">
-                <p class="text-sm font-medium text-red-800 dark:text-red-200">
+                <p class="text-sm font-medium text-[var(--color-danger)]">
                     {m.key_revoke_warning_title()}
                 </p>
                 <p
-                    class="text-xs text-red-700 dark:text-red-300 leading-relaxed"
+                    class="text-xs text-[var(--color-text-secondary)] leading-relaxed"
                 >
                     {m.key_revoke_warning_message()}
                 </p>
