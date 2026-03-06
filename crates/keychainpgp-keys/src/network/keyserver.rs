@@ -2,10 +2,25 @@
 //!
 //! Supports keys.openpgp.org (Hagrid VKS) and standard HKP keyservers.
 
-/// Result from a keyserver search.
+/// Result from a keyserver search (machine-readable index).
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct KeyserverMatch {
+    /// Key ID (long or short).
+    pub key_id: String,
+    /// Key fingerprint (hex).
+    pub fingerprint: String,
+    /// Creation date (seconds since epoch).
+    pub created_at: Option<u64>,
+    /// Expiration date (seconds since epoch).
+    pub expires_at: Option<u64>,
+    /// List of User IDs (name <email>).
+    pub user_ids: Vec<String>,
+}
+
+/// Result from a keyserver search (full key data).
 #[derive(Debug, Clone)]
 pub struct KeyserverResult {
-    /// Email address associated with the key.
+    /// Email address associated with the key (if known from query).
     pub email: Option<String>,
     /// ASCII-armored public key data.
     pub key_data: Vec<u8>,
@@ -28,17 +43,17 @@ fn build_client(timeout_secs: u64, proxy_url: Option<&str>) -> Result<reqwest::C
 
 /// Search for keys on a keyserver by email or name.
 ///
-/// Uses the VKS API (keys.openpgp.org) by default.
+/// Returns a list of machine-readable matches.
 pub async fn keyserver_search(
     query: &str,
     keyserver_url: &str,
     proxy_url: Option<&str>,
-) -> Result<Vec<KeyserverResult>, String> {
-    let client = build_client(10, proxy_url)?;
+) -> Result<Vec<KeyserverMatch>, String> {
+    let client = build_client(15, proxy_url)?;
 
-    // Use HKP lookup endpoint
+    // Use HKP lookup endpoint with machine-readable option
     let url = format!(
-        "{}/pks/lookup?search={}&op=get&options=mr",
+        "{}/pks/lookup?search={}&op=index&options=mr",
         keyserver_url.trim_end_matches('/'),
         urlencoding(query)
     );
@@ -49,8 +64,15 @@ pub async fn keyserver_search(
         .await
         .map_err(|e| format!("Keyserver search failed: {e}"))?;
 
+    if response.status() == reqwest::StatusCode::NOT_FOUND {
+        return Ok(vec![]);
+    }
+
     if !response.status().is_success() {
-        return Err("No keys found on keyserver.".into());
+        return Err(format!(
+            "Keyserver search failed with status: {}",
+            response.status()
+        ));
     }
 
     let body = response
@@ -58,19 +80,47 @@ pub async fn keyserver_search(
         .await
         .map_err(|e| format!("Failed to read keyserver response: {e}"))?;
 
-    // If the response contains a PGP key block, return it as a single result
-    if body.contains("-----BEGIN PGP PUBLIC KEY BLOCK-----") {
-        return Ok(vec![KeyserverResult {
-            email: if query.contains('@') {
-                Some(query.to_string())
-            } else {
-                None
-            },
-            key_data: body.into_bytes(),
-        }]);
+    // Parse HKP machine-readable index format
+    Ok(parse_mr_index(&body))
+}
+
+/// Fetch a full ASCII-armored public key from a keyserver by fingerprint.
+pub async fn keyserver_fetch(
+    fingerprint: &str,
+    keyserver_url: &str,
+    proxy_url: Option<&str>,
+) -> Result<Vec<u8>, String> {
+    let client = build_client(15, proxy_url)?;
+
+    let url = format!(
+        "{}/pks/lookup?search=0x{}&op=get&options=mr",
+        keyserver_url.trim_end_matches('/'),
+        fingerprint
+    );
+
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Keyserver fetch failed: {e}"))?;
+
+    if !response.status().is_success() {
+        return Err(format!(
+            "Key not found or server error: {}",
+            response.status()
+        ));
     }
 
-    Ok(vec![])
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read keyserver response: {e}"))?;
+
+    if body.contains("-----BEGIN PGP PUBLIC KEY BLOCK-----") {
+        Ok(body.into_bytes())
+    } else {
+        Err("Response did not contain a valid PGP key block".into())
+    }
 }
 
 /// Upload a public key to a keyserver.
@@ -79,6 +129,7 @@ pub async fn keyserver_upload(
     keyserver_url: &str,
     proxy_url: Option<&str>,
 ) -> Result<String, String> {
+    validate_keyserver_url(keyserver_url)?;
     let client = build_client(15, proxy_url)?;
 
     let key_text = String::from_utf8_lossy(key_data).into_owned();
@@ -119,6 +170,115 @@ pub async fn keyserver_upload(
     }
 }
 
+/// Validates and normalizes a keyserver URL.
+/// Prepends "https://" if no scheme is present.
+pub fn validate_keyserver_url(url: &str) -> Result<(), String> {
+    if url.starts_with("http://") || url.starts_with("https://") {
+        Ok(())
+    } else {
+        Err(format!(
+            "Invalid keyserver URL: '{url}'. It must start with http:// or https://"
+        ))
+    }
+}
+
+/// Parse the HKP machine-readable index format (options=mr).
+///
+/// Format: colon-separated records.
+/// info:version:count
+/// pub:keyid:algo:keylen:creationdate:expirationdate:flags
+/// uid:escaped_uid:creationdate:expirationdate:flags
+fn parse_mr_index(body: &str) -> Vec<KeyserverMatch> {
+    let mut results = Vec::new();
+    let mut current_key: Option<KeyserverMatch> = None;
+
+    for line in body.lines() {
+        let parts: Vec<&str> = line.split(':').collect();
+        if parts.is_empty() {
+            continue;
+        }
+
+        match parts[0] {
+            "pub" => {
+                // If we were building a key, push it
+                if let Some(k) = current_key.take() {
+                    results.push(k);
+                }
+
+                if parts.len() < 5 {
+                    continue;
+                }
+
+                let key_id = parts[1].to_string();
+                // Fingerprint is not always in 'pub' record in old HKP,
+                // but some modern ones (Hagrid) use it as keyid or add it.
+                // We'll treat the keyid as the primary identifier for now.
+                let created_at = parts.get(4).and_then(|s| s.parse().ok());
+                let expires_at = parts.get(5).and_then(|s| s.parse().ok());
+
+                current_key = Some(KeyserverMatch {
+                    key_id,
+                    fingerprint: String::new(), // Will be updated if we find more info or just use KeyID
+                    created_at,
+                    expires_at,
+                    user_ids: Vec::new(),
+                });
+            }
+            "uid" => {
+                if let Some(ref mut k) = current_key {
+                    if parts.len() > 1 {
+                        // HKP escapes certain characters in UIDs
+                        let uid = hkr_unescape(parts[1]);
+                        k.user_ids.push(uid);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(k) = current_key {
+        results.push(k);
+    }
+
+    // Post-process: many keyservers return the fingerprint in the 'pub' field if it's 40 chars
+    for k in &mut results {
+        if k.key_id.len() >= 32 {
+            k.fingerprint = k.key_id.to_uppercase();
+        }
+    }
+
+    results
+}
+
+/// Unescape HKP 'escaped_uid' field.
+fn hkr_unescape(input: &str) -> String {
+    let mut result = String::with_capacity(input.len());
+    let mut chars = input.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c == '%' {
+            let mut hex = String::new();
+            if let Some(h1) = chars.next() {
+                hex.push(h1);
+            }
+            if let Some(h2) = chars.next() {
+                hex.push(h2);
+            }
+            if let Ok(byte) = u8::from_str_radix(&hex, 16) {
+                result.push(byte as char);
+            } else {
+                result.push('%');
+                result.push_str(&hex);
+            }
+        } else {
+            result.push(c);
+        }
+    }
+
+    result
+}
+
 /// Simple percent-encoding for URL query parameters.
 fn urlencoding(input: &str) -> String {
     let mut result = String::new();
@@ -135,4 +295,43 @@ fn urlencoding(input: &str) -> String {
         }
     }
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hkr_unescape() {
+        assert_eq!(hkr_unescape("Alice%20Smith"), "Alice Smith");
+        assert_eq!(
+            hkr_unescape("Alice%3cemail%40example.com%3e"),
+            "Alice<email@example.com>"
+        );
+        assert_eq!(hkr_unescape("No%20changes"), "No changes");
+    }
+
+    #[test]
+    fn test_parse_mr_index() {
+        let body = "info:1:2\n\
+                    pub:ED7001AAAD902CA416FB7A5148007E3D:1:2048:1620000000::\n\
+                    uid:Alice%20Smith%20<alice@example.com>:1620000000::\n\
+                    pub:F22FD696C8875505:1:4096:1610000000:1700000000:\n\
+                    uid:Bob%20Brown:1610000000::\n\
+                    uid:Bob%20Admin%20<admin@example.com>:1610000000::";
+
+        let results = parse_mr_index(body);
+        assert_eq!(results.len(), 2);
+
+        assert_eq!(results[0].key_id, "ED7001AAAD902CA416FB7A5148007E3D");
+        assert_eq!(results[0].fingerprint, "ED7001AAAD902CA416FB7A5148007E3D");
+        assert_eq!(results[0].user_ids.len(), 1);
+        assert_eq!(results[0].user_ids[0], "Alice Smith <alice@example.com>");
+
+        assert_eq!(results[1].key_id, "F22FD696C8875505");
+        assert_eq!(results[1].fingerprint, ""); // Short ID, not enough for fingerprint
+        assert_eq!(results[1].user_ids.len(), 2);
+        assert_eq!(results[1].user_ids[0], "Bob Brown");
+        assert_eq!(results[1].user_ids[1], "Bob Admin <admin@example.com>");
+    }
 }

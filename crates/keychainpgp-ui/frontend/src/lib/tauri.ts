@@ -206,6 +206,13 @@ export async function keyserverUpload(fingerprint: string, keyserverUrl?: string
   return invoke("keyserver_upload", { fingerprint, keyserverUrl: keyserverUrl ?? null });
 }
 
+export async function fetchAndImportKey(
+  fingerprint: string,
+  keyserverUrl: string
+): Promise<KeyInfo> {
+  return invoke("fetch_and_import_key", { fingerprint, keyserverUrl });
+}
+
 export interface BackupImportResult {
   imported_count: number;
   keys: KeyInfo[];

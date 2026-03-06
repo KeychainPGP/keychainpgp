@@ -8,19 +8,13 @@ use tauri_plugin_store::StoreExt;
 
 use keychainpgp_core::CryptoEngine;
 use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
+use keychainpgp_keys::network::keyserver::{
+    keyserver_fetch, keyserver_search as ks_search, validate_keyserver_url,
+};
 use keychainpgp_keys::storage::KeyRecord;
 use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
-
-/// Validate that a keyserver URL uses an allowed protocol.
-fn validate_keyserver_url(url: &str) -> Result<(), String> {
-    if url.starts_with("https://") || url.starts_with("http://") {
-        Ok(())
-    } else {
-        Err("Keyserver URL must use https:// or http:// protocol".into())
-    }
-}
 
 /// Validate that a proxy URL uses an allowed SOCKS5 protocol.
 fn validate_proxy_url(url: &str) -> Result<(), String> {
@@ -196,6 +190,18 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
         .keyring
         .lock()
         .map_err(|e| format!("Internal error: {e}"))?;
+
+    // Check if key already exists to avoid UNIQUE constraint error
+    if keyring
+        .get_key(&record.fingerprint)
+        .map_err(|e| e.to_string())?
+        .is_some()
+    {
+        return Err(format!(
+            "Key already exists in keyring: {}",
+            record.fingerprint
+        ));
+    }
 
     if cert_info.has_secret_key && state.opsec_mode.load(Ordering::SeqCst) {
         // OPSEC mode: store secret key in RAM only, public key in DB
@@ -459,46 +465,149 @@ pub async fn wkd_lookup(
     }))
 }
 
-/// Search for keys on a keyserver.
+/// Search for keys on one or more keyservers.
+///
+/// If `keyserver_url` contains commas, it is treated as a list of servers to query in parallel.
 #[tauri::command]
 pub async fn keyserver_search(
     app: AppHandle,
-    state: State<'_, AppState>,
+    _state: State<'_, AppState>,
     query: String,
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
-    let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
-    validate_keyserver_url(&url)?;
-    let proxy = get_proxy_url(&app);
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
+        settings
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    };
 
-    let results =
-        keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
-            .await
-            .map_err(|e| e.to_string())?;
-
-    let mut keys = Vec::new();
-    for result in results {
-        match state.engine.inspect_key(&result.key_data) {
-            Ok(cert_info) => {
-                let name = cert_info.name().map(String::from);
-                let email_val = cert_info.email().map(String::from).or(result.email);
-                let fp = cert_info.fingerprint.0.clone();
-                keys.push(KeyInfo {
-                    fingerprint: fp,
-                    name,
-                    email: email_val,
-                    algorithm: cert_info.algorithm.to_string(),
-                    created_at: cert_info.created_at,
-                    expires_at: cert_info.expires_at,
-                    trust_level: 0,
-                    is_own_key: false,
-                });
+    let url_string = keyserver_url.unwrap_or(settings_url);
+    let urls: Vec<String> = url_string
+        .split(',')
+        .map(|s| {
+            let mut s = s.trim().to_string();
+            if !s.is_empty() && !s.contains("://") {
+                s = format!("https://{s}");
             }
-            Err(_) => continue,
+            s
+        })
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if urls.is_empty() {
+        return Err("No keyservers configured".into());
+    }
+
+    for url in &urls {
+        validate_keyserver_url(url)?;
+    }
+
+    let proxy = get_proxy_url(&app);
+    let query_clone = query.clone();
+
+    let mut futures = Vec::new();
+    for url in urls {
+        let u = url.to_string();
+        let q = query_clone.clone();
+        let p = proxy.clone();
+        futures.push(tokio::spawn(async move {
+            ks_search(&q, &u, p.as_deref()).await
+        }));
+    }
+
+    let mut all_matches = Vec::new();
+
+    for handle in futures {
+        if let Ok(Ok(ks_matches)) = handle.await {
+            for m in ks_matches {
+                all_matches.push(m);
+            }
         }
     }
 
-    Ok(keys)
+    // Deduplicate by fingerprint (or KeyID if fingerprint is missing)
+    let mut unique_keys = std::collections::HashMap::new();
+    for m in all_matches {
+        let id = if m.fingerprint.is_empty() {
+            &m.key_id
+        } else {
+            &m.fingerprint
+        };
+        unique_keys.entry(id.clone()).or_insert(m);
+    }
+
+    let infos = unique_keys
+        .into_values()
+        .map(|m| {
+            // Parse "Name <email>" if possible
+            let (name, email) = if let Some(uid) = m.user_ids.first() {
+                if let Some(pos) = uid.find('<') {
+                    let name = uid[..pos].trim().to_string();
+                    let email = uid[pos + 1..].trim_matches('>').to_string();
+                    (Some(name), Some(email))
+                } else {
+                    (Some(uid.clone()), None)
+                }
+            } else {
+                (None, None)
+            };
+
+            KeyInfo {
+                fingerprint: m.fingerprint,
+                name,
+                email,
+                algorithm: String::new(), // Algorithm not always in index
+                created_at: m
+                    .created_at
+                    .as_ref()
+                    .map(|t| t.to_string())
+                    .unwrap_or_default(),
+                expires_at: m.expires_at.as_ref().map(|t| t.to_string()),
+                trust_level: 0,
+                is_own_key: false,
+            }
+        })
+        .collect();
+
+    Ok(infos)
+}
+
+/// Fetch a key from one or more keyservers and import it.
+#[tauri::command]
+pub async fn fetch_and_import_key(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    fingerprint: String,
+    keyserver_url: String,
+) -> Result<KeyInfo, String> {
+    let urls: Vec<&str> = keyserver_url
+        .split(',')
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let proxy = get_proxy_url(&app);
+
+    let mut last_error = String::new();
+    for url in urls {
+        validate_keyserver_url(url)?;
+        match keyserver_fetch(&fingerprint, url, proxy.as_deref()).await {
+            Ok(key_data) => {
+                let key_text = String::from_utf8_lossy(&key_data).into_owned();
+                return import_key(state, key_text);
+            }
+            Err(e) => last_error = e,
+        }
+    }
+
+    Err(if last_error.is_empty() {
+        "No keyservers available to fetch from".into()
+    } else {
+        format!("Failed to fetch key from any server. Last error: {last_error}")
+    })
 }
 
 /// Upload a public key to a keyserver.
