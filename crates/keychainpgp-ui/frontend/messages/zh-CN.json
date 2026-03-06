@@ -164,7 +164,7 @@
   "discovery_searching": "正在搜索...",
   "discovery_not_found": "未找到密钥。",
   "discovery_found": "已找到",
-  "discovery_import_hint": "要导入发现的密钥，请复制其公钥，然后在密钥视图中使用导入功能。",
+  "discovery_import_hint": "点击导入将密钥添加到您的密钥环。请务必与密钥所有者核实指纹。",
   "discovery_import_fail": "无法获取密钥数据以进行导入。",
   "discovery_close": "关闭",
   "trust_unknown": "未知",

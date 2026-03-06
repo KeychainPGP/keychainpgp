@@ -164,7 +164,7 @@
   "discovery_searching": "Suche läuft...",
   "discovery_not_found": "Keine Schlüssel gefunden.",
   "discovery_found": "Gefunden",
-  "discovery_import_hint": "Um einen gefundenen Schlüssel zu importieren, kopieren Sie seinen öffentlichen Schlüssel und verwenden Sie die Importfunktion in der Schlüsselansicht.",
+  "discovery_import_hint": "Klicken Sie auf Importieren, um einen Schlüssel zu Ihrem Schlüsselbund hinzuzufügen. Überprüfen Sie den Fingerabdruck immer mit dem Schlüsselbesitzer.",
   "discovery_import_fail": "Schlüsseldaten konnten nicht zum Import abgerufen werden.",
   "discovery_close": "Schließen",
   "trust_unknown": "Unbekannt",

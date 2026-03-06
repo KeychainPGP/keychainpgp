@@ -27,14 +27,16 @@
   onclick={onBackdropClick}
 >
   <div
-    class="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl shadow-xl
-           w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
+    class="mx-4 flex max-h-[80vh] w-full max-w-lg
+           flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] shadow-xl"
   >
     {#if title}
-      <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
+      <div
+        class="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4"
+      >
         <h2 class="text-lg font-semibold">{title}</h2>
         <button
-          class="p-1 rounded hover:bg-[var(--color-bg-secondary)] transition-colors text-[var(--color-text-secondary)]"
+          class="rounded p-1 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-bg-secondary)]"
           onclick={() => appStore.closeModal()}
         >
           &times;

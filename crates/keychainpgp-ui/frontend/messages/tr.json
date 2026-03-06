@@ -164,7 +164,7 @@
   "discovery_searching": "Aranıyor...",
   "discovery_not_found": "Anahtar bulunamadı.",
   "discovery_found": "Bulundu",
-  "discovery_import_hint": "Keşfedilen bir anahtarı içe aktarmak için açık anahtarını kopyalayın ve Anahtarlar görünümündeki İçe Aktar işlevini kullanın.",
+  "discovery_import_hint": "Anahtarlığınıza bir anahtar eklemek için İçe Aktar'a tıklayın. Parmak izini her zaman anahtar sahibiyle doğrulayın.",
   "discovery_import_fail": "İçe aktarma için anahtar verileri alınamadı.",
   "discovery_close": "Kapat",
   "trust_unknown": "Bilinmiyor",

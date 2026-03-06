@@ -164,7 +164,7 @@
   "discovery_searching": "מחפש...",
   "discovery_not_found": "לא נמצאו מפתחות.",
   "discovery_found": "נמצא",
-  "discovery_import_hint": "כדי לייבא מפתח שנמצא, העתק את המפתח הציבורי שלו והשתמש בפונקציית הייבוא בתצוגת המפתחות.",
+  "discovery_import_hint": "לחצו על ייבוא כדי להוסיף מפתח לחבילת המפתחות שלכם. תמיד אמתו את טביעת האצבע מול בעל המפתח.",
   "discovery_import_fail": "לא ניתן לאחזר נתוני מפתח לייבוא.",
   "discovery_close": "סגור",
   "trust_unknown": "לא ידוע",

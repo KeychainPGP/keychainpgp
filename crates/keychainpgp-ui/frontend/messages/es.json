@@ -164,7 +164,7 @@
   "discovery_searching": "Buscando...",
   "discovery_not_found": "No se encontraron claves.",
   "discovery_found": "Encontrada",
-  "discovery_import_hint": "Para importar una clave descubierta, copia su clave pública y usa la función Importar en la vista de Claves.",
+  "discovery_import_hint": "Haga clic en Importar para añadir una clave a su llavero. Verifique siempre la huella digital con el propietario de la clave.",
   "discovery_import_fail": "No se pudieron obtener los datos de la clave para importar.",
   "discovery_close": "Cerrar",
   "trust_unknown": "Desconocida",

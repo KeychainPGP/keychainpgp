@@ -96,7 +96,14 @@
 
   // Auto-import when QR scan captured both data and passphrase
   $effect(() => {
-    if (passphraseFromQr && encryptedData && passphrase && !importing && importedCount === null && !scanning) {
+    if (
+      passphraseFromQr &&
+      encryptedData &&
+      passphrase &&
+      !importing &&
+      importedCount === null &&
+      !scanning
+    ) {
       handleImport();
     }
   });
@@ -104,7 +111,7 @@
   const scanProgress = $derived(
     totalParts > 0
       ? m.sync_qr_progress({ current: scannedParts.size, total: totalParts })
-      : undefined
+      : undefined,
   );
 </script>
 
@@ -124,7 +131,7 @@
   <div class="space-y-4">
     {#if importedCount !== null}
       <!-- Success -->
-      <div class="p-4 rounded-lg bg-green-50 border border-green-200 text-green-800">
+      <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
         <p class="text-sm font-medium">
           {importedCount === 1
             ? m.sync_success_count_one()
@@ -133,8 +140,8 @@
       </div>
       <div class="flex justify-end">
         <button
-          class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-                 hover:bg-[var(--color-primary-hover)] transition-colors"
+          class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+                 transition-colors hover:bg-[var(--color-primary-hover)]"
           onclick={() => appStore.closeModal()}
         >
           {m.done()}
@@ -145,31 +152,31 @@
       <div class="space-y-2">
         {#if mobile}
           <button
-            class="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg
-                   bg-[var(--color-primary)] text-white font-medium
-                   hover:bg-[var(--color-primary-hover)] transition-colors"
+            class="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-3
+                   text-sm font-medium text-white
+                   transition-colors hover:bg-[var(--color-primary-hover)]"
             onclick={startScan}
           >
             <Camera size={16} />
             {m.onboarding_scan_qr()}
           </button>
           {#if scannedParts.size > 0 && scannedParts.size < totalParts}
-            <p class="text-xs text-center text-[var(--color-warning)]">
+            <p class="text-center text-xs text-[var(--color-warning)]">
               {m.sync_qr_progress({ current: scannedParts.size, total: totalParts })}
             </p>
           {:else if encryptedData && totalParts > 0}
-            <p class="text-xs text-center text-[var(--color-success)]">
+            <p class="text-center text-xs text-[var(--color-success)]">
               {m.sync_qr_progress({ current: totalParts, total: totalParts })}
             </p>
           {/if}
-          <p class="text-xs text-center text-[var(--color-text-secondary)]">{m.import_or()}</p>
+          <p class="text-center text-xs text-[var(--color-text-secondary)]">{m.import_or()}</p>
         {/if}
         <p class="text-sm font-medium">{m.sync_file_load()}</p>
         <div class="flex gap-2">
           <label
-            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm rounded-lg
-                   border-2 border-dashed border-[var(--color-border)] cursor-pointer
-                   hover:border-[var(--color-primary)] transition-colors"
+            class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed
+                   border-[var(--color-border)] px-4 py-3 text-sm
+                   transition-colors hover:border-[var(--color-primary)]"
           >
             <Upload size={16} />
             {encryptedData ? m.sync_file_loaded() : m.sync_file_choose()}
@@ -180,21 +187,23 @@
         <textarea
           bind:value={encryptedData}
           rows={3}
-          class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-                 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none font-mono"
+          class="w-full resize-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2
+                 font-mono text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
           placeholder={m.sync_paste_placeholder()}
         ></textarea>
       </div>
 
       <!-- Passphrase input -->
       <div class="space-y-1">
-        <label class="block text-sm font-medium" for="sync-passphrase">{m.sync_passphrase_label()}</label>
+        <label class="block text-sm font-medium" for="sync-passphrase"
+          >{m.sync_passphrase_label()}</label
+        >
         <input
           id="sync-passphrase"
           type="text"
           bind:value={passphrase}
-          class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]
-                 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] font-mono tracking-wider"
+          class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 font-mono
+                 text-sm tracking-wider focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
           placeholder="1234-5678-9012-3456-7890-1234"
         />
       </div>
@@ -205,15 +214,15 @@
 
       <div class="flex justify-end gap-2">
         <button
-          class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)] font-medium
-                 hover:bg-[var(--color-bg-secondary)] transition-colors"
+          class="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-medium
+                 transition-colors hover:bg-[var(--color-bg-secondary)]"
           onclick={() => appStore.closeModal()}
         >
           {m.cancel()}
         </button>
         <button
-          class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-                 hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+          class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+                 transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
           onclick={handleImport}
           disabled={importing}
         >

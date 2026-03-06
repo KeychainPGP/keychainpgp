@@ -164,7 +164,7 @@
   "discovery_searching": "A pesquisar...",
   "discovery_not_found": "Nenhuma chave encontrada.",
   "discovery_found": "Encontrado",
-  "discovery_import_hint": "Para importar uma chave descoberta, copie a sua chave pública e utilize a função Importar no ecrã de Chaves.",
+  "discovery_import_hint": "Clique em Importar para adicionar uma chave ao seu porta-chaves. Verifique sempre a impressão digital com o proprietário da chave.",
   "discovery_import_fail": "Não foi possível obter os dados da chave para importação.",
   "discovery_close": "Fechar",
   "trust_unknown": "Desconhecida",

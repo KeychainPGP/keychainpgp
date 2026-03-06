@@ -42,16 +42,17 @@
 
 <ModalContainer title={m.decrypted_title()}>
   <div class="space-y-3">
-    <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 max-h-64 overflow-auto">
+    <div
+      class="max-h-64 overflow-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
+    >
       <pre
-        class="text-sm whitespace-pre-wrap break-words font-mono"
+        class="font-mono text-sm break-words whitespace-pre-wrap"
         class:select-none={isOpsec}
-        class:pointer-events-none={isOpsec}
-      >{plaintext}</pre>
+        class:pointer-events-none={isOpsec}>{plaintext}</pre>
     </div>
 
     {#if isOpsec && countdown > 0}
-      <p class="text-xs text-[var(--color-text-secondary)] text-center">
+      <p class="text-center text-xs text-[var(--color-text-secondary)]">
         {m.opsec_closing_in({ seconds: countdown })}
       </p>
     {/if}
@@ -59,8 +60,8 @@
     <div class="flex justify-end gap-2">
       {#if !isOpsec}
         <button
-          class="inline-flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg border border-[var(--color-border)]
-                 hover:bg-[var(--color-bg-secondary)] transition-colors"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm
+                 transition-colors hover:bg-[var(--color-bg-secondary)]"
           onclick={copyPlaintext}
         >
           {#if copied}
@@ -73,8 +74,8 @@
         </button>
       {/if}
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
         onclick={() => appStore.closeModal()}
       >
         {m.decrypted_close()}

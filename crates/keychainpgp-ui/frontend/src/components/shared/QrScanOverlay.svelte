@@ -27,12 +27,16 @@
   onMount(() => {
     if (!videoEl) return;
     // Show the video once the camera stream actually renders a frame
-    videoEl.addEventListener("playing", () => { videoReady = true; }, { once: true });
-    cleanup = startContinuousScan(
-      videoEl,
-      onscan,
-      (err) => { error = err; },
+    videoEl.addEventListener(
+      "playing",
+      () => {
+        videoReady = true;
+      },
+      { once: true },
     );
+    cleanup = startContinuousScan(videoEl, onscan, (err) => {
+      error = err;
+    });
     return () => {
       if (cleanup) cleanup();
     };
@@ -50,27 +54,29 @@
   <!-- svelte-ignore element_invalid_self_closing_tag -->
   <video
     bind:this={videoEl}
-    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-200"
+    class="absolute inset-0 h-full w-full object-cover transition-opacity duration-200"
     class:opacity-0={!videoReady}
     playsinline
   />
 
   <!-- Dark overlay with viewfinder cutout (box-shadow trick) -->
   <div
-    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-2xl border-4 border-white/80"
+    class="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-2xl border-4 border-white/80"
     style="box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);"
   ></div>
 
   <!-- Controls layer -->
-  <div class="relative z-10 flex flex-col items-center justify-between h-full py-16 pointer-events-none">
+  <div
+    class="pointer-events-none relative z-10 flex h-full flex-col items-center justify-between py-16"
+  >
     <!-- Top: progress / error -->
     <div class="pointer-events-auto">
       {#if error}
-        <div class="px-4 py-2 rounded-full bg-red-600/90 text-white text-sm font-medium">
+        <div class="rounded-full bg-red-600/90 px-4 py-2 text-sm font-medium text-white">
           {error}
         </div>
       {:else if progress}
-        <div class="px-4 py-2 rounded-full bg-black/80 text-white text-sm font-medium">
+        <div class="rounded-full bg-black/80 px-4 py-2 text-sm font-medium text-white">
           {progress}
         </div>
       {/if}
@@ -81,7 +87,7 @@
 
     <!-- Bottom: cancel button -->
     <button
-      class="pointer-events-auto flex items-center gap-2 px-8 py-3 rounded-full bg-black/80 text-white font-medium text-base active:bg-black/90"
+      class="pointer-events-auto flex items-center gap-2 rounded-full bg-black/80 px-8 py-3 text-base font-medium text-white active:bg-black/90"
       onclick={handleCancel}
     >
       <X size={18} />

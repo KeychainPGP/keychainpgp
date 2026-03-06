@@ -9,8 +9,13 @@
   import { isPgpMessage } from "$lib/utils";
   import { isDesktop } from "$lib/platform";
   import {
-    decryptClipboard, signClipboard, verifyClipboard,
-    decryptText, signText, verifyText, writeClipboard,
+    decryptClipboard,
+    signClipboard,
+    verifyClipboard,
+    decryptText,
+    signText,
+    verifyText,
+    writeClipboard,
   } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
@@ -31,10 +36,18 @@
     if (!action) return;
     appStore.clearAction();
     switch (action) {
-      case "encrypt": handleEncrypt(); break;
-      case "decrypt": handleDecrypt(); break;
-      case "sign": handleSign(); break;
-      case "verify": handleVerify(); break;
+      case "encrypt":
+        handleEncrypt();
+        break;
+      case "decrypt":
+        handleDecrypt();
+        break;
+      case "sign":
+        handleSign();
+        break;
+      case "verify":
+        handleVerify();
+        break;
     }
   });
 
@@ -81,7 +94,9 @@
         appStore.openModal("passphrase", {
           onSubmit: async (passphrase: string) => {
             try {
-              const result = isCompose ? await decryptText(content, passphrase) : await decryptClipboard(passphrase);
+              const result = isCompose
+                ? await decryptText(content, passphrase)
+                : await decryptClipboard(passphrase);
               if (result.success) {
                 appStore.openModal("decrypted-viewer", { plaintext: result.plaintext });
                 appStore.setStatus(m.decrypt_success());
@@ -171,9 +186,14 @@
   }
 </script>
 
-<div class="max-w-2xl mx-auto space-y-6" class:flex={!desktop} class:flex-col={!desktop} class:h-full={!desktop}>
+<div
+  class="mx-auto max-w-2xl space-y-6"
+  class:flex={!desktop}
+  class:flex-col={!desktop}
+  class:h-full={!desktop}
+>
   {#if desktop}
-    <div class="text-center space-y-2">
+    <div class="space-y-2 text-center">
       <h1 class="text-2xl font-bold">{m.home_title()}</h1>
       <p class="text-[var(--color-text-secondary)]">
         {isCompose ? m.home_tagline_compose() : m.home_tagline_clipboard()}
@@ -181,7 +201,7 @@
     </div>
   {:else}
     <div class="flex items-center gap-3">
-      <img src="/logo-32.png" alt="KeychainPGP" class="w-8 h-8 rounded-lg" />
+      <img src="/logo-32.png" alt="KeychainPGP" class="h-8 w-8 rounded-lg" />
       <div>
         <h1 class="text-xl font-bold">{m.home_title()}</h1>
         <p class="text-sm text-[var(--color-text-secondary)]">
@@ -196,19 +216,19 @@
     <div class="flex justify-center">
       <div class="inline-flex rounded-lg border border-[var(--color-border)] p-0.5">
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+          class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
           class:bg-[var(--color-primary)]={!isCompose}
           class:text-white={!isCompose}
-          onclick={() => appStore.inputMode = "clipboard"}
+          onclick={() => (appStore.inputMode = "clipboard")}
         >
           <Clipboard size={14} />
           {m.mode_clipboard()}
         </button>
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors"
+          class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
           class:bg-[var(--color-primary)]={isCompose}
           class:text-white={isCompose}
-          onclick={() => appStore.inputMode = "compose"}
+          onclick={() => (appStore.inputMode = "compose")}
         >
           <MessageSquare size={14} />
           {m.mode_compose()}
@@ -225,13 +245,20 @@
     <ClipboardPreview />
   {/if}
 
-  <div class="grid grid-cols-2 max-w-md mx-auto w-full" class:mt-auto={!desktop}
-    class:gap-2={!desktop} class:gap-3={desktop}>
+  <div
+    class="mx-auto grid w-full max-w-md grid-cols-2"
+    class:mt-auto={!desktop}
+    class:gap-2={!desktop}
+    class:gap-3={desktop}
+  >
     <button
-      class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
-             hover:bg-[var(--color-primary-hover)] transition-colors
-             flex flex-col items-center"
-      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class="flex flex-col items-center rounded-lg
+             bg-[var(--color-primary)] font-semibold
+             text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+      class:py-4={desktop}
+      class:py-2.5={!desktop}
+      class:gap-1={desktop}
+      class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleEncrypt}
     >
@@ -240,10 +267,13 @@
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "E"]} variant="light" />{/if}
     </button>
     <button
-      class="rounded-lg bg-[var(--color-primary)] text-white font-semibold
-             hover:bg-[var(--color-primary-hover)] transition-colors
-             flex flex-col items-center"
-      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class="flex flex-col items-center rounded-lg
+             bg-[var(--color-primary)] font-semibold
+             text-white transition-colors hover:bg-[var(--color-primary-hover)]"
+      class:py-4={desktop}
+      class:py-2.5={!desktop}
+      class:gap-1={desktop}
+      class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleDecrypt}
     >
@@ -252,10 +282,13 @@
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "D"]} variant="light" />{/if}
     </button>
     <button
-      class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
-             hover:bg-[var(--color-primary)] hover:text-white transition-colors
-             flex flex-col items-center"
-      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class="flex flex-col items-center rounded-lg border-2
+             border-[var(--color-primary)] font-semibold text-[var(--color-primary)]
+             transition-colors hover:bg-[var(--color-primary)] hover:text-white"
+      class:py-4={desktop}
+      class:py-2.5={!desktop}
+      class:gap-1={desktop}
+      class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleSign}
     >
@@ -264,10 +297,13 @@
       {#if desktop}<Kbd keys={[m.kbd_ctrl(), m.kbd_shift(), "S"]} />{/if}
     </button>
     <button
-      class="rounded-lg border-2 border-[var(--color-primary)] text-[var(--color-primary)] font-semibold
-             hover:bg-[var(--color-primary)] hover:text-white transition-colors
-             flex flex-col items-center"
-      class:py-4={desktop} class:py-2.5={!desktop} class:gap-1={desktop} class:gap-0.5={!desktop}
+      class="flex flex-col items-center rounded-lg border-2
+             border-[var(--color-primary)] font-semibold text-[var(--color-primary)]
+             transition-colors hover:bg-[var(--color-primary)] hover:text-white"
+      class:py-4={desktop}
+      class:py-2.5={!desktop}
+      class:gap-1={desktop}
+      class:gap-0.5={!desktop}
       class:text-sm={!desktop}
       onclick={handleVerify}
     >

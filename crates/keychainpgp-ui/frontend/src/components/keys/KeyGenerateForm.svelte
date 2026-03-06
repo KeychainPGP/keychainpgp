@@ -35,45 +35,47 @@
   }
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-3">
+<div
+  class="space-y-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
+>
   <h3 class="font-medium">{m.keygen_title()}</h3>
   <div class="grid grid-cols-2 gap-3">
     <input
       type="text"
       placeholder={m.keygen_name_placeholder()}
       bind:value={name}
-      class="px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
-             bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+      class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2
+             text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
     />
     <input
       type="email"
       placeholder={m.keygen_email_placeholder()}
       bind:value={email}
-      class="px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
-             bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+      class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2
+             text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
     />
   </div>
   <input
     type="password"
     placeholder={m.keygen_passphrase_placeholder()}
     bind:value={passphrase}
-    class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)]
-           bg-[var(--color-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+    class="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2
+           text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
   />
   {#if error}
     <p class="text-sm text-[var(--color-danger)]">{error}</p>
   {/if}
-  <div class="flex gap-2 justify-end">
+  <div class="flex justify-end gap-2">
     <button
-      class="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)]
-             hover:bg-[var(--color-bg)] transition-colors"
+      class="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm
+             transition-colors hover:bg-[var(--color-bg)]"
       onclick={onDone}
     >
       {m.keygen_cancel()}
     </button>
     <button
-      class="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-             hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+      class="rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-sm font-medium text-white
+             transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
       onclick={handleGenerate}
       disabled={generating}
     >

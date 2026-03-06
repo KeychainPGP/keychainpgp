@@ -42,10 +42,7 @@
     await initPlatform();
     mobile = isMobile();
 
-    await Promise.all([
-      keyStore.refresh(),
-      settingsStore.load(),
-    ]);
+    await Promise.all([keyStore.refresh(), settingsStore.load()]);
     initLocale(settingsStore.settings.locale);
 
     if (isDesktop()) {
@@ -62,10 +59,22 @@
       keydownHandler = (e: KeyboardEvent) => {
         if (e.ctrlKey && e.shiftKey) {
           switch (e.key.toUpperCase()) {
-            case "E": e.preventDefault(); appStore.dispatchAction("encrypt"); break;
-            case "D": e.preventDefault(); appStore.dispatchAction("decrypt"); break;
-            case "S": e.preventDefault(); appStore.dispatchAction("sign"); break;
-            case "V": e.preventDefault(); appStore.dispatchAction("verify"); break;
+            case "E":
+              e.preventDefault();
+              appStore.dispatchAction("encrypt");
+              break;
+            case "D":
+              e.preventDefault();
+              appStore.dispatchAction("decrypt");
+              break;
+            case "S":
+              e.preventDefault();
+              appStore.dispatchAction("sign");
+              break;
+            case "V":
+              e.preventDefault();
+              appStore.dispatchAction("verify");
+              break;
           }
         }
       };
@@ -95,9 +104,9 @@
   const showOnboarding = $derived(initialized && !keyStore.hasOwnKey);
 </script>
 
-<main class="flex flex-col h-screen" class:safe-area-top={mobile}>
+<main class="flex h-screen flex-col" class:safe-area-top={mobile}>
   {#if !initialized}
-    <div class="flex items-center justify-center h-full">
+    <div class="flex h-full items-center justify-center">
       <p class="text-[var(--color-text-secondary)]">{m.loading()}</p>
     </div>
   {:else}

@@ -8,11 +8,11 @@
       <span class="text-[10px] opacity-50">+</span>
     {/if}
     <kbd
-      class="inline-block min-w-[1.25rem] text-center text-[10px] font-mono font-medium leading-none
-             px-1 py-0.5 rounded border shadow-[0_1px_0]
+      class="inline-block min-w-[1.25rem] rounded border px-1 py-0.5 text-center
+             font-mono text-[10px] leading-none font-medium shadow-[0_1px_0]
              {variant === 'light'
-               ? 'bg-white/20 border-white/30 text-white shadow-white/10'
-               : 'bg-[var(--color-bg)] border-[var(--color-border)] text-[var(--color-text-secondary)] shadow-[var(--color-border)]'}"
+        ? 'border-white/30 bg-white/20 text-white shadow-white/10'
+        : 'border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-secondary)] shadow-[var(--color-border)]'}"
     >
       {key}
     </kbd>

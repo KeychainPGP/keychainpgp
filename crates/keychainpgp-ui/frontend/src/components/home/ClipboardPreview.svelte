@@ -6,10 +6,10 @@
 </script>
 
 <div
-  class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 min-h-32 relative"
+  class="relative min-h-32 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
 >
-  <div class="flex items-center justify-between mb-2">
-    <span class="text-xs font-medium text-[var(--color-text-secondary)] uppercase tracking-wide">
+  <div class="mb-2 flex items-center justify-between">
+    <span class="text-xs font-medium tracking-wide text-[var(--color-text-secondary)] uppercase">
       {m.clipboard_label()}
     </span>
     <div class="flex items-center gap-2">
@@ -19,13 +19,15 @@
           {m.clipboard_signed_message()}
         </span>
       {:else if clipboardStore.isPgpMessage}
-        <span class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]">
+        <span
+          class="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary)]"
+        >
           <Lock size={12} />
           {m.clipboard_pgp_message()}
         </span>
       {/if}
       <button
-        class="p-1 rounded hover:bg-[var(--color-border)] transition-colors"
+        class="rounded p-1 transition-colors hover:bg-[var(--color-border)]"
         onclick={() => clipboardStore.refresh()}
         title={m.clipboard_refresh()}
       >
@@ -35,11 +37,11 @@
   </div>
 
   {#if clipboardStore.content}
-    <p class="text-sm font-mono whitespace-pre-wrap break-all text-[var(--color-text)]">
+    <p class="font-mono text-sm break-all whitespace-pre-wrap text-[var(--color-text)]">
       {truncate(clipboardStore.content, 500)}
     </p>
   {:else}
-    <p class="text-[var(--color-text-secondary)] text-sm italic">
+    <p class="text-sm text-[var(--color-text-secondary)] italic">
       {m.clipboard_empty()}
     </p>
   {/if}
