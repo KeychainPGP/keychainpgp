@@ -164,7 +164,7 @@
   "discovery_searching": "Wyszukiwanie...",
   "discovery_not_found": "Nie znaleziono kluczy.",
   "discovery_found": "Znaleziono",
-  "discovery_import_hint": "Aby zaimportować znaleziony klucz, skopiuj jego klucz publiczny i użyj funkcji importu w zakładce Klucze.",
+  "discovery_import_hint": "Kliknij Importuj, aby dodać klucz do swojego pęku kluczy. Zawsze weryfikuj odcisk palca z właścicielem klucza.",
   "discovery_import_fail": "Nie udało się pobrać danych klucza do importu.",
   "discovery_close": "Zamknij",
   "trust_unknown": "Nieznany",

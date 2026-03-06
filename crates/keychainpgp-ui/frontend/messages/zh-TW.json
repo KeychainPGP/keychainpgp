@@ -164,7 +164,7 @@
   "discovery_searching": "正在搜尋...",
   "discovery_not_found": "未找到金鑰。",
   "discovery_found": "已找到",
-  "discovery_import_hint": "若要匯入探索到的金鑰，請複製其公鑰，然後在金鑰檢視中使用匯入功能。",
+  "discovery_import_hint": "點擊匯入將金鑰新增至您的金鑰環。請務必與金鑰擁有者確認指紋。",
   "discovery_import_fail": "無法取得金鑰資料以進行匯入。",
   "discovery_close": "關閉",
   "trust_unknown": "未知",

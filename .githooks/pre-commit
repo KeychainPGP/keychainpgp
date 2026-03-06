@@ -15,9 +15,13 @@ echo "==> Running cargo clippy..."
 cargo clippy --workspace --all-targets --exclude keychainpgp-wasm --exclude keychainpgp-ui -- -D warnings
 
 echo "==> Running prettier on staged frontend files..."
-FRONTEND_FILES=$(git diff --cached --name-only --diff-filter=ACM -- 'crates/keychainpgp-ui/frontend/src/**' 'crates/keychainpgp-ui/frontend/messages/**' 'crates/keychainpgp-ui/frontend/scripts/**' | grep -E '\.(js|ts|svelte|json|css|html)$' || true)
+FRONTEND_DIR="crates/keychainpgp-ui/frontend"
+FRONTEND_FILES=$(git diff --cached --name-only --diff-filter=ACM -- "$FRONTEND_DIR/src/**" "$FRONTEND_DIR/messages/**" "$FRONTEND_DIR/scripts/**" | grep -E '\.(js|ts|svelte|json|css|html)$' || true)
 if [ -n "$FRONTEND_FILES" ]; then
-  npx --prefix crates/keychainpgp-ui/frontend prettier --write $FRONTEND_FILES
+  # Run prettier from the frontend dir so plugins resolve correctly
+  # Convert repo-relative paths to frontend-relative paths
+  RELATIVE_FILES=$(echo "$FRONTEND_FILES" | sed "s|^$FRONTEND_DIR/||")
+  (cd "$FRONTEND_DIR" && echo "$RELATIVE_FILES" | xargs npx prettier --write)
   echo "$FRONTEND_FILES" | xargs git add
 fi
 

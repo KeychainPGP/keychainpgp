@@ -164,7 +164,7 @@
   "discovery_searching": "Ricerca in corso...",
   "discovery_not_found": "Nessuna chiave trovata.",
   "discovery_found": "Trovata",
-  "discovery_import_hint": "Per importare una chiave trovata, copia la sua chiave pubblica e usa la funzione Importa nella vista Chiavi.",
+  "discovery_import_hint": "Fare clic su Importa per aggiungere una chiave al portachiavi. Verificare sempre l'impronta digitale con il proprietario della chiave.",
   "discovery_import_fail": "Impossibile recuperare i dati della chiave per l'importazione.",
   "discovery_close": "Chiudi",
   "trust_unknown": "Sconosciuta",

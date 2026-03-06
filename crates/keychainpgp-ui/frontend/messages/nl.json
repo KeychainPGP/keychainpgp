@@ -164,7 +164,7 @@
   "discovery_searching": "Zoeken...",
   "discovery_not_found": "Geen sleutels gevonden.",
   "discovery_found": "Gevonden",
-  "discovery_import_hint": "Om een ontdekte sleutel te importeren, kopieer de publieke sleutel en gebruik de importfunctie in het scherm Sleutels.",
+  "discovery_import_hint": "Klik op Importeren om een sleutel aan uw sleutelbos toe te voegen. Controleer altijd de vingerafdruk bij de sleuteleigenaar.",
   "discovery_import_fail": "Kon de sleutelgegevens niet ophalen voor import.",
   "discovery_close": "Sluiten",
   "trust_unknown": "Onbekend",

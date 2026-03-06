@@ -164,7 +164,7 @@
   "discovery_searching": "Recherche...",
   "discovery_not_found": "Aucune clé trouvée.",
   "discovery_found": "Trouvée",
-  "discovery_import_hint": "Pour importer une clé découverte, copiez sa clé publique et utilisez la fonction Importer dans la vue Clés.",
+  "discovery_import_hint": "Cliquez sur Importer pour ajouter une clé à votre trousseau. Vérifiez toujours l'empreinte avec le propriétaire de la clé.",
   "discovery_import_fail": "Impossible de récupérer les données de la clé pour l'import.",
   "discovery_close": "Fermer",
   "trust_unknown": "Inconnue",

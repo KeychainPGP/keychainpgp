@@ -164,7 +164,7 @@
   "discovery_searching": "検索中...",
   "discovery_not_found": "鍵が見つかりませんでした。",
   "discovery_found": "見つかりました",
-  "discovery_import_hint": "検索した鍵をインポートするには、公開鍵をコピーして鍵ビューのインポート機能をお使いください。",
+  "discovery_import_hint": "インポートをクリックしてキーリングに鍵を追加します。必ず鍵の所有者とフィンガープリントを確認してください。",
   "discovery_import_fail": "インポート用の鍵データを取得できませんでした。",
   "discovery_close": "閉じる",
   "trust_unknown": "不明",

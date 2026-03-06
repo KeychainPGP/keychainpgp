@@ -164,7 +164,7 @@
   "discovery_searching": "Searching...",
   "discovery_not_found": "No keys found.",
   "discovery_found": "Found",
-  "discovery_import_hint": "To import a discovered key, copy its public key and use the Import function in the Keys view.",
+  "discovery_import_hint": "Click Import to add a key to your keyring. Always verify the fingerprint with the key owner.",
   "discovery_import_fail": "Could not retrieve key data for import.",
   "discovery_close": "Close",
   "trust_unknown": "Unknown",
