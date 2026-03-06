@@ -87,6 +87,7 @@ export interface Settings {
   opsec_mode: boolean;
   opsec_window_title: string;
   opsec_view_timeout_secs: number;
+  upload_to_keyservers: boolean;
 }
 
 // --- Crypto ---

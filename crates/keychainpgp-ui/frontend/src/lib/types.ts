@@ -24,6 +24,8 @@ export interface ModalProps {
   /** For confirm dialog */
   title?: string;
   message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm?: () => void;
   /** For error dialog */
   error?: string;
