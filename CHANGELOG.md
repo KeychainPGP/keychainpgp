@@ -22,3 +22,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `keychainpgp-clipboard`: Clipboard monitoring, PGP detection, and auto-clear
 - `keychainpgp-ui`: Tauri desktop application with Svelte frontend
 - `keychainpgp-cli`: Command-line interface
+- Support for PGP private key backup to file with security warnings
+- Support for revocation certificate export and direct publication to keyservers

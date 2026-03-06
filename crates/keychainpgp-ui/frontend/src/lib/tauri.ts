@@ -14,6 +14,7 @@ export interface KeyInfo {
   expires_at: string | null;
   trust_level: number;
   is_own_key: boolean;
+  is_revoked: boolean;
 }
 
 export interface EncryptResult {
@@ -64,6 +65,7 @@ export interface KeyDetailedInfo {
   expires_at: string | null;
   trust_level: number;
   is_own_key: boolean;
+  is_revoked: boolean;
   user_ids: UserIdDto[];
   subkeys: SubkeyInfoDto[];
 }
@@ -152,6 +154,14 @@ export async function importKey(keyData: string): Promise<KeyInfo> {
 
 export async function exportKey(fingerprint: string): Promise<string> {
   return invoke("export_key", { fingerprint });
+}
+
+export async function exportPrivateKey(fingerprint: string, path: string): Promise<void> {
+  return invoke("export_private_key", { fingerprint, path });
+}
+
+export async function publishRevocationCert(fingerprint: string): Promise<string> {
+  return invoke("publish_revocation_cert", { fingerprint });
 }
 
 export async function deleteKey(fingerprint: string): Promise<boolean> {

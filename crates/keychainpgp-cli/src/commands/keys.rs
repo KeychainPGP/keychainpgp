@@ -51,6 +51,7 @@ pub fn import(file: &Path) -> Result<()> {
             expires_at: info.expires_at.clone(),
             trust_level: 2, // own key = verified
             is_own_key: true,
+            is_revoked: info.is_revoked,
             pgp_data: data.clone(),
         };
         keyring.store_generated_key(record, &data)?;
@@ -66,6 +67,7 @@ pub fn import(file: &Path) -> Result<()> {
             expires_at: info.expires_at.clone(),
             trust_level: 1, // imported = unverified
             is_own_key: false,
+            is_revoked: info.is_revoked,
             pgp_data: data,
         };
         keyring.import_public_key(record)?;
@@ -133,7 +135,8 @@ fn print_key_summary(key: &KeyRecord) {
         .map(|e| format!("  expires {}", format_date(e)))
         .unwrap_or_default();
 
-    println!("{tag}   {:<12} {trust}", key.algorithm);
+    let revoked = if key.is_revoked { " [REVOKED]" } else { "" };
+    println!("{tag}   {:<12} {trust}{revoked}", key.algorithm);
     println!("      {}", key.fingerprint);
     println!("      {name}{email}{expires}");
 }

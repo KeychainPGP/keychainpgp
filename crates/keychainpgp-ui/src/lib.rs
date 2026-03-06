@@ -21,6 +21,7 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_os::init())
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -52,6 +53,8 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::list_keys,
             commands::keys::import_key,
             commands::keys::export_key,
+            commands::keys::export_private_key,
+            commands::keys::publish_revocation_cert,
             commands::keys::delete_key,
             commands::keys::search_keys,
             commands::keys::inspect_key,
@@ -99,6 +102,8 @@ fn create_builder() -> tauri::Builder<tauri::Wry> {
             commands::keys::list_keys,
             commands::keys::import_key,
             commands::keys::export_key,
+            commands::keys::export_private_key,
+            commands::keys::publish_revocation_cert,
             commands::keys::delete_key,
             commands::keys::search_keys,
             commands::keys::inspect_key,

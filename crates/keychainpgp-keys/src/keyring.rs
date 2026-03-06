@@ -115,10 +115,25 @@ impl Keyring {
         self.storage.set_trust(fingerprint, trust)
     }
 
+    /// Mark a key as revoked in the database.
+    pub fn set_revoked(&self, fingerprint: &str, revoked: bool) -> Result<bool> {
+        self.storage.set_revoked(fingerprint, revoked)
+    }
+
+    /// Update the PGP data for a key.
+    pub fn update_pgp_data(&self, fingerprint: &str, pgp_data: &[u8]) -> Result<bool> {
+        self.storage.update_pgp_data(fingerprint, pgp_data)
+    }
+
     /// Store a revocation certificate for the given key.
     pub fn store_revocation_cert(&self, fingerprint: &str, rev_cert: &[u8]) -> Result<()> {
         self.credentials
             .store_revocation_cert(fingerprint, rev_cert)
+    }
+
+    /// Retrieve a revocation certificate for the given key.
+    pub fn get_revocation_cert(&self, fingerprint: &str) -> Result<Option<Vec<u8>>> {
+        self.credentials.get_revocation_cert(fingerprint)
     }
 
     /// Enable portable mode on the credential store (skips OS keyring).

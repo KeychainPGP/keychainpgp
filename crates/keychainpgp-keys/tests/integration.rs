@@ -35,6 +35,7 @@ fn generate_and_store(
         expires_at: info.expires_at,
         trust_level: 2,
         is_own_key: true,
+        is_revoked: info.is_revoked,
         pgp_data: key_pair.public_key.clone(),
     };
 
@@ -218,6 +219,7 @@ fn test_import_public_key() {
         expires_at: info.expires_at,
         trust_level: 1,
         is_own_key: false,
+        is_revoked: info.is_revoked,
         pgp_data: key_pair.public_key.clone(),
     };
 

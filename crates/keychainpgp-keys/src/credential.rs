@@ -153,6 +153,19 @@ impl CredentialStore {
         Ok(())
     }
 
+    /// Retrieve a revocation certificate for the given key.
+    pub fn get_revocation_cert(&self, fingerprint: &str) -> Result<Option<Vec<u8>>> {
+        Self::validate_fingerprint(fingerprint)?;
+        let path = self.secrets_dir.join(format!("{fingerprint}.rev"));
+        if !path.exists() {
+            return Ok(None);
+        }
+        let data = std::fs::read(&path).map_err(|e| Error::CredentialStore {
+            reason: format!("failed to read revocation cert: {e}"),
+        })?;
+        Ok(Some(data))
+    }
+
     /// Check if a secret key exists in either store.
     pub fn has_secret_key(&self, fingerprint: &str) -> bool {
         if Self::validate_fingerprint(fingerprint).is_err() {

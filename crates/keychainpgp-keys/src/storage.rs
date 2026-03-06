@@ -24,6 +24,8 @@ pub struct KeyRecord {
     pub trust_level: i32,
     /// Whether this is the user's own key (has a corresponding private key).
     pub is_own_key: bool,
+    /// Whether the key is revoked.
+    pub is_revoked: bool,
     /// Raw ASCII-armored public key data.
     pub pgp_data: Vec<u8>,
 }
@@ -61,11 +63,34 @@ impl KeyStorage {
                 expires_at  TEXT,
                 trust_level INTEGER NOT NULL DEFAULT 0,
                 is_own_key  INTEGER NOT NULL DEFAULT 0,
+                is_revoked  INTEGER NOT NULL DEFAULT 0,
                 pgp_data    BLOB NOT NULL
             );
 
-            CREATE INDEX IF NOT EXISTS idx_keys_email ON keys(email);
-            CREATE INDEX IF NOT EXISTS idx_keys_name  ON keys(name);",
+            -- Migration: add is_revoked if it does not exist
+            PRAGMA table_info(keys);",
+        )?;
+
+        // Check if is_revoked exists, if not add it
+        let mut stmt = self.conn.prepare("PRAGMA table_info(keys)")?;
+        let columns = stmt.query_map([], |row| row.get::<_, String>(1))?;
+        let mut has_revoked = false;
+        for col in columns {
+            if col? == "is_revoked" {
+                has_revoked = true;
+                break;
+            }
+        }
+        if !has_revoked {
+            self.conn.execute(
+                "ALTER TABLE keys ADD COLUMN is_revoked INTEGER NOT NULL DEFAULT 0",
+                [],
+            )?;
+        }
+
+        self.conn.execute_batch(
+            "CREATE INDEX IF NOT EXISTS idx_keys_email ON keys(email);
+             CREATE INDEX IF NOT EXISTS idx_keys_name  ON keys(name);",
         )?;
         Ok(())
     }
@@ -73,8 +98,8 @@ impl KeyStorage {
     /// Insert a key record. Returns an error if the fingerprint already exists.
     pub fn insert(&self, record: &KeyRecord) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO keys (fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, pgp_data)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            "INSERT INTO keys (fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, is_revoked, pgp_data)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 record.fingerprint,
                 record.name,
@@ -84,6 +109,7 @@ impl KeyStorage {
                 record.expires_at,
                 record.trust_level,
                 record.is_own_key,
+                record.is_revoked,
                 record.pgp_data,
             ],
         )?;
@@ -95,7 +121,7 @@ impl KeyStorage {
         let record = self
             .conn
             .query_row(
-                "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, pgp_data
+                "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, is_revoked, pgp_data
                  FROM keys WHERE fingerprint = ?1",
                 params![fingerprint],
                 |row| {
@@ -108,7 +134,8 @@ impl KeyStorage {
                         expires_at: row.get(5)?,
                         trust_level: row.get(6)?,
                         is_own_key: row.get(7)?,
-                        pgp_data: row.get(8)?,
+                        is_revoked: row.get::<_, i32>(8)? != 0,
+                        pgp_data: row.get(9)?,
                     })
                 },
             )
@@ -119,7 +146,7 @@ impl KeyStorage {
     /// List all key records.
     pub fn list_all(&self) -> Result<Vec<KeyRecord>> {
         let mut stmt = self.conn.prepare(
-            "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, pgp_data
+            "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, is_revoked, pgp_data
              FROM keys ORDER BY is_own_key DESC, name ASC",
         )?;
         let records = stmt
@@ -133,7 +160,8 @@ impl KeyStorage {
                     expires_at: row.get(5)?,
                     trust_level: row.get(6)?,
                     is_own_key: row.get(7)?,
-                    pgp_data: row.get(8)?,
+                    is_revoked: row.get::<_, i32>(8)? != 0,
+                    pgp_data: row.get(9)?,
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
@@ -144,7 +172,7 @@ impl KeyStorage {
     pub fn search(&self, query: &str) -> Result<Vec<KeyRecord>> {
         let pattern = format!("%{query}%");
         let mut stmt = self.conn.prepare(
-            "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, pgp_data
+            "SELECT fingerprint, name, email, algorithm, created_at, expires_at, trust_level, is_own_key, is_revoked, pgp_data
              FROM keys
              WHERE name LIKE ?1 COLLATE NOCASE
                 OR email LIKE ?1 COLLATE NOCASE
@@ -162,7 +190,8 @@ impl KeyStorage {
                     expires_at: row.get(5)?,
                     trust_level: row.get(6)?,
                     is_own_key: row.get(7)?,
-                    pgp_data: row.get(8)?,
+                    is_revoked: row.get::<_, i32>(8)? != 0,
+                    pgp_data: row.get(9)?,
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
@@ -174,6 +203,24 @@ impl KeyStorage {
         let rows = self.conn.execute(
             "DELETE FROM keys WHERE fingerprint = ?1",
             params![fingerprint],
+        )?;
+        Ok(rows > 0)
+    }
+
+    /// Mark a key as revoked.
+    pub fn set_revoked(&self, fingerprint: &str, revoked: bool) -> Result<bool> {
+        let rows = self.conn.execute(
+            "UPDATE keys SET is_revoked = ?1 WHERE fingerprint = ?2",
+            params![revoked as i32, fingerprint],
+        )?;
+        Ok(rows > 0)
+    }
+
+    /// Update the PGP data for a key.
+    pub fn update_pgp_data(&self, fingerprint: &str, pgp_data: &[u8]) -> Result<bool> {
+        let rows = self.conn.execute(
+            "UPDATE keys SET pgp_data = ?1 WHERE fingerprint = ?2",
+            params![pgp_data, fingerprint],
         )?;
         Ok(rows > 0)
     }
@@ -207,6 +254,7 @@ mod tests {
             expires_at: Some("2028-02-20T00:00:00Z".to_string()),
             trust_level: 0,
             is_own_key: false,
+            is_revoked: false,
             pgp_data: b"fake-pgp-data".to_vec(),
         }
     }

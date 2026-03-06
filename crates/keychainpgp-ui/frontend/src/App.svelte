@@ -31,6 +31,7 @@
   import KeyDiscoveryModal from "./components/modals/KeyDiscoveryModal.svelte";
   import KeySyncExportModal from "./components/modals/KeySyncExportModal.svelte";
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
+  import RevokeKeyModal from "./components/modals/RevokeKeyModal.svelte";
   import DonateModal from "./components/modals/DonateModal.svelte";
 
   let initialized = $state(false);
@@ -156,6 +157,8 @@
     <KeySyncExportModal />
   {:else if appStore.activeModal === "key-sync-import"}
     <KeySyncImportModal />
+  {:else if appStore.activeModal === "key-revoke"}
+    <RevokeKeyModal onConfirmRevoke={appStore.modalProps.onConfirmRevoke!} />
   {:else if appStore.activeModal === "donate"}
     <DonateModal />
   {/if}

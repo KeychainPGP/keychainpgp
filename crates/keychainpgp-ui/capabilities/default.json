@@ -2,8 +2,14 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "desktop-default",
   "description": "Default capabilities for desktop platforms",
-  "windows": ["main"],
-  "platforms": ["linux", "macOS", "windows"],
+  "windows": [
+    "main"
+  ],
+  "platforms": [
+    "linux",
+    "macOS",
+    "windows"
+  ],
   "permissions": [
     "core:default",
     "global-shortcut:allow-register",
@@ -12,6 +18,7 @@
     "notification:default",
     "clipboard-manager:default",
     "store:default",
+    "dialog:default",
     "os:default"
   ]
 }

@@ -54,6 +54,7 @@ pub struct KeyInfo {
     pub expires_at: Option<String>,
     pub trust_level: i32,
     pub is_own_key: bool,
+    pub is_revoked: bool,
 }
 
 impl From<KeyRecord> for KeyInfo {
@@ -67,6 +68,7 @@ impl From<KeyRecord> for KeyInfo {
             expires_at: r.expires_at,
             trust_level: r.trust_level,
             is_own_key: r.is_own_key,
+            is_revoked: r.is_revoked,
         }
     }
 }
@@ -113,6 +115,7 @@ pub fn generate_key_pair(
         expires_at: info.expires_at,
         trust_level: 2, // Own key = verified
         is_own_key: true,
+        is_revoked: info.is_revoked,
         pgp_data: key_pair.public_key.clone(),
     };
 
@@ -185,6 +188,7 @@ pub fn import_key(state: State<'_, AppState>, key_data: String) -> Result<KeyInf
         expires_at: cert_info.expires_at,
         trust_level: if cert_info.has_secret_key { 2 } else { 1 },
         is_own_key: cert_info.has_secret_key,
+        is_revoked: cert_info.is_revoked,
         pgp_data: key_data.as_bytes().to_vec(),
     };
 
@@ -464,6 +468,7 @@ pub async fn wkd_lookup(
         expires_at: cert_info.expires_at,
         trust_level: 0,
         is_own_key: false,
+        is_revoked: cert_info.is_revoked,
     }))
 }
 
@@ -577,6 +582,7 @@ pub async fn keyserver_search(
                 expires_at: m.expires_at.as_ref().map(|t| t.to_string()),
                 trust_level: 0,
                 is_own_key: false,
+                is_revoked: false,
             }
         })
         .collect();
@@ -619,7 +625,7 @@ pub async fn fetch_and_import_key(
     })
 }
 
-/// Upload a public key to a keyserver.
+/// Upload a public key to one or more keyservers.
 #[tauri::command]
 pub async fn keyserver_upload(
     app: AppHandle,
@@ -627,8 +633,31 @@ pub async fn keyserver_upload(
     fingerprint: String,
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
-    let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
-    validate_keyserver_url(&url)?;
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
+        settings
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    };
+
+    let url_string = keyserver_url.unwrap_or(settings_url);
+    let urls: Vec<String> = url_string
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if urls.is_empty() {
+        return Err("No keyservers configured".into());
+    }
+
+    for url in &urls {
+        validate_keyserver_url(url)?;
+    }
+
     let proxy = get_proxy_url(&app);
 
     let key_data = {
@@ -643,9 +672,38 @@ pub async fn keyserver_upload(
         record.pgp_data.clone()
     };
 
-    keychainpgp_keys::network::keyserver::keyserver_upload(&key_data, &url, proxy.as_deref())
+    let mut successes = Vec::new();
+    let mut failures = Vec::new();
+
+    for url in &urls {
+        match keychainpgp_keys::network::keyserver::keyserver_upload(
+            &key_data,
+            url,
+            proxy.as_deref(),
+        )
         .await
-        .map_err(|e| e.to_string())
+        {
+            Ok(msg) => successes.push(format!("{url}: {msg}")),
+            Err(e) => failures.push(format!("{url}: {e}")),
+        }
+    }
+
+    if successes.is_empty() {
+        Err(format!(
+            "Failed to upload to all keyservers: {}",
+            failures.join("; ")
+        ))
+    } else if failures.is_empty() {
+        Ok(successes.join("\n"))
+    } else {
+        Ok(format!(
+            "Uploaded to {} server(s):\n{}\nFailed on {} server(s):\n{}",
+            successes.len(),
+            successes.join("\n"),
+            failures.len(),
+            failures.join("\n")
+        ))
+    }
 }
 
 /// Test a proxy connection by making a simple HTTPS request through it.
@@ -726,6 +784,7 @@ pub fn import_backup(
                     expires_at: cert_info.expires_at,
                     trust_level: 2,
                     is_own_key: true,
+                    is_revoked: cert_info.is_revoked,
                     pgp_data: public_bytes,
                 };
                 // Delete the public-only record and re-store with secret material
@@ -755,6 +814,7 @@ pub fn import_backup(
             expires_at: cert_info.expires_at,
             trust_level: if is_own { 2 } else { 1 },
             is_own_key: is_own,
+            is_revoked: cert_info.is_revoked,
             pgp_data: public_bytes,
         };
 
@@ -792,6 +852,156 @@ fn verify_fetched_key(
         return Err("Fetched key fingerprint does not match requested fingerprint".into());
     }
     Ok(())
+}
+
+/// Export a private key to a file path.
+#[tauri::command]
+pub fn export_private_key(
+    state: State<'_, AppState>,
+    fingerprint: String,
+    path: String,
+) -> Result<String, String> {
+    let keyring = state
+        .keyring
+        .lock()
+        .map_err(|e| format!("Internal error: {e}"))?;
+
+    // Verify the key exists and is an own key
+    let record = keyring
+        .get_key(&fingerprint)
+        .map_err(|e| format!("Failed to look up key: {e}"))?
+        .ok_or_else(|| format!("Key not found: {fingerprint}"))?;
+
+    if !record.is_own_key {
+        return Err("Cannot export private key: this is not your own key".into());
+    }
+
+    // Check OPSEC mode — secret key might be in RAM
+    let secret_key_bytes = if state.opsec_mode.load(Ordering::SeqCst) {
+        let opsec_keys = state
+            .opsec_secret_keys
+            .lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        opsec_keys
+            .get(&fingerprint)
+            .map(|z| (**z).clone())
+            .ok_or_else(|| "Secret key not found in OPSEC session".to_string())?
+    } else {
+        let sk = keyring
+            .get_secret_key(&fingerprint)
+            .map_err(|e| format!("Failed to retrieve secret key: {e}"))?;
+        sk.expose_secret().clone()
+    };
+
+    // Armor the secret key
+    let armored = state
+        .engine
+        .armor_key(&secret_key_bytes)
+        .map_err(|e| format!("Failed to armor private key: {e}"))?;
+
+    std::fs::write(&path, armored.as_bytes()).map_err(|e| format!("Failed to write file: {e}"))?;
+
+    Ok(format!("Private key exported to {path}"))
+}
+
+/// Publish a revocation certificate to all configured keyservers.
+///
+/// This retrieves the stored revocation certificate, which is already a full
+/// revoked certificate (public key merged with revocation signature), and
+/// uploads it to every configured keyserver. The local key is then marked
+/// as revoked in the database and its PGP data is updated.
+#[tauri::command]
+pub async fn publish_revocation_cert(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    fingerprint: String,
+) -> Result<String, String> {
+    let rev_cert = {
+        let keyring = state
+            .keyring
+            .lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        keyring
+            .get_revocation_cert(&fingerprint)
+            .map_err(|e| format!("Failed to get revocation certificate: {e}"))?
+            .ok_or_else(|| {
+                "No revocation certificate found for this key. Only keys generated by KeychainPGP have revocation certificates.".to_string()
+            })?
+    };
+
+    // Read keyserver URLs from settings
+    let settings_url = {
+        let store = app.store("settings.json").ok();
+        let val = store.and_then(|s| s.get("settings"));
+        let settings: Option<super::settings::Settings> =
+            val.and_then(|v| serde_json::from_value(v).ok());
+        settings
+            .map(|s| s.keyserver_url)
+            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    };
+
+    let urls: Vec<String> = settings_url
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    if urls.is_empty() {
+        return Err("No keyservers configured".into());
+    }
+
+    let proxy = get_proxy_url(&app);
+
+    let mut successes = Vec::new();
+    let mut failures = Vec::new();
+
+    for url in &urls {
+        if let Err(e) = validate_keyserver_url(url) {
+            failures.push(format!("{url}: {e}"));
+            continue;
+        }
+        match keychainpgp_keys::network::keyserver::keyserver_upload(
+            &rev_cert,
+            url,
+            proxy.as_deref(),
+        )
+        .await
+        {
+            Ok(_) => successes.push(url.clone()),
+            Err(e) => failures.push(format!("{url}: {e}")),
+        }
+    }
+
+    if successes.is_empty() {
+        return Err(format!(
+            "Failed to publish revocation to any keyserver: {}",
+            failures.join("; ")
+        ));
+    }
+
+    // Update local database: mark as revoked and update PGP data with revoked cert
+    {
+        let keyring = state
+            .keyring
+            .lock()
+            .map_err(|e| format!("Internal error: {e}"))?;
+        let _ = keyring.set_revoked(&fingerprint, true);
+        let _ = keyring.update_pgp_data(&fingerprint, &rev_cert);
+    }
+
+    if failures.is_empty() {
+        Ok(format!(
+            "Revocation published to {} keyserver(s)",
+            successes.len()
+        ))
+    } else {
+        Ok(format!(
+            "Revocation published to {} keyserver(s). Failed on {}: {}",
+            successes.len(),
+            failures.len(),
+            failures.join("; ")
+        ))
+    }
 }
 
 #[cfg(test)]

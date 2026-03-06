@@ -472,6 +472,7 @@ mod tests {
             expires_at: info.expires_at,
             trust_level: 2,
             is_own_key: true,
+            is_revoked: info.is_revoked,
             pgp_data: key_pair.public_key.clone(),
         };
 

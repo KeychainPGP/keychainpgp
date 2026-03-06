@@ -30,6 +30,7 @@ pub fn run(name: &str, email: &str, passphrase: Option<&str>) -> Result<()> {
         expires_at: info.expires_at,
         trust_level: 2,
         is_own_key: true,
+        is_revoked: info.is_revoked,
         pgp_data: key_pair.public_key.clone(),
     };
 

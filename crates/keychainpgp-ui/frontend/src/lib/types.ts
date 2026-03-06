@@ -14,6 +14,7 @@ export type ModalType =
   | "key-discovery"
   | "key-sync-export"
   | "key-sync-import"
+  | "key-revoke"
   | "donate";
 
 export interface ModalProps {
@@ -24,7 +25,10 @@ export interface ModalProps {
   /** For confirm dialog */
   title?: string;
   message?: string;
+  confirmLabel?: string;
   onConfirm?: () => void;
+  /** For revoke modal */
+  onConfirmRevoke?: (deleteLocal: boolean) => void;
   /** For error dialog */
   error?: string;
   suggestion?: string;

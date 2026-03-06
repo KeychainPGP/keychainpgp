@@ -54,6 +54,9 @@ pub trait CryptoEngine: Send + Sync {
     /// Parse a key (public or secret) and extract metadata.
     fn inspect_key(&self, key_data: &[u8]) -> Result<CertInfo>;
 
+    /// Armor a key (public or secret) back into ASCII format.
+    fn armor_key(&self, key_data: &[u8]) -> Result<String>;
+
     /// Encrypt data symmetrically with a passphrase (SKESK).
     ///
     /// Creates an OpenPGP message encrypted with a symmetric key derived from

@@ -151,7 +151,10 @@ pub async fn keyserver_upload(
         .await;
 
     if let Ok(resp) = response {
-        if resp.status().is_success() {
+        let status = resp.status();
+        let body = resp.text().await.unwrap_or_default();
+        tracing::debug!("VKS upload status: {}, body: {}", status, body);
+        if status.is_success() {
             return Ok("Key uploaded successfully. Check your email to verify.".into());
         }
     }
@@ -169,10 +172,20 @@ pub async fn keyserver_upload(
         .await
         .map_err(|e| format!("Upload failed: {e}"))?;
 
-    if response.status().is_success() {
+    let status = response.status();
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("Failed to read keyserver response: {e}"))?;
+
+    tracing::debug!("HKP upload status: {}, body: {}", status, body);
+
+    if status.is_success() {
         Ok("Key uploaded successfully.".into())
     } else {
-        Err(format!("Upload failed with status: {}", response.status()))
+        Err(format!(
+            "Upload failed with status: {status}. Response: {body}"
+        ))
     }
 }
 

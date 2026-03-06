@@ -168,6 +168,7 @@ pub fn import_key_bundle(
             expires_at: cert_info.expires_at,
             trust_level: entry.trust_level,
             is_own_key: entry.secret_key.is_some(),
+            is_revoked: cert_info.is_revoked,
             pgp_data: entry.public_key.clone(),
         };
 

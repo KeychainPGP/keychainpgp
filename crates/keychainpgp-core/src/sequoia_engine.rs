@@ -460,7 +460,7 @@ impl CryptoEngine for SequoiaEngine {
             })?;
         }
 
-        // Serialize revocation certificate (important for key lifecycle management)
+        // Serialize revocation certificate (as a full revoked certificate)
         let mut revocation_cert = Vec::new();
         {
             let mut writer = self
@@ -471,7 +471,17 @@ impl CryptoEngine for SequoiaEngine {
                 .map_err(|e| Error::KeyGeneration {
                     reason: format!("armor error: {e}"),
                 })?;
-            sequoia_openpgp::Packet::from(revocation)
+
+            // Merge revocation signature into the cert to create a full revoked certificate.
+            // This is more widely compatible than a standalone signature packet.
+            let (revoked_cert, _) = cert
+                .clone()
+                .insert_packets(vec![sequoia_openpgp::Packet::from(revocation)])
+                .map_err(|e| Error::KeyGeneration {
+                    reason: format!("failed to merge revocation: {e}"),
+                })?;
+
+            revoked_cert
                 .serialize(&mut writer)
                 .map_err(|e| Error::KeyGeneration {
                     reason: format!("revocation cert serialize error: {e}"),
@@ -525,7 +535,7 @@ impl CryptoEngine for SequoiaEngine {
 
         if recipients.is_empty() {
             return Err(Error::Encryption {
-                reason: "no valid encryption-capable subkeys found in recipient keys".into(),
+                reason: "no valid encryption-capable subkeys found".into(),
             });
         }
 
@@ -770,6 +780,15 @@ impl CryptoEngine for SequoiaEngine {
         // Check for secret key material
         let has_secret_key = cert.is_tsk();
 
+        let is_revoked = cert
+            .with_policy(&self.policy, None)
+            .ok()
+            .map(|valid_cert| {
+                valid_cert.primary_key().revocation_status()
+                    != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow
+            })
+            .unwrap_or(false);
+
         // Extract subkey information
         let subkeys = cert
             .with_policy(&self.policy, None)
@@ -806,8 +825,9 @@ impl CryptoEngine for SequoiaEngine {
                             capabilities.push(KeyCapability::Authenticate);
                         }
 
-                        let is_revoked = ka.revocation_status()
-                            != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow;
+                        let is_revoked = is_revoked
+                            || (ka.revocation_status()
+                                != sequoia_openpgp::types::RevocationStatus::NotAsFarAsWeKnow);
 
                         SubkeyInfo {
                             fingerprint: sk_fp,
@@ -829,6 +849,7 @@ impl CryptoEngine for SequoiaEngine {
             created_at,
             expires_at,
             has_secret_key,
+            is_revoked,
             subkeys,
         })
     }
@@ -862,6 +883,35 @@ impl CryptoEngine for SequoiaEngine {
         }
 
         Ok(output)
+    }
+
+    fn armor_key(&self, key_data: &[u8]) -> Result<String> {
+        let cert = Cert::from_bytes(key_data).map_err(|e| Error::InvalidArmor {
+            reason: e.to_string(),
+        })?;
+
+        let mut armored = Vec::new();
+        let kind = if cert.is_tsk() {
+            sequoia_openpgp::armor::Kind::SecretKey
+        } else {
+            sequoia_openpgp::armor::Kind::PublicKey
+        };
+
+        {
+            let mut writer =
+                self.armor_writer(&mut armored, kind)
+                    .map_err(|e| Error::InvalidArmor {
+                        reason: e.to_string(),
+                    })?;
+            cert.serialize(&mut writer)
+                .map_err(|e| Error::InvalidArmor {
+                    reason: e.to_string(),
+                })?;
+        }
+
+        String::from_utf8(armored).map_err(|e| Error::InvalidArmor {
+            reason: format!("Internal UTF-8 error: {e}"),
+        })
     }
 }
 

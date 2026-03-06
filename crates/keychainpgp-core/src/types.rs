@@ -199,6 +199,8 @@ pub struct CertInfo {
     pub expires_at: Option<String>,
     /// Whether the certificate contains secret key material.
     pub has_secret_key: bool,
+    /// Whether the primary key has been revoked.
+    pub is_revoked: bool,
     /// Subkeys.
     pub subkeys: Vec<SubkeyInfo>,
 }
