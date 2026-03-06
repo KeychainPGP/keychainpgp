@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Laden...",
   "ready": "Gereed",
-
   "nav_home": "Versleutelen / Ontsleutelen",
   "nav_keys": "Sleutels",
   "nav_settings": "Instellingen",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Kopieer tekst en kies hieronder een actie.",
   "home_tagline_compose": "Typ uw bericht en kies hieronder een actie.",
   "mode_clipboard": "Klembord",
   "mode_compose": "Opstellen",
-
   "action_encrypt": "VERSLEUTELEN",
   "action_decrypt": "ONTSLEUTELEN",
   "action_sign": "ONDERTEKENEN",
   "action_verify": "VERIFIËREN",
-
   "clipboard_label": "Klembord",
   "clipboard_empty": "Uw klembord is leeg. Kopieer tekst om te beginnen.",
   "clipboard_pgp_message": "PGP-bericht",
   "clipboard_signed_message": "Ondertekend bericht",
   "clipboard_refresh": "Klembord vernieuwen",
-
   "compose_label": "Opstellen",
   "compose_placeholder": "Typ of plak hier uw bericht...",
   "compose_clear": "Wissen",
-
   "encrypt_empty_clipboard": "Het klembord is leeg. Kopieer eerst tekst.",
   "encrypt_empty_compose": "Het tekstveld is leeg. Typ eerst een bericht.",
   "encrypt_no_keys": "Geen sleutels beschikbaar. Genereer of importeer eerst een sleutel.",
-
   "decrypt_empty_clipboard": "Het klembord is leeg. Kopieer eerst een versleuteld bericht.",
   "decrypt_empty_compose": "Het tekstveld is leeg.",
   "decrypt_no_pgp": "Geen PGP-bericht gedetecteerd.",
   "decrypt_in_progress": "Ontsleutelen...",
   "decrypt_success": "Ontsleuteling geslaagd.",
   "decrypt_wrong_key_hint": "Controleer of u de juiste privésleutel hebt geïmporteerd.",
-
   "sign_empty_clipboard": "Het klembord is leeg. Kopieer eerst tekst.",
   "sign_empty_compose": "Het tekstveld is leeg.",
   "sign_no_key": "Geen privésleutel beschikbaar. Genereer of importeer er eerst een.",
   "sign_in_progress": "Ondertekenen...",
   "sign_success_compose": "Bericht ondertekend.",
-
   "verify_empty_clipboard": "Het klembord is leeg. Kopieer eerst een ondertekend bericht.",
   "verify_empty_compose": "Het tekstveld is leeg.",
   "verify_in_progress": "Verifiëren...",
   "verify_success": "Handtekening geverifieerd.",
   "verify_failed": "Verificatie mislukt.",
-
   "verify_modal_title": "Handtekeningverificatie",
   "verify_valid_verified": "Geldige handtekening — Geverifieerd",
   "verify_valid_verified_desc": "Dit bericht is ondertekend met een geverifieerde sleutel.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Ondertekenaar",
   "verify_email_label": "E-mail",
   "verify_fingerprint_label": "Vingerafdruk",
-
   "keys_title": "Sleutelbeheer",
   "keys_generate": "Genereren",
   "keys_import_btn": "Importeren",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Contacten",
   "keys_export_success": "Publieke sleutel gekopieerd naar klembord.",
   "keys_deleted": "Sleutel verwijderd.",
-
   "key_details_title": "Sleuteldetails",
   "key_details_btn": "Details",
   "key_export_btn": "Publieke sleutel exporteren",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR-code",
   "key_details_not_found": "Sleutel niet gevonden.",
   "key_trust_update_failed": "Vertrouwen bijwerken mislukt: {error}",
-
   "keygen_title": "Nieuw sleutelpaar genereren",
   "keygen_name_placeholder": "Naam",
   "keygen_email_placeholder": "E-mail",
@@ -112,7 +98,6 @@
   "keygen_submit": "Genereren",
   "keygen_loading": "Genereren...",
   "keygen_success": "Sleutelpaar succesvol gegenereerd!",
-
   "onboarding_title": "Welkom bij KeychainPGP",
   "onboarding_subtitle": "Genereer uw eerste sleutelpaar om te beginnen met klembordversleuteling.",
   "onboarding_name_placeholder": "Uw naam",
@@ -123,7 +108,6 @@
   "onboarding_import": "Bestaande sleutel importeren",
   "onboarding_scan_qr": "QR-code scannen",
   "onboarding_sync": "Synchroniseren vanaf een ander apparaat",
-
   "recipient_title": "Ontvangers selecteren",
   "recipient_search_placeholder": "Sleutels zoeken...",
   "recipient_no_keys": "Geen sleutels beschikbaar.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Versleutelen voor {count} ontvangers",
   "recipient_encrypting": "Versleutelen...",
   "recipient_encrypt_success": "Bericht versleuteld en gekopieerd naar klembord.",
-
   "import_title": "Sleutel importeren",
   "import_textarea_placeholder": "Plak een ASCII-armored PGP-sleutel of back-upbestand...",
   "import_or": "of",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "1 sleutel geïmporteerd",
   "import_backup_success_other": "{count} sleutels geïmporteerd",
   "import_backup_skipped": ", {count} al in sleutelbos",
-
   "passphrase_title": "Wachtwoordzin invoeren",
   "passphrase_desc": "Deze sleutel is beveiligd met een wachtwoordzin. Voer deze in om te ontsleutelen.",
   "passphrase_placeholder": "Wachtwoordzin",
   "passphrase_cancel": "Annuleren",
   "passphrase_submit": "Ontsleutelen",
-
   "decrypted_title": "Ontsleuteld bericht",
   "decrypted_copy": "Kopiëren",
   "decrypted_copied": "Gekopieerd",
   "decrypted_close": "Sluiten",
-
   "error_title": "Fout",
   "error_fallback": "Er is een onverwachte fout opgetreden.",
   "error_ok": "OK",
-
   "confirm_default_title": "Bevestigen",
   "confirm_default_message": "Weet u het zeker?",
   "confirm_cancel": "Annuleren",
   "confirm_delete": "Verwijderen",
-
   "qr_title": "QR-code exporteren",
   "qr_generating": "QR-code genereren...",
   "qr_desc": "Scan deze QR-code om de publieke sleutel te importeren.",
   "qr_close": "Sluiten",
-
   "discovery_title": "Sleutels ontdekken",
   "discovery_placeholder": "E-mailadres of naam...",
   "discovery_search": "Zoeken",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Om een ontdekte sleutel te importeren, kopieer de publieke sleutel en gebruik de importfunctie in het scherm Sleutels.",
   "discovery_import_fail": "Kon de sleutelgegevens niet ophalen voor import.",
   "discovery_close": "Sluiten",
-
   "trust_unknown": "Onbekend",
   "trust_imported": "Geïmporteerd",
   "trust_verified": "Geverifieerd",
-
   "settings_title": "Instellingen",
   "settings_appearance": "Weergave",
   "settings_theme_system": "Systeem",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Donker",
   "settings_close_to_tray_label": "Sluiten naar systeemvak",
   "settings_close_to_tray_desc": "De app in het systeemvak laten draaien wanneer u het venster sluit",
-
   "settings_clipboard": "Klembord",
   "settings_auto_clear_label": "Klembord automatisch wissen",
   "settings_auto_clear_desc": "Gevoelige gegevens van het klembord wissen na ontsleuteling",
   "settings_auto_clear_delay_label": "Vertraging automatisch wissen",
   "settings_auto_clear_delay_desc": "Seconden voordat het klembord wordt gewist",
-
   "settings_encryption": "Versleuteling",
   "settings_encrypt_to_self_label": "Naar uzelf versleutelen",
   "settings_encrypt_to_self_desc": "Altijd uw eigen sleutel als ontvanger opnemen",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "{count} sleutels geselecteerd.",
   "settings_include_armor_label": "Armor-headers opnemen",
   "settings_include_armor_desc": "Versie- en commentaarmetadata toevoegen aan PGP-uitvoer",
-
   "settings_security": "Beveiliging",
   "settings_passphrase_cache_label": "Cacheduur wachtwoordzin",
   "settings_passphrase_cache_desc": "Seconden om wachtwoordzinnen te onthouden (0 = uitgeschakeld)",
   "settings_clear_cache": "Gecachte wachtwoordzinnen wissen",
   "settings_cache_cleared": "Cache van wachtwoordzinnen gewist.",
   "settings_cache_clear_failed": "Cache wissen mislukt: {error}",
-
   "settings_key_discovery": "Sleutelontdekking",
   "settings_keyserver_label": "Sleutelserver-URL",
   "settings_keyserver_desc": "Gebruikt voor het zoeken en uploaden van sleutels",
-
   "settings_language": "Taal",
   "settings_language_label": "Weergavetaal",
   "settings_language_desc": "Kies de taal voor de interface",
-
   "settings_sync": "Sleutelsynchronisatie",
   "settings_sync_desc": "Draag uw sleutels veilig over tussen apparaten.",
   "settings_sync_export": "Sleutels exporteren",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Voer de synchronisatiewachtwoordzin in die op het exporterende apparaat wordt getoond.",
   "done": "Gereed",
   "cancel": "Annuleren",
-
   "settings_opsec": "OPSEC-modus",
   "settings_opsec_desc": "Verharde modus voor risicovolle omgevingen. Sleutels worden alleen in RAM opgeslagen en gewist bij afsluiten.",
   "settings_opsec_enable": "OPSEC-modus inschakelen",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "Verbinding geslaagd!",
   "settings_proxy_failed": "Verbinding mislukt: {error}",
   "settings_proxy_custom": "Aangepast",
-
-  "settings_about": "KeychainPGP {version} — Klembordgerichte PGP-versleuteling voor desktop.",
   "settings_about_title": "Over",
+  "settings_about": "KeychainPGP {version} — Klembordgerichte PGP-versleuteling voor desktop.",
   "settings_portable_badge": "Draagbare modus",
   "donate_button": "Steun dit project",
   "donate_title": "Steun KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Bedankt voor uw steun!",
-
   "unnamed": "(naamloos)",
   "none_value": "(geen)",
   "date_na": "N.v.t.",
   "fingerprint_copy": "Vingerafdruk kopiëren",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

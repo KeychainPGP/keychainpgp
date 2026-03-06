@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Cargando...",
   "ready": "Listo",
-
   "nav_home": "Cifrar / Descifrar",
   "nav_keys": "Claves",
   "nav_settings": "Ajustes",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Copia un texto y elige una acción a continuación.",
   "home_tagline_compose": "Escribe tu mensaje y elige una acción a continuación.",
   "mode_clipboard": "Portapapeles",
   "mode_compose": "Redactar",
-
   "action_encrypt": "CIFRAR",
   "action_decrypt": "DESCIFRAR",
   "action_sign": "FIRMAR",
   "action_verify": "VERIFICAR",
-
   "clipboard_label": "Portapapeles",
   "clipboard_empty": "El portapapeles está vacío. Copia algo de texto para comenzar.",
   "clipboard_pgp_message": "Mensaje PGP",
   "clipboard_signed_message": "Mensaje firmado",
   "clipboard_refresh": "Actualizar portapapeles",
-
   "compose_label": "Redactar",
   "compose_placeholder": "Escribe o pega tu mensaje aquí...",
   "compose_clear": "Borrar",
-
   "encrypt_empty_clipboard": "El portapapeles está vacío. Copia algo de texto primero.",
   "encrypt_empty_compose": "El campo de redacción está vacío. Escribe un mensaje primero.",
   "encrypt_no_keys": "No hay claves disponibles. Genera o importa una clave primero.",
-
   "decrypt_empty_clipboard": "El portapapeles está vacío. Copia un mensaje cifrado primero.",
   "decrypt_empty_compose": "El campo de redacción está vacío.",
   "decrypt_no_pgp": "No se detectó ningún mensaje PGP.",
   "decrypt_in_progress": "Descifrando...",
   "decrypt_success": "Descifrado correctamente.",
   "decrypt_wrong_key_hint": "Asegúrate de tener la clave privada correcta importada.",
-
   "sign_empty_clipboard": "El portapapeles está vacío. Copia algo de texto primero.",
   "sign_empty_compose": "El campo de redacción está vacío.",
   "sign_no_key": "No hay clave privada disponible. Genera o importa una primero.",
   "sign_in_progress": "Firmando...",
   "sign_success_compose": "Mensaje firmado.",
-
   "verify_empty_clipboard": "El portapapeles está vacío. Copia un mensaje firmado primero.",
   "verify_empty_compose": "El campo de redacción está vacío.",
   "verify_in_progress": "Verificando...",
   "verify_success": "Firma verificada.",
   "verify_failed": "La verificación falló.",
-
   "verify_modal_title": "Verificación de firma",
   "verify_valid_verified": "Firma válida — Verificada",
   "verify_valid_verified_desc": "Este mensaje fue firmado por una clave verificada.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Firmante",
   "verify_email_label": "Correo electrónico",
   "verify_fingerprint_label": "Huella digital",
-
   "keys_title": "Gestor de claves",
   "keys_generate": "Generar",
   "keys_import_btn": "Importar",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Contactos",
   "keys_export_success": "Clave pública copiada al portapapeles.",
   "keys_deleted": "Clave eliminada.",
-
   "key_details_title": "Detalles de la clave",
   "key_details_btn": "Detalles",
   "key_export_btn": "Exportar clave pública",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "Código QR",
   "key_details_not_found": "Clave no encontrada.",
   "key_trust_update_failed": "No se pudo actualizar la confianza: {error}",
-
   "keygen_title": "Generar nuevo par de claves",
   "keygen_name_placeholder": "Nombre",
   "keygen_email_placeholder": "Correo electrónico",
@@ -112,7 +98,6 @@
   "keygen_submit": "Generar",
   "keygen_loading": "Generando...",
   "keygen_success": "¡Par de claves generado correctamente!",
-
   "onboarding_title": "Bienvenido a KeychainPGP",
   "onboarding_subtitle": "Genera tu primer par de claves para comenzar a cifrar desde el portapapeles.",
   "onboarding_name_placeholder": "Tu nombre",
@@ -123,7 +108,6 @@
   "onboarding_import": "Importar clave existente",
   "onboarding_scan_qr": "Escanear código QR",
   "onboarding_sync": "Sincronizar desde otro dispositivo",
-
   "recipient_title": "Seleccionar destinatarios",
   "recipient_search_placeholder": "Buscar claves...",
   "recipient_no_keys": "No hay claves disponibles.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Cifrar para {count} destinatarios",
   "recipient_encrypting": "Cifrando...",
   "recipient_encrypt_success": "Mensaje cifrado y copiado al portapapeles.",
-
   "import_title": "Importar clave",
   "import_textarea_placeholder": "Pega una clave PGP en formato ASCII-armored o un archivo de respaldo...",
   "import_or": "o",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "1 clave importada",
   "import_backup_success_other": "{count} claves importadas",
   "import_backup_skipped": ", {count} ya en el llavero",
-
   "passphrase_title": "Introducir frase de contraseña",
   "passphrase_desc": "Esta clave está protegida con una frase de contraseña. Introdúcela para descifrar.",
   "passphrase_placeholder": "Frase de contraseña",
   "passphrase_cancel": "Cancelar",
   "passphrase_submit": "Descifrar",
-
   "decrypted_title": "Mensaje descifrado",
   "decrypted_copy": "Copiar",
   "decrypted_copied": "Copiado",
   "decrypted_close": "Cerrar",
-
   "error_title": "Error",
   "error_fallback": "Ha ocurrido un error inesperado.",
   "error_ok": "Aceptar",
-
   "confirm_default_title": "Confirmar",
   "confirm_default_message": "¿Estás seguro?",
   "confirm_cancel": "Cancelar",
   "confirm_delete": "Eliminar",
-
   "qr_title": "Exportar código QR",
   "qr_generating": "Generando código QR...",
   "qr_desc": "Escanea este código QR para importar la clave pública.",
   "qr_close": "Cerrar",
-
   "discovery_title": "Buscar claves",
   "discovery_placeholder": "Dirección de correo o nombre...",
   "discovery_search": "Buscar",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "Para importar una clave descubierta, copia su clave pública y usa la función Importar en la vista de Claves.",
   "discovery_import_fail": "No se pudieron obtener los datos de la clave para importar.",
   "discovery_close": "Cerrar",
-
   "trust_unknown": "Desconocida",
   "trust_imported": "Importada",
   "trust_verified": "Verificada",
-
   "settings_title": "Ajustes",
   "settings_appearance": "Apariencia",
   "settings_theme_system": "Sistema",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Oscuro",
   "settings_close_to_tray_label": "Cerrar a la bandeja",
   "settings_close_to_tray_desc": "Mantener la aplicación en la bandeja del sistema al cerrar la ventana",
-
   "settings_clipboard": "Portapapeles",
   "settings_auto_clear_label": "Vaciar portapapeles automáticamente",
   "settings_auto_clear_desc": "Eliminar datos sensibles del portapapeles después de descifrar",
   "settings_auto_clear_delay_label": "Retraso del vaciado automático",
   "settings_auto_clear_delay_desc": "Segundos antes de vaciar el portapapeles",
-
   "settings_encryption": "Cifrado",
   "settings_encrypt_to_self_label": "Cifrar para uno mismo",
   "settings_encrypt_to_self_desc": "Incluir siempre tu propia clave como destinatario",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "{count} claves seleccionadas.",
   "settings_include_armor_label": "Incluir cabeceras armor",
   "settings_include_armor_desc": "Añadir metadatos de versión y comentario a la salida PGP",
-
   "settings_security": "Seguridad",
   "settings_passphrase_cache_label": "Duración de la caché de frases de contraseña",
   "settings_passphrase_cache_desc": "Segundos que se recuerdan las frases de contraseña (0 = desactivado)",
   "settings_clear_cache": "Borrar frases de contraseña en caché",
   "settings_cache_cleared": "Caché de frases de contraseña borrada.",
   "settings_cache_clear_failed": "No se pudo borrar la caché: {error}",
-
   "settings_key_discovery": "Descubrimiento de claves",
   "settings_keyserver_label": "URL del servidor de claves",
   "settings_keyserver_desc": "Se usa para buscar y subir claves",
-
   "settings_language": "Idioma",
   "settings_language_label": "Idioma de la interfaz",
   "settings_language_desc": "Elige el idioma de la interfaz",
-
   "settings_sync": "Sincronización de claves",
   "settings_sync_desc": "Transfiere tus claves entre dispositivos de forma segura.",
   "settings_sync_export": "Exportar claves",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "Introduce la frase de sincronización que se muestra en el dispositivo exportador.",
   "done": "Hecho",
   "cancel": "Cancelar",
-
   "settings_opsec": "Modo OPSEC",
   "settings_opsec_desc": "Modo reforzado para entornos de alto riesgo. Las claves se almacenan solo en RAM y se borran al salir.",
   "settings_opsec_enable": "Activar modo OPSEC",
@@ -280,7 +248,6 @@
   "settings_proxy_success": "Conexión exitosa!",
   "settings_proxy_failed": "Error de conexión: {error}",
   "settings_proxy_custom": "Personalizado",
-
   "settings_about_title": "Acerca de",
   "settings_about": "KeychainPGP {version} — Cifrado PGP desde el portapapeles para escritorio.",
   "settings_portable_badge": "Modo portátil",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "¡Gracias por tu apoyo!",
-
   "unnamed": "(sin nombre)",
   "none_value": "(ninguno)",
   "date_na": "N/D",
   "fingerprint_copy": "Copiar huella digital",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Mayús"
 }

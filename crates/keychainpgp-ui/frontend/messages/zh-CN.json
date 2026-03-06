@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "加载中...",
   "ready": "就绪",
-
   "nav_home": "加密 / 解密",
   "nav_keys": "密钥",
   "nav_settings": "设置",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "复制文本，然后选择下方的操作。",
   "home_tagline_compose": "输入消息，然后选择下方的操作。",
   "mode_clipboard": "剪贴板",
   "mode_compose": "编写",
-
   "action_encrypt": "加密",
   "action_decrypt": "解密",
   "action_sign": "签名",
   "action_verify": "验证",
-
   "clipboard_label": "剪贴板",
   "clipboard_empty": "剪贴板为空。请先复制一些文本。",
   "clipboard_pgp_message": "PGP 消息",
   "clipboard_signed_message": "已签名消息",
   "clipboard_refresh": "刷新剪贴板",
-
   "compose_label": "编写",
   "compose_placeholder": "在此输入或粘贴消息...",
   "compose_clear": "清除",
-
   "encrypt_empty_clipboard": "剪贴板为空。请先复制一些文本。",
   "encrypt_empty_compose": "编写区域为空。请先输入消息。",
   "encrypt_no_keys": "没有可用的密钥。请先生成或导入密钥。",
-
   "decrypt_empty_clipboard": "剪贴板为空。请先复制加密消息。",
   "decrypt_empty_compose": "编写区域为空。",
   "decrypt_no_pgp": "未检测到 PGP 消息。",
   "decrypt_in_progress": "正在解密...",
   "decrypt_success": "解密成功。",
   "decrypt_wrong_key_hint": "请确保已导入正确的私钥。",
-
   "sign_empty_clipboard": "剪贴板为空。请先复制一些文本。",
   "sign_empty_compose": "编写区域为空。",
   "sign_no_key": "没有可用的私钥。请先生成或导入私钥。",
   "sign_in_progress": "正在签名...",
   "sign_success_compose": "消息已签名。",
-
   "verify_empty_clipboard": "剪贴板为空。请先复制已签名的消息。",
   "verify_empty_compose": "编写区域为空。",
   "verify_in_progress": "正在验证...",
   "verify_success": "签名验证通过。",
   "verify_failed": "验证失败。",
-
   "verify_modal_title": "签名验证",
   "verify_valid_verified": "有效签名 — 已验证",
   "verify_valid_verified_desc": "此消息由已验证的密钥签名。",
@@ -61,7 +50,6 @@
   "verify_signer_label": "签名者",
   "verify_email_label": "电子邮件",
   "verify_fingerprint_label": "指纹",
-
   "keys_title": "密钥管理",
   "keys_generate": "生成",
   "keys_import_btn": "导入",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "联系人",
   "keys_export_success": "公钥已复制到剪贴板。",
   "keys_deleted": "密钥已删除。",
-
   "key_details_title": "密钥详情",
   "key_details_btn": "详情",
   "key_export_btn": "导出公钥",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "二维码",
   "key_details_not_found": "未找到密钥。",
   "key_trust_update_failed": "更新信任度失败：{error}",
-
   "keygen_title": "生成新密钥对",
   "keygen_name_placeholder": "名称",
   "keygen_email_placeholder": "电子邮件",
@@ -112,7 +98,6 @@
   "keygen_submit": "生成",
   "keygen_loading": "正在生成...",
   "keygen_success": "密钥对生成成功！",
-
   "onboarding_title": "欢迎使用 KeychainPGP",
   "onboarding_subtitle": "生成您的第一个密钥对，开始使用剪贴板加密功能。",
   "onboarding_name_placeholder": "您的名称",
@@ -123,7 +108,6 @@
   "onboarding_import": "导入已有密钥",
   "onboarding_scan_qr": "扫描二维码",
   "onboarding_sync": "从其他设备同步",
-
   "recipient_title": "选择收件人",
   "recipient_search_placeholder": "搜索密钥...",
   "recipient_no_keys": "没有可用的密钥。",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "为 {count} 位收件人加密",
   "recipient_encrypting": "正在加密...",
   "recipient_encrypt_success": "消息已加密并复制到剪贴板。",
-
   "import_title": "导入密钥",
   "import_textarea_placeholder": "粘贴 ASCII-armored PGP 密钥或备份文件...",
   "import_or": "或",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "已导入 1 个密钥",
   "import_backup_success_other": "已导入 {count} 个密钥",
   "import_backup_skipped": "，{count} 个已在密钥环中",
-
   "passphrase_title": "输入密码短语",
   "passphrase_desc": "此密钥受密码短语保护。请输入密码短语以解密。",
   "passphrase_placeholder": "密码短语",
   "passphrase_cancel": "取消",
   "passphrase_submit": "解密",
-
   "decrypted_title": "已解密消息",
   "decrypted_copy": "复制",
   "decrypted_copied": "已复制",
   "decrypted_close": "关闭",
-
   "error_title": "错误",
   "error_fallback": "发生了意外错误。",
   "error_ok": "确定",
-
   "confirm_default_title": "确认",
   "confirm_default_message": "确定要继续吗？",
   "confirm_cancel": "取消",
   "confirm_delete": "删除",
-
   "qr_title": "二维码导出",
   "qr_generating": "正在生成二维码...",
   "qr_desc": "扫描此二维码以导入公钥。",
   "qr_close": "关闭",
-
   "discovery_title": "发现密钥",
   "discovery_placeholder": "电子邮件地址或名称...",
   "discovery_search": "搜索",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "要导入发现的密钥，请复制其公钥，然后在密钥视图中使用导入功能。",
   "discovery_import_fail": "无法获取密钥数据以进行导入。",
   "discovery_close": "关闭",
-
   "trust_unknown": "未知",
   "trust_imported": "已导入",
   "trust_verified": "已验证",
-
   "settings_title": "设置",
   "settings_appearance": "外观",
   "settings_theme_system": "跟随系统",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "深色",
   "settings_close_to_tray_label": "关闭到托盘",
   "settings_close_to_tray_desc": "关闭窗口时保持应用在系统托盘中运行",
-
   "settings_clipboard": "剪贴板",
   "settings_auto_clear_label": "自动清除剪贴板",
   "settings_auto_clear_desc": "解密后自动清除剪贴板中的敏感数据",
   "settings_auto_clear_delay_label": "自动清除延迟",
   "settings_auto_clear_delay_desc": "清除剪贴板前的等待秒数",
-
   "settings_encryption": "加密",
   "settings_encrypt_to_self_label": "同时加密给自己",
   "settings_encrypt_to_self_desc": "始终将自己的密钥包含为收件人",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "已选择 {count} 个密钥。",
   "settings_include_armor_label": "包含 armor 头部",
   "settings_include_armor_desc": "在 PGP 输出中添加版本和注释元数据",
-
   "settings_security": "安全",
   "settings_passphrase_cache_label": "密码短语缓存时长",
   "settings_passphrase_cache_desc": "记住密码短语的秒数（0 = 禁用）",
   "settings_clear_cache": "清除已缓存的密码短语",
   "settings_cache_cleared": "密码短语缓存已清除。",
   "settings_cache_clear_failed": "清除缓存失败：{error}",
-
   "settings_key_discovery": "密钥发现",
   "settings_keyserver_label": "密钥服务器 URL",
   "settings_keyserver_desc": "用于密钥搜索和上传",
-
   "settings_language": "语言",
   "settings_language_label": "显示语言",
   "settings_language_desc": "选择界面语言",
-
   "settings_sync": "密钥同步",
   "settings_sync_desc": "在设备之间安全地传输密钥。",
   "settings_sync_export": "导出密钥",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "请输入导出设备上显示的同步密码短语。",
   "done": "完成",
   "cancel": "取消",
-
   "settings_opsec": "OPSEC 模式",
   "settings_opsec_desc": "高风险环境下的强化模式。密钥仅存储在内存中，退出时自动擦除。",
   "settings_opsec_enable": "启用 OPSEC 模式",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "连接成功！",
   "settings_proxy_failed": "连接失败：{error}",
   "settings_proxy_custom": "自定义",
-
-  "settings_about": "KeychainPGP {version} — 桌面端剪贴板优先的 PGP 加密工具。",
   "settings_about_title": "关于",
+  "settings_about": "KeychainPGP {version} — 桌面端剪贴板优先的 PGP 加密工具。",
   "settings_portable_badge": "便携模式",
   "donate_button": "支持此项目",
   "donate_title": "支持 KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "感谢您的支持！",
-
   "unnamed": "（未命名）",
   "none_value": "（无）",
   "date_na": "不适用",
   "fingerprint_copy": "复制指纹",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

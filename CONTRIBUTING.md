@@ -45,6 +45,15 @@ New crate dependencies require justification in the PR description:
 - Is the crate well-maintained and audited?
 - Does its license comply with MIT/Apache-2.0?
 
+## Internationalization (i18n)
+
+The frontend supports 20 locales via [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). When adding new UI strings:
+
+- **Only add your keys to `messages/en.json`** — you don't need to touch the other 19 locale files.
+- A pre-build script (`scripts/sync-translations.js`) automatically copies missing keys from `en.json` into all other locales as fallback.
+- Proper translations are handled separately by maintainers after merge.
+- Use the `m.your_key()` pattern in Svelte components (see existing code for examples).
+
 ## Security
 
 - No `unsafe` blocks without a `// SAFETY:` comment and second reviewer approval

@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "กำลังโหลด...",
   "ready": "พร้อม",
-
   "nav_home": "เข้ารหัส / ถอดรหัส",
   "nav_keys": "คีย์",
   "nav_settings": "การตั้งค่า",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "คัดลอกข้อความ จากนั้นเลือกการดำเนินการด้านล่าง",
   "home_tagline_compose": "พิมพ์ข้อความของคุณ จากนั้นเลือกการดำเนินการด้านล่าง",
   "mode_clipboard": "คลิปบอร์ด",
   "mode_compose": "เขียน",
-
   "action_encrypt": "เข้ารหัส",
   "action_decrypt": "ถอดรหัส",
   "action_sign": "ลงลายเซ็น",
   "action_verify": "ตรวจสอบ",
-
   "clipboard_label": "คลิปบอร์ด",
   "clipboard_empty": "คลิปบอร์ดของคุณว่างเปล่า คัดลอกข้อความเพื่อเริ่มต้น",
   "clipboard_pgp_message": "ข้อความ PGP",
   "clipboard_signed_message": "ข้อความที่ลงลายเซ็น",
   "clipboard_refresh": "รีเฟรชคลิปบอร์ด",
-
   "compose_label": "เขียน",
   "compose_placeholder": "พิมพ์หรือวางข้อความของคุณที่นี่...",
   "compose_clear": "ล้าง",
-
   "encrypt_empty_clipboard": "คลิปบอร์ดว่างเปล่า กรุณาคัดลอกข้อความก่อน",
   "encrypt_empty_compose": "ช่องเขียนว่างเปล่า กรุณาพิมพ์ข้อความก่อน",
   "encrypt_no_keys": "ไม่มีคีย์ที่พร้อมใช้งาน กรุณาสร้างหรือนำเข้าคีย์ก่อน",
-
   "decrypt_empty_clipboard": "คลิปบอร์ดว่างเปล่า กรุณาคัดลอกข้อความที่เข้ารหัสก่อน",
   "decrypt_empty_compose": "ช่องเขียนว่างเปล่า",
   "decrypt_no_pgp": "ไม่พบข้อความ PGP",
   "decrypt_in_progress": "กำลังถอดรหัส...",
   "decrypt_success": "ถอดรหัสสำเร็จ",
   "decrypt_wrong_key_hint": "ตรวจสอบให้แน่ใจว่าคุณนำเข้าคีย์ส่วนตัวที่ถูกต้องแล้ว",
-
   "sign_empty_clipboard": "คลิปบอร์ดว่างเปล่า กรุณาคัดลอกข้อความก่อน",
   "sign_empty_compose": "ช่องเขียนว่างเปล่า",
   "sign_no_key": "ไม่มีคีย์ส่วนตัวที่พร้อมใช้งาน กรุณาสร้างหรือนำเข้าคีย์ก่อน",
   "sign_in_progress": "กำลังลงลายเซ็น...",
   "sign_success_compose": "ลงลายเซ็นข้อความแล้ว",
-
   "verify_empty_clipboard": "คลิปบอร์ดว่างเปล่า กรุณาคัดลอกข้อความที่ลงลายเซ็นก่อน",
   "verify_empty_compose": "ช่องเขียนว่างเปล่า",
   "verify_in_progress": "กำลังตรวจสอบ...",
   "verify_success": "ตรวจสอบลายเซ็นสำเร็จ",
   "verify_failed": "การตรวจสอบล้มเหลว",
-
   "verify_modal_title": "การตรวจสอบลายเซ็น",
   "verify_valid_verified": "ลายเซ็นถูกต้อง — ยืนยันแล้ว",
   "verify_valid_verified_desc": "ข้อความนี้ลงลายเซ็นโดยคีย์ที่ยืนยันแล้ว",
@@ -61,7 +50,6 @@
   "verify_signer_label": "ผู้ลงลายเซ็น",
   "verify_email_label": "อีเมล",
   "verify_fingerprint_label": "ลายนิ้วมือ",
-
   "keys_title": "จัดการคีย์",
   "keys_generate": "สร้าง",
   "keys_import_btn": "นำเข้า",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "ผู้ติดต่อ",
   "keys_export_success": "คัดลอกคีย์สาธารณะไปยังคลิปบอร์ดแล้ว",
   "keys_deleted": "ลบคีย์แล้ว",
-
   "key_details_title": "รายละเอียดคีย์",
   "key_details_btn": "รายละเอียด",
   "key_export_btn": "ส่งออกคีย์สาธารณะ",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR Code",
   "key_details_not_found": "ไม่พบคีย์",
   "key_trust_update_failed": "อัปเดตความเชื่อถือล้มเหลว: {error}",
-
   "keygen_title": "สร้างคู่คีย์ใหม่",
   "keygen_name_placeholder": "ชื่อ",
   "keygen_email_placeholder": "อีเมล",
@@ -112,7 +98,6 @@
   "keygen_submit": "สร้าง",
   "keygen_loading": "กำลังสร้าง...",
   "keygen_success": "สร้างคู่คีย์สำเร็จแล้ว!",
-
   "onboarding_title": "ยินดีต้อนรับสู่ KeychainPGP",
   "onboarding_subtitle": "สร้างคู่คีย์แรกของคุณเพื่อเริ่มต้นการเข้ารหัสคลิปบอร์ด",
   "onboarding_name_placeholder": "ชื่อของคุณ",
@@ -123,7 +108,6 @@
   "onboarding_import": "นำเข้าคีย์ที่มีอยู่",
   "onboarding_scan_qr": "สแกน QR โค้ด",
   "onboarding_sync": "ซิงค์จากอุปกรณ์อื่น",
-
   "recipient_title": "เลือกผู้รับ",
   "recipient_search_placeholder": "ค้นหาคีย์...",
   "recipient_no_keys": "ไม่มีคีย์ที่พร้อมใช้งาน",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "เข้ารหัสสำหรับผู้รับ {count} คน",
   "recipient_encrypting": "กำลังเข้ารหัส...",
   "recipient_encrypt_success": "เข้ารหัสข้อความและคัดลอกไปยังคลิปบอร์ดแล้ว",
-
   "import_title": "นำเข้าคีย์",
   "import_textarea_placeholder": "วางคีย์ PGP แบบ ASCII-armored หรือไฟล์สำรอง...",
   "import_or": "หรือ",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "นำเข้า 1 คีย์แล้ว",
   "import_backup_success_other": "นำเข้า {count} คีย์แล้ว",
   "import_backup_skipped": ", {count} อยู่ในชุดคีย์แล้ว",
-
   "passphrase_title": "ป้อนวลีรหัสผ่าน",
   "passphrase_desc": "คีย์นี้ได้รับการป้องกันด้วยวลีรหัสผ่าน ป้อนเพื่อถอดรหัส",
   "passphrase_placeholder": "วลีรหัสผ่าน",
   "passphrase_cancel": "ยกเลิก",
   "passphrase_submit": "ถอดรหัส",
-
   "decrypted_title": "ข้อความที่ถอดรหัสแล้ว",
   "decrypted_copy": "คัดลอก",
   "decrypted_copied": "คัดลอกแล้ว",
   "decrypted_close": "ปิด",
-
   "error_title": "ข้อผิดพลาด",
   "error_fallback": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
   "error_ok": "ตกลง",
-
   "confirm_default_title": "ยืนยัน",
   "confirm_default_message": "คุณแน่ใจหรือไม่?",
   "confirm_cancel": "ยกเลิก",
   "confirm_delete": "ลบ",
-
   "qr_title": "ส่งออก QR Code",
   "qr_generating": "กำลังสร้าง QR Code...",
   "qr_desc": "สแกน QR Code นี้เพื่อนำเข้าคีย์สาธารณะ",
   "qr_close": "ปิด",
-
   "discovery_title": "ค้นหาคีย์",
   "discovery_placeholder": "ที่อยู่อีเมลหรือชื่อ...",
   "discovery_search": "ค้นหา",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "หากต้องการนำเข้าคีย์ที่ค้นพบ ให้คัดลอกคีย์สาธารณะแล้วใช้ฟังก์ชันนำเข้าในหน้าจัดการคีย์",
   "discovery_import_fail": "ไม่สามารถดึงข้อมูลคีย์สำหรับการนำเข้าได้",
   "discovery_close": "ปิด",
-
   "trust_unknown": "ไม่ทราบ",
   "trust_imported": "นำเข้าแล้ว",
   "trust_verified": "ยืนยันแล้ว",
-
   "settings_title": "การตั้งค่า",
   "settings_appearance": "รูปลักษณ์",
   "settings_theme_system": "ระบบ",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "มืด",
   "settings_close_to_tray_label": "ปิดไปที่ถาดระบบ",
   "settings_close_to_tray_desc": "เปิดแอปต่อในถาดระบบเมื่อปิดหน้าต่าง",
-
   "settings_clipboard": "คลิปบอร์ด",
   "settings_auto_clear_label": "ล้างคลิปบอร์ดอัตโนมัติ",
   "settings_auto_clear_desc": "ล้างข้อมูลที่ละเอียดอ่อนจากคลิปบอร์ดหลังการถอดรหัส",
   "settings_auto_clear_delay_label": "การหน่วงเวลาล้างอัตโนมัติ",
   "settings_auto_clear_delay_desc": "จำนวนวินาทีก่อนล้างคลิปบอร์ด",
-
   "settings_encryption": "การเข้ารหัส",
   "settings_encrypt_to_self_label": "เข้ารหัสถึงตัวเอง",
   "settings_encrypt_to_self_desc": "รวมคีย์ของคุณเป็นผู้รับเสมอ",
@@ -217,22 +190,18 @@
   "settings_self_keys_count_other": "เลือก {count} คีย์แล้ว",
   "settings_include_armor_label": "รวมส่วนหัว armor",
   "settings_include_armor_desc": "เพิ่มข้อมูลเมตาเวอร์ชันและความคิดเห็นในผลลัพธ์ PGP",
-
   "settings_security": "ความปลอดภัย",
   "settings_passphrase_cache_label": "ระยะเวลาแคชวลีรหัสผ่าน",
   "settings_passphrase_cache_desc": "จำนวนวินาทีที่จดจำวลีรหัสผ่าน (0 = ปิดใช้งาน)",
   "settings_clear_cache": "ล้างวลีรหัสผ่านที่แคชไว้",
   "settings_cache_cleared": "ล้างแคชวลีรหัสผ่านแล้ว",
   "settings_cache_clear_failed": "ล้างแคชล้มเหลว: {error}",
-
   "settings_key_discovery": "การค้นหาคีย์",
   "settings_keyserver_label": "URL เซิร์ฟเวอร์คีย์",
   "settings_keyserver_desc": "ใช้สำหรับค้นหาและอัปโหลดคีย์",
-
   "settings_language": "ภาษา",
   "settings_language_label": "ภาษาที่แสดง",
   "settings_language_desc": "เลือกภาษาสำหรับอินเทอร์เฟซ",
-
   "settings_sync": "ซิงค์คีย์",
   "settings_sync_desc": "โอนคีย์ของคุณระหว่างอุปกรณ์อย่างปลอดภัย",
   "settings_sync_export": "ส่งออกคีย์",
@@ -258,7 +227,6 @@
   "sync_error_no_passphrase": "ป้อนวลีรหัสผ่านซิงค์ที่แสดงบนอุปกรณ์ที่ส่งออก",
   "done": "เสร็จสิ้น",
   "cancel": "ยกเลิก",
-
   "settings_opsec": "โหมด OPSEC",
   "settings_opsec_desc": "โหมดเสริมความปลอดภัยสำหรับสภาพแวดล้อมที่มีความเสี่ยงสูง คีย์จะถูกเก็บใน RAM เท่านั้นและถูกลบเมื่อออกจากโปรแกรม",
   "settings_opsec_enable": "เปิดใช้งานโหมด OPSEC",
@@ -280,9 +248,8 @@
   "settings_proxy_success": "เชื่อมต่อสำเร็จ!",
   "settings_proxy_failed": "เชื่อมต่อล้มเหลว: {error}",
   "settings_proxy_custom": "กำหนดเอง",
-
-  "settings_about": "KeychainPGP {version} — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
   "settings_about_title": "เกี่ยวกับ",
+  "settings_about": "KeychainPGP {version} — การเข้ารหัส PGP แบบคลิปบอร์ดเป็นหลักสำหรับเดสก์ท็อป",
   "settings_portable_badge": "โหมดพกพา",
   "donate_button": "สนับสนุนโครงการนี้",
   "donate_title": "สนับสนุน KeychainPGP",
@@ -294,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "ขอบคุณสำหรับการสนับสนุนของคุณ!",
-
   "unnamed": "(ไม่มีชื่อ)",
   "none_value": "(ไม่มี)",
   "date_na": "ไม่มีข้อมูล",
   "fingerprint_copy": "คัดลอกลายนิ้วมือ",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }

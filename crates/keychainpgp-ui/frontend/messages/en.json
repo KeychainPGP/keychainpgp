@@ -1,57 +1,46 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-
   "loading": "Loading...",
   "ready": "Ready",
-
   "nav_home": "Encrypt / Decrypt",
   "nav_keys": "Keys",
   "nav_settings": "Settings",
-
   "home_title": "KeychainPGP",
   "home_tagline_clipboard": "Copy text, then choose an action below.",
   "home_tagline_compose": "Type your message, then choose an action below.",
   "mode_clipboard": "Clipboard",
   "mode_compose": "Compose",
-
   "action_encrypt": "ENCRYPT",
   "action_decrypt": "DECRYPT",
   "action_sign": "SIGN",
   "action_verify": "VERIFY",
-
   "clipboard_label": "Clipboard",
   "clipboard_empty": "Your clipboard is empty. Copy some text to get started.",
   "clipboard_pgp_message": "PGP Message",
   "clipboard_signed_message": "Signed Message",
   "clipboard_refresh": "Refresh clipboard",
-
   "compose_label": "Compose",
   "compose_placeholder": "Type or paste your message here...",
   "compose_clear": "Clear",
-
   "encrypt_empty_clipboard": "Clipboard is empty. Copy some text first.",
   "encrypt_empty_compose": "Compose field is empty. Type a message first.",
   "encrypt_no_keys": "No keys available. Generate or import a key first.",
-
   "decrypt_empty_clipboard": "Clipboard is empty. Copy an encrypted message first.",
   "decrypt_empty_compose": "Compose field is empty.",
   "decrypt_no_pgp": "No PGP message detected.",
   "decrypt_in_progress": "Decrypting...",
   "decrypt_success": "Decrypted successfully.",
   "decrypt_wrong_key_hint": "Make sure you have the correct private key imported.",
-
   "sign_empty_clipboard": "Clipboard is empty. Copy some text first.",
   "sign_empty_compose": "Compose field is empty.",
   "sign_no_key": "No private key available. Generate or import one first.",
   "sign_in_progress": "Signing...",
   "sign_success_compose": "Message signed.",
-
   "verify_empty_clipboard": "Clipboard is empty. Copy a signed message first.",
   "verify_empty_compose": "Compose field is empty.",
   "verify_in_progress": "Verifying...",
   "verify_success": "Signature verified.",
   "verify_failed": "Verification failed.",
-
   "verify_modal_title": "Signature Verification",
   "verify_valid_verified": "Valid Signature — Verified",
   "verify_valid_verified_desc": "This message was signed by a verified key.",
@@ -61,7 +50,6 @@
   "verify_signer_label": "Signer",
   "verify_email_label": "Email",
   "verify_fingerprint_label": "Fingerprint",
-
   "keys_title": "Key Manager",
   "keys_generate": "Generate",
   "keys_import_btn": "Import",
@@ -74,7 +62,6 @@
   "keys_section_contacts": "Contacts",
   "keys_export_success": "Public key copied to clipboard.",
   "keys_deleted": "Key deleted.",
-
   "key_details_title": "Key Details",
   "key_details_btn": "Details",
   "key_export_btn": "Export public key",
@@ -102,7 +89,6 @@
   "key_details_qr_btn": "QR Code",
   "key_details_not_found": "Key not found.",
   "key_trust_update_failed": "Failed to update trust: {error}",
-
   "keygen_title": "Generate New Key Pair",
   "keygen_name_placeholder": "Name",
   "keygen_email_placeholder": "Email",
@@ -112,7 +98,6 @@
   "keygen_submit": "Generate",
   "keygen_loading": "Generating...",
   "keygen_success": "Key pair generated successfully!",
-
   "onboarding_title": "Welcome to KeychainPGP",
   "onboarding_subtitle": "Generate your first key pair to get started with clipboard encryption.",
   "onboarding_name_placeholder": "Your name",
@@ -123,7 +108,6 @@
   "onboarding_import": "Import Existing Key",
   "onboarding_scan_qr": "Scan QR Code",
   "onboarding_sync": "Sync from Another Device",
-
   "recipient_title": "Select Recipients",
   "recipient_search_placeholder": "Search keys...",
   "recipient_no_keys": "No keys available.",
@@ -136,7 +120,6 @@
   "recipient_encrypt_btn_other": "Encrypt for {count} recipients",
   "recipient_encrypting": "Encrypting...",
   "recipient_encrypt_success": "Message encrypted and copied to clipboard.",
-
   "import_title": "Import Key",
   "import_textarea_placeholder": "Paste ASCII-armored PGP key or backup file...",
   "import_or": "or",
@@ -155,32 +138,26 @@
   "import_backup_success_one": "Imported 1 key",
   "import_backup_success_other": "Imported {count} keys",
   "import_backup_skipped": ", {count} already in keyring",
-
   "passphrase_title": "Enter Passphrase",
   "passphrase_desc": "This key is protected with a passphrase. Enter it to decrypt.",
   "passphrase_placeholder": "Passphrase",
   "passphrase_cancel": "Cancel",
   "passphrase_submit": "Decrypt",
-
   "decrypted_title": "Decrypted Message",
   "decrypted_copy": "Copy",
   "decrypted_copied": "Copied",
   "decrypted_close": "Close",
-
   "error_title": "Error",
   "error_fallback": "An unexpected error occurred.",
   "error_ok": "OK",
-
   "confirm_default_title": "Confirm",
   "confirm_default_message": "Are you sure?",
   "confirm_cancel": "Cancel",
   "confirm_delete": "Delete",
-
   "qr_title": "QR Code Export",
   "qr_generating": "Generating QR code...",
   "qr_desc": "Scan this QR code to import the public key.",
   "qr_close": "Close",
-
   "discovery_title": "Discover Keys",
   "discovery_placeholder": "Email address or name...",
   "discovery_search": "Search",
@@ -190,11 +167,9 @@
   "discovery_import_hint": "To import a discovered key, copy its public key and use the Import function in the Keys view.",
   "discovery_import_fail": "Could not retrieve key data for import.",
   "discovery_close": "Close",
-
   "trust_unknown": "Unknown",
   "trust_imported": "Imported",
   "trust_verified": "Verified",
-
   "settings_title": "Settings",
   "settings_appearance": "Appearance",
   "settings_theme_system": "System",
@@ -202,13 +177,11 @@
   "settings_theme_dark": "Dark",
   "settings_close_to_tray_label": "Close to tray",
   "settings_close_to_tray_desc": "Keep the app running in the system tray when you close the window",
-
   "settings_clipboard": "Clipboard",
   "settings_auto_clear_label": "Auto-clear clipboard",
   "settings_auto_clear_desc": "Clear sensitive data from clipboard after decryption",
   "settings_auto_clear_delay_label": "Auto-clear delay",
   "settings_auto_clear_delay_desc": "Seconds before clipboard is cleared",
-
   "settings_encryption": "Encryption",
   "settings_encrypt_to_self_label": "Encrypt to self",
   "settings_encrypt_to_self_desc": "Always include your own key as a recipient",
@@ -217,27 +190,22 @@
   "settings_self_keys_count_other": "{count} keys selected.",
   "settings_include_armor_label": "Include armor headers",
   "settings_include_armor_desc": "Add Version and Comment metadata to PGP output",
-
   "settings_security": "Security",
   "settings_passphrase_cache_label": "Passphrase cache duration",
   "settings_passphrase_cache_desc": "Seconds to remember passphrases (0 = disabled)",
   "settings_clear_cache": "Clear cached passphrases",
   "settings_cache_cleared": "Passphrase cache cleared.",
   "settings_cache_clear_failed": "Failed to clear cache: {error}",
-
   "settings_key_discovery": "Key Discovery",
   "settings_keyserver_label": "Keyserver URL",
   "settings_keyserver_desc": "Used for key search and upload",
-
   "settings_language": "Language",
   "settings_language_label": "Display language",
   "settings_language_desc": "Choose the language for the interface",
-
   "settings_sync": "Key Sync",
   "settings_sync_desc": "Transfer your keys between devices securely.",
   "settings_sync_export": "Export Keys",
   "settings_sync_import": "Import Keys",
-
   "sync_export_title": "Export Keys for Sync",
   "sync_import_title": "Import Keys from Device",
   "sync_exporting": "Preparing key bundle...",
@@ -259,7 +227,6 @@
   "sync_error_no_passphrase": "Enter the sync passphrase shown on the exporting device.",
   "done": "Done",
   "cancel": "Cancel",
-
   "settings_opsec": "OPSEC Mode",
   "settings_opsec_desc": "Hardened mode for high-risk environments. Keys are stored in RAM only and wiped on exit.",
   "settings_opsec_enable": "Enable OPSEC Mode",
@@ -271,7 +238,6 @@
   "opsec_closing_in": "Closing in {seconds}s...",
   "opsec_enabled": "OPSEC mode enabled.",
   "opsec_disabled": "OPSEC mode disabled.",
-
   "settings_proxy": "Network Proxy",
   "settings_proxy_desc": "Route keyserver traffic through a SOCKS5 proxy (Tor, Lokinet, etc.).",
   "settings_proxy_enable": "Enable proxy",
@@ -282,11 +248,9 @@
   "settings_proxy_success": "Connection successful!",
   "settings_proxy_failed": "Connection failed: {error}",
   "settings_proxy_custom": "Custom",
-
   "settings_about_title": "About",
   "settings_about": "KeychainPGP {version} — Clipboard-first PGP encryption for desktop.",
   "settings_portable_badge": "Portable Mode",
-
   "donate_button": "Support this project",
   "donate_title": "Support KeychainPGP",
   "donate_desc": "KeychainPGP is free and open source. If you find it useful, consider donating directly — no middlemen, no tracking.",
@@ -297,12 +261,10 @@
   "donate_eth": "Ethereum",
   "donate_xmr": "Monero",
   "donate_thanks": "Thank you for your support!",
-
   "unnamed": "(unnamed)",
   "none_value": "(none)",
   "date_na": "N/A",
   "fingerprint_copy": "Copy fingerprint",
-
   "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
 }
