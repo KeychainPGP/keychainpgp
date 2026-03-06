@@ -1,41 +1,24 @@
 /**
- * Global hotkey registration via tauri-plugin-global-shortcut.
+ * Hotkey management.
+ *
+ * - Panic wipe (Ctrl+Shift+P): registered as a GLOBAL shortcut via
+ *   tauri-plugin-global-shortcut so it works even when the app is in background.
+ * - Encrypt/Decrypt/Sign/Verify: handled as window-scoped keydown events
+ *   in App.svelte so they don't intercept system shortcuts.
  */
 import { register, unregisterAll } from "@tauri-apps/plugin-global-shortcut";
 
-export interface HotkeyHandlers {
-  onEncrypt: () => void;
-  onDecrypt: () => void;
-  onSign: () => void;
-  onVerify: () => void;
-  onPanic?: () => void;
-}
-
-export async function registerHotkeys(handlers: HotkeyHandlers) {
+export async function registerPanicHotkey(handler: () => void) {
   try {
-    await register("CmdOrCtrl+Shift+E", (event) => {
-      if (event.state === "Pressed") handlers.onEncrypt();
+    await register("CmdOrCtrl+Shift+P", (event) => {
+      if (event.state === "Pressed") handler();
     });
-    await register("CmdOrCtrl+Shift+D", (event) => {
-      if (event.state === "Pressed") handlers.onDecrypt();
-    });
-    await register("CmdOrCtrl+Shift+S", (event) => {
-      if (event.state === "Pressed") handlers.onSign();
-    });
-    await register("CmdOrCtrl+Shift+V", (event) => {
-      if (event.state === "Pressed") handlers.onVerify();
-    });
-    if (handlers.onPanic) {
-      await register("CmdOrCtrl+Shift+P", (event) => {
-        if (event.state === "Pressed") handlers.onPanic?.();
-      });
-    }
   } catch (e) {
-    console.warn("Failed to register global hotkeys:", e);
+    console.warn("Failed to register panic hotkey:", e);
   }
 }
 
-export async function unregisterHotkeys() {
+export async function unregisterPanicHotkey() {
   try {
     await unregisterAll();
   } catch {
