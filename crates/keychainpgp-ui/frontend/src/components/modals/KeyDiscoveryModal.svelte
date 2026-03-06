@@ -2,7 +2,8 @@
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
-  import { wkdLookup, keyserverSearch, importKey, exportKey, type KeyInfo } from "$lib/tauri";
+  import { settingsStore } from "$lib/stores/settings.svelte";
+  import { wkdLookup, keyserverSearch, fetchAndImportKey, type KeyInfo } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
   let query = $state("");
@@ -17,20 +18,37 @@
     error = null;
     results = [];
 
+    const isEmail = query.includes("@");
+    
     try {
-      // If it looks like an email, try WKD first
-      if (query.includes("@")) {
-        const wkdResult = await wkdLookup(query.trim());
-        if (wkdResult) {
-          results = [wkdResult];
-          searching = false;
-          return;
+      // Run WKD and Keyserver search in parallel
+      // Resilience: Wrap each promise in a .catch to prevent one failure from blocking everything
+      const searchPromises: Promise<any>[] = [
+        keyserverSearch(query.trim()).catch(e => {
+          console.error("Keyserver search failed:", e);
+          return [];
+        })
+      ];
+      
+      if (isEmail) {
+        searchPromises.push(wkdLookup(query.trim()).catch(e => {
+          console.error("WKD lookup failed:", e);
+          return null;
+        }));
+      }
+
+      const [ksResults, wkdResult] = await Promise.all(searchPromises);
+      
+      let allResults = [...(ksResults || [])];
+      if (wkdResult) {
+        // De-duplicate if WKD finds the same key
+        const exists = allResults.some(r => r.fingerprint === wkdResult.fingerprint);
+        if (!exists) {
+          allResults.unshift(wkdResult);
         }
       }
 
-      // Fall back to keyserver search
-      const ksResults = await keyserverSearch(query.trim());
-      results = ksResults;
+      results = allResults;
 
       if (results.length === 0) {
         error = m.discovery_not_found();
@@ -44,16 +62,23 @@
 
   async function handleImport(key: KeyInfo) {
     try {
-      const ksResults = await keyserverSearch(
-        key.email ?? key.fingerprint
+      searching = true;
+      appStore.setStatus(m.discovery_searching());
+      
+      const importedKey = await fetchAndImportKey(
+        key.fingerprint,
+        settingsStore.settings.keyserver_url
       );
-      if (ksResults.length === 0) {
-        appStore.setStatus(m.discovery_import_fail());
-        return;
-      }
-      appStore.setStatus(m.discovery_import_hint());
+      
+      await keyStore.refresh();
+      importedFps.add(key.fingerprint);
+      appStore.setStatus(m.import_success_key({ name: (importedKey.name ?? importedKey.email ?? importedKey.fingerprint) || "" }));
+      appStore.closeModal();
     } catch (e) {
+      error = String(e);
       appStore.setStatus(`${e}`);
+    } finally {
+      searching = false;
     }
   }
 
@@ -96,7 +121,18 @@
               <p class="text-[var(--color-text-secondary)]">{key.email ?? ""}</p>
               <p class="text-xs font-mono text-[var(--color-text-secondary)]">{key.fingerprint.slice(-16)}</p>
             </div>
-            <span class="text-xs text-green-600 font-medium">{m.discovery_found()}</span>
+            {#if importedFps.has(key.fingerprint)}
+              <span class="text-xs text-green-600 font-medium">{m.discovery_found()}</span>
+            {:else}
+              <button
+                class="px-3 py-1 text-xs rounded-md bg-[var(--color-primary)] text-white font-medium
+                       hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
+                onclick={() => handleImport(key)}
+                disabled={searching}
+              >
+                {searching ? m.discovery_searching() : m.keys_import_btn()}
+              </button>
+            {/if}
           </div>
         {/each}
       </div>
