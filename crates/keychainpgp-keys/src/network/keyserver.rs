@@ -259,30 +259,29 @@ fn parse_mr_index(body: &str) -> Vec<KeyserverMatch> {
 
 /// Unescape HKP 'escaped_uid' field.
 fn hkr_unescape(input: &str) -> String {
-    let mut result = String::with_capacity(input.len());
-    let mut chars = input.chars().peekable();
+    let mut result_bytes = Vec::with_capacity(input.len());
+    let bytes = input.as_bytes();
+    let mut i = 0;
 
-    while let Some(c) = chars.next() {
-        if c == '%' {
-            let mut hex = String::new();
-            if let Some(h1) = chars.next() {
-                hex.push(h1);
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            let hex_bytes = &bytes[i + 1..=i + 2];
+            // Safely attempt to parse the next two bytes as a hex string
+            if let Ok(hex_str) = std::str::from_utf8(hex_bytes) {
+                if let Ok(byte) = u8::from_str_radix(hex_str, 16) {
+                    result_bytes.push(byte);
+                    i += 3;
+                    continue;
+                }
             }
-            if let Some(h2) = chars.next() {
-                hex.push(h2);
-            }
-            if let Ok(byte) = u8::from_str_radix(&hex, 16) {
-                result.push(byte as char);
-            } else {
-                result.push('%');
-                result.push_str(&hex);
-            }
-        } else {
-            result.push(c);
         }
+
+        // Fallback for non-escaped bytes or invalid hex after '%'
+        result_bytes.push(bytes[i]);
+        i += 1;
     }
 
-    result
+    String::from_utf8_lossy(&result_bytes).into_owned()
 }
 
 /// Simple percent-encoding for URL query parameters.
@@ -308,13 +307,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_hkr_unescape() {
+    fn test_hkr_unescape_basic() {
         assert_eq!(hkr_unescape("Alice%20Smith"), "Alice Smith");
         assert_eq!(
             hkr_unescape("Alice%3cemail%40example.com%3e"),
             "Alice<email@example.com>"
         );
         assert_eq!(hkr_unescape("No%20changes"), "No changes");
+    }
+
+    #[test]
+    fn test_hkr_unescape_multibyte_utf8() {
+        // "é" is %C3%A9
+        assert_eq!(hkr_unescape("Alice%20%C3%A9"), "Alice é");
+
+        // "🦀" is %F0%9F%A6%80
+        assert_eq!(hkr_unescape("Ferris%20%F0%9F%A6%80"), "Ferris 🦀");
+    }
+
+    #[test]
+    fn test_hkr_unescape_invalid_utf8() {
+        // %FF is an invalid UTF-8 start byte.
+        // `from_utf8_lossy` should replace it with the Unicode replacement character ().
+        assert_eq!(hkr_unescape("Bad%FFData"), "Bad\u{FFFD}Data");
+    }
+
+    #[test]
+    fn test_hkr_unescape_malformed_escapes() {
+        // Handle '%' at the end of the string
+        assert_eq!(hkr_unescape("Trailing%"), "Trailing%");
+
+        // Handle invalid hex digits
+        assert_eq!(hkr_unescape("Invalid%ZZHex"), "Invalid%ZZHex");
     }
 
     #[test]
