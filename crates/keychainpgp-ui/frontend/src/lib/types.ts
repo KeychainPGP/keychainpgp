@@ -8,6 +8,7 @@ export type ModalType =
   | "key-import"
   | "key-details"
   | "confirm"
+  | "notice"
   | "error"
   | "verify-result"
   | "qr-export"

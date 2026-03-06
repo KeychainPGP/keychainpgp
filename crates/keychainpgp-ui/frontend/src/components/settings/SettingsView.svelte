@@ -112,10 +112,19 @@
     const newValue = !settingsStore.settings.opsec_mode;
     await settingsStore.save({ opsec_mode: newValue });
     if (newValue) {
-      await enableOpsecMode(
+      const disabledUpload = await enableOpsecMode(
         settingsStore.settings.opsec_window_title || undefined,
       );
-      appStore.setStatus(m.opsec_enabled());
+      if (disabledUpload) {
+        appStore.openModal("notice", {
+          title: m.settings_opsec(),
+          message: m.opsec_upload_disabled(),
+        });
+        // Reload settings to ensure UI reflects the change
+        await settingsStore.load();
+      } else {
+        appStore.setStatus(m.opsec_enabled());
+      }
     } else {
       await disableOpsecMode();
       appStore.setStatus(m.opsec_disabled());
@@ -592,9 +601,7 @@
         value={settingsStore.settings.keyserver_url}
         onchange={(e) =>
           settingsStore.save({
-            keyserver_url:
-              e.currentTarget.value ||
-              "https://keys.openpgp.org,https://keyserver.ubuntu.com",
+            keyserver_url: e.currentTarget.value || "https://keys.openpgp.org",
           })}
         class="w-56 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
                focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -614,7 +621,8 @@
         type="checkbox"
         checked={settingsStore.settings.upload_to_keyservers}
         onchange={handleUploadToggle}
-        class="w-4 h-4 accent-[var(--color-primary)]"
+        disabled={settingsStore.settings.opsec_mode}
+        class="w-4 h-4 accent-[var(--color-primary)] disabled:opacity-50"
       />
     </label>
 

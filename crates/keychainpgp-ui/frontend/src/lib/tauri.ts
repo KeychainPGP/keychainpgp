@@ -255,7 +255,7 @@ export async function importKeyBundle(
 
 // --- OPSEC ---
 
-export async function enableOpsecMode(title?: string): Promise<void> {
+export async function enableOpsecMode(title?: string): Promise<boolean> {
   return invoke("enable_opsec_mode", { title });
 }
 
