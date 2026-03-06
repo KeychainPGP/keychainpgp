@@ -14,3 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `keychainpgp-clipboard`: Clipboard monitoring, PGP detection, and auto-clear
 - `keychainpgp-ui`: Tauri desktop application with Svelte frontend
 - `keychainpgp-cli`: Command-line interface
+- Automatic keyserver upload for newly generated keys with multi-server support
+- Manual upload prompt for pre-existing keys when enabling automatic uploads
