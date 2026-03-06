@@ -62,6 +62,10 @@ export function changeLocale(tag: string) {
 }
 
 export const localeStore = {
-  get current() { return current; },
-  get locales() { return locales; },
+  get current() {
+    return current;
+  },
+  get locales() {
+    return locales;
+  },
 };

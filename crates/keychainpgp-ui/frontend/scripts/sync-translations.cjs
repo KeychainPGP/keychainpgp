@@ -73,6 +73,6 @@ if (totalAdded === 0 && totalRemoved === 0) {
   console.log("sync-translations: all locales are in sync.");
 } else {
   console.log(
-    `sync-translations: ${totalAdded} key(s) added, ${totalRemoved} key(s) removed across ${localeFiles.length} locales.`
+    `sync-translations: ${totalAdded} key(s) added, ${totalRemoved} key(s) removed across ${localeFiles.length} locales.`,
   );
 }

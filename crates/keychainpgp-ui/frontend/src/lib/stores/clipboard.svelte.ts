@@ -7,7 +7,9 @@ let pollInterval: ReturnType<typeof setInterval> | null = null;
 let autoClearTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const clipboardStore = {
-  get content() { return content; },
+  get content() {
+    return content;
+  },
 
   get isPgpMessage() {
     return content ? isPgpMessage(content) : false;

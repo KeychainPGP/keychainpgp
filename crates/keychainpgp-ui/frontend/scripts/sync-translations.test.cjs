@@ -29,11 +29,7 @@ function readJson(file) {
 }
 
 function writeJson(file, data) {
-  fs.writeFileSync(
-    path.join(MESSAGES_DIR, file),
-    JSON.stringify(data, null, 2) + "\n",
-    "utf-8"
-  );
+  fs.writeFileSync(path.join(MESSAGES_DIR, file), JSON.stringify(data, null, 2) + "\n", "utf-8");
 }
 
 function run() {
@@ -78,18 +74,12 @@ try {
   const frKeys = Object.keys(fr3).filter((k) => !k.startsWith("$"));
   const enKeys = Object.keys(readJson("en.json")).filter((k) => !k.startsWith("$"));
   const frOrdered = enKeys.filter((k) => frKeys.includes(k));
-  assert(
-    JSON.stringify(frKeys) === JSON.stringify(frOrdered),
-    "fr.json key order matches en.json"
-  );
+  assert(JSON.stringify(frKeys) === JSON.stringify(frOrdered), "fr.json key order matches en.json");
 
   // --- Test 5: Idempotent — running twice changes nothing ---
   console.log("Test 5: Idempotent run");
   const output = run();
-  assert(
-    output.includes("all locales are in sync"),
-    "second run reports all in sync"
-  );
+  assert(output.includes("all locales are in sync"), "second run reports all in sync");
 } finally {
   // Restore originals
   writeJson("en.json", enBackup);

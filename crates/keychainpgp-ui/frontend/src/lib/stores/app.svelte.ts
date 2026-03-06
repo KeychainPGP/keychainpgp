@@ -13,21 +13,41 @@ let inputMode: InputMode = $state("clipboard");
 let composeText: string = $state("");
 
 export const appStore = {
-  get currentView() { return currentView; },
-  set currentView(v: View) { currentView = v; },
+  get currentView() {
+    return currentView;
+  },
+  set currentView(v: View) {
+    currentView = v;
+  },
 
-  get activeModal() { return activeModal; },
-  get modalProps() { return modalProps; },
+  get activeModal() {
+    return activeModal;
+  },
+  get modalProps() {
+    return modalProps;
+  },
 
-  get statusMessage() { return statusMessage; },
+  get statusMessage() {
+    return statusMessage;
+  },
 
-  get pendingAction() { return pendingAction; },
+  get pendingAction() {
+    return pendingAction;
+  },
 
-  get inputMode() { return inputMode; },
-  set inputMode(v: InputMode) { inputMode = v; },
+  get inputMode() {
+    return inputMode;
+  },
+  set inputMode(v: InputMode) {
+    inputMode = v;
+  },
 
-  get composeText() { return composeText; },
-  set composeText(v: string) { composeText = v; },
+  get composeText() {
+    return composeText;
+  },
+  set composeText(v: string) {
+    composeText = v;
+  },
 
   openModal(type: ModalType, props: ModalProps = {}) {
     activeModal = type;

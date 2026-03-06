@@ -109,19 +109,21 @@
       <p class="text-sm text-red-600">{error}</p>
     {:else if bundle}
       <!-- Passphrase display -->
-      <div class="p-4 rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border)]">
-        <p class="text-xs text-[var(--color-text-secondary)] mb-1">{m.sync_passphrase_label()}</p>
+      <div
+        class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4"
+      >
+        <p class="mb-1 text-xs text-[var(--color-text-secondary)]">{m.sync_passphrase_label()}</p>
         <div class="flex items-center gap-2">
-          <code class="text-lg font-mono font-bold tracking-wider flex-1">{bundle.passphrase}</code>
+          <code class="flex-1 font-mono text-lg font-bold tracking-wider">{bundle.passphrase}</code>
           <button
-            class="p-1.5 rounded hover:bg-[var(--color-border)] transition-colors"
+            class="rounded p-1.5 transition-colors hover:bg-[var(--color-border)]"
             onclick={copyPassphrase}
             title="Copy"
           >
             <Copy size={16} />
           </button>
         </div>
-        <p class="text-xs text-[var(--color-text-secondary)] mt-1">
+        <p class="mt-1 text-xs text-[var(--color-text-secondary)]">
           {passphraseCopied ? m.sync_passphrase_copied() : m.sync_passphrase_desc()}
         </p>
       </div>
@@ -130,24 +132,29 @@
       {#if bundle.qr_parts.length > 0}
         <div class="space-y-2">
           <div
-            class="flex justify-center items-center p-4 bg-white rounded-lg"
-            style={qrFixedSize ? `min-width:${qrFixedSize + 32}px;min-height:${qrFixedSize + 32}px` : ''}
+            class="flex items-center justify-center rounded-lg bg-white p-4"
+            style={qrFixedSize
+              ? `min-width:${qrFixedSize + 32}px;min-height:${qrFixedSize + 32}px`
+              : ""}
           >
-            <img src="data:image/svg+xml;base64,{btoa(bundle.qr_parts[currentQrIndex])}" alt="QR Code" />
+            <img
+              src="data:image/svg+xml;base64,{btoa(bundle.qr_parts[currentQrIndex])}"
+              alt="QR Code"
+            />
           </div>
           {#if bundle.qr_parts.length > 1}
             <!-- Controls: arrows + play/pause + counter -->
             <div class="flex items-center justify-center gap-2">
               {#if !autoPlay}
                 <button
-                  class="p-1.5 rounded hover:bg-[var(--color-bg-secondary)] transition-colors"
+                  class="rounded p-1.5 transition-colors hover:bg-[var(--color-bg-secondary)]"
                   onclick={goPrev}
                 >
                   <ChevronLeft size={18} />
                 </button>
               {/if}
               <button
-                class="p-1.5 rounded hover:bg-[var(--color-bg-secondary)] transition-colors"
+                class="rounded p-1.5 transition-colors hover:bg-[var(--color-bg-secondary)]"
                 onclick={toggleAutoPlay}
                 title={autoPlay ? "Pause" : "Play"}
               >
@@ -159,7 +166,7 @@
               </button>
               {#if !autoPlay}
                 <button
-                  class="p-1.5 rounded hover:bg-[var(--color-bg-secondary)] transition-colors"
+                  class="rounded p-1.5 transition-colors hover:bg-[var(--color-bg-secondary)]"
                   onclick={goNext}
                 >
                   <ChevronRight size={18} />
@@ -178,10 +185,12 @@
                 step="100"
                 value={speed}
                 oninput={handleSpeedChange}
-                class="flex-1 h-1.5 accent-[var(--color-primary)] cursor-pointer"
+                class="h-1.5 flex-1 cursor-pointer accent-[var(--color-primary)]"
                 style="direction: rtl;"
               />
-              <span class="text-xs text-[var(--color-text-secondary)] tabular-nums shrink-0">{speed}ms</span>
+              <span class="shrink-0 text-xs text-[var(--color-text-secondary)] tabular-nums"
+                >{speed}ms</span
+              >
             </div>
           {/if}
         </div>
@@ -189,9 +198,9 @@
 
       <!-- File download fallback -->
       <button
-        class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-lg
-               border border-[var(--color-border)] font-medium
-               hover:bg-[var(--color-bg-secondary)] transition-colors"
+        class="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] px-4
+               py-2 text-sm font-medium
+               transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={downloadFile}
       >
         <Download size={16} />
@@ -201,8 +210,8 @@
 
     <div class="flex justify-end">
       <button
-        class="px-4 py-2 text-sm rounded-lg bg-[var(--color-primary)] text-white font-medium
-               hover:bg-[var(--color-primary-hover)] transition-colors"
+        class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white
+               transition-colors hover:bg-[var(--color-primary-hover)]"
         onclick={() => appStore.closeModal()}
       >
         {m.done()}

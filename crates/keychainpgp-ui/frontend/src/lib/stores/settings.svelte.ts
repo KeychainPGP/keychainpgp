@@ -26,8 +26,12 @@ let settings: Settings = $state({ ...defaults });
 let loaded: boolean = $state(false);
 
 export const settingsStore = {
-  get settings() { return settings; },
-  get loaded() { return loaded; },
+  get settings() {
+    return settings;
+  },
+  get loaded() {
+    return loaded;
+  },
 
   async load() {
     try {

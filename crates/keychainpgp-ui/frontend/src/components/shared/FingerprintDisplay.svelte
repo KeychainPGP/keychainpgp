@@ -12,7 +12,7 @@
   let copied = $state(false);
 
   const display = $derived(
-    short ? fingerprint.slice(-8).toUpperCase() : formatFingerprint(fingerprint)
+    short ? fingerprint.slice(-8).toUpperCase() : formatFingerprint(fingerprint),
   );
 
   async function copyToClipboard() {
@@ -25,7 +25,7 @@
 <span class="inline-flex items-center gap-1 font-mono text-xs">
   <span class="select-all">{display}</span>
   <button
-    class="p-0.5 rounded hover:bg-[var(--color-bg-secondary)] transition-colors"
+    class="rounded p-0.5 transition-colors hover:bg-[var(--color-bg-secondary)]"
     onclick={copyToClipboard}
     title={m.fingerprint_copy()}
   >

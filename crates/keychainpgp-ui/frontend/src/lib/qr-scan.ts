@@ -78,7 +78,7 @@ export function cancelScan(): void {
 export async function importScannedContent(content: string): Promise<KeyInfo> {
   if (content.startsWith("KCPGP:")) {
     throw new Error(
-      "This is a sync QR code. Use Settings → Key Sync → Import Keys to scan sync codes."
+      "This is a sync QR code. Use Settings → Key Sync → Import Keys to scan sync codes.",
     );
   }
   return await importKey(content);

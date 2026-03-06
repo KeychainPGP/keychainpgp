@@ -5,13 +5,25 @@ let keys: KeyInfo[] = $state([]);
 let loading: boolean = $state(false);
 
 export const keyStore = {
-  get keys() { return keys; },
-  get loading() { return loading; },
+  get keys() {
+    return keys;
+  },
+  get loading() {
+    return loading;
+  },
 
-  get ownKeys() { return keys.filter(k => k.is_own_key); },
-  get contactKeys() { return keys.filter(k => !k.is_own_key); },
-  get hasKeys() { return keys.length > 0; },
-  get hasOwnKey() { return keys.some(k => k.is_own_key); },
+  get ownKeys() {
+    return keys.filter((k) => k.is_own_key);
+  },
+  get contactKeys() {
+    return keys.filter((k) => !k.is_own_key);
+  },
+  get hasKeys() {
+    return keys.length > 0;
+  },
+  get hasOwnKey() {
+    return keys.some((k) => k.is_own_key);
+  },
 
   async refresh() {
     loading = true;

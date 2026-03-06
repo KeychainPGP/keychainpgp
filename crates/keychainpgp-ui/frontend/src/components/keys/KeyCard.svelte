@@ -27,7 +27,9 @@
   function handleDelete() {
     appStore.openModal("confirm", {
       title: m.key_delete_title(),
-      message: m.key_delete_message({ name: keyInfo.name ?? keyInfo.email ?? keyInfo.fingerprint.slice(-8) }),
+      message: m.key_delete_message({
+        name: keyInfo.name ?? keyInfo.email ?? keyInfo.fingerprint.slice(-8),
+      }),
       onConfirm: async () => {
         try {
           await deleteKey(keyInfo.fingerprint);
@@ -48,18 +50,18 @@
 
 <div
   class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4
-         hover:border-[var(--color-primary)]/30 transition-colors"
+         transition-colors hover:border-[var(--color-primary)]/30"
 >
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0 flex-1">
-      <div class="flex items-center gap-2 mb-1">
-        <span class="font-medium truncate">
+      <div class="mb-1 flex items-center gap-2">
+        <span class="truncate font-medium">
           {keyInfo.name ?? m.unnamed()}
         </span>
         <TrustBadge level={keyInfo.trust_level} />
       </div>
       {#if keyInfo.email}
-        <p class="text-sm text-[var(--color-text-secondary)] truncate">{keyInfo.email}</p>
+        <p class="truncate text-sm text-[var(--color-text-secondary)]">{keyInfo.email}</p>
       {/if}
       <div class="mt-2 flex items-center gap-3 text-xs text-[var(--color-text-secondary)]">
         <FingerprintDisplay fingerprint={keyInfo.fingerprint} short />
@@ -68,23 +70,23 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-1 shrink-0">
+    <div class="flex shrink-0 items-center gap-1">
       <button
-        class="p-1.5 rounded hover:bg-[var(--color-border)] transition-colors"
+        class="rounded p-1.5 transition-colors hover:bg-[var(--color-border)]"
         onclick={handleDetails}
         title={m.key_details_btn()}
       >
         <Info size={16} class="text-[var(--color-text-secondary)]" />
       </button>
       <button
-        class="p-1.5 rounded hover:bg-[var(--color-border)] transition-colors"
+        class="rounded p-1.5 transition-colors hover:bg-[var(--color-border)]"
         onclick={handleExport}
         title={m.key_export_btn()}
       >
         <Download size={16} class="text-[var(--color-text-secondary)]" />
       </button>
       <button
-        class="p-1.5 rounded hover:bg-[var(--color-danger)]/10 transition-colors"
+        class="rounded p-1.5 transition-colors hover:bg-[var(--color-danger)]/10"
         onclick={handleDelete}
         title={m.key_delete_btn()}
       >
