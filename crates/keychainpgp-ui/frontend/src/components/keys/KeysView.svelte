@@ -40,7 +40,7 @@
 
   function handleScanResult(content: string): boolean {
     if (content.startsWith("KCPGP:")) {
-      appStore.setStatus("This is a sync QR code. Use Settings → Key Sync → Import Keys.");
+      appStore.setStatus(m.error_sync_qr_wrong_context());
       return true;
     }
     importKey(content)

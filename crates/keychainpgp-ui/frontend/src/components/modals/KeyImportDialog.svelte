@@ -88,7 +88,7 @@
   <QrScanOverlay
     onscan={(content) => {
       if (content.startsWith("KCPGP:")) {
-        error = "This is a sync QR code. Use Settings → Key Sync → Import Keys.";
+        error = m.error_sync_qr_wrong_context();
         scanning = false;
         return true;
       }

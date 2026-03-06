@@ -40,7 +40,7 @@
 
     const part = parseKcpgpPart(content);
     if (!part) {
-      error = "Not a sync QR code. Use the Import Key function for single keys.";
+      error = m.error_not_sync_qr();
       return true; // stop
     }
 

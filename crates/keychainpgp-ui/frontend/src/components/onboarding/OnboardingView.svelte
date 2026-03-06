@@ -37,7 +37,7 @@
 
   function handleScanResult(content: string): boolean {
     if (content.startsWith("KCPGP:")) {
-      error = "This is a sync QR code. Use the Sync function instead.";
+      error = m.error_sync_qr_use_sync();
       return true;
     }
     importKey(content)

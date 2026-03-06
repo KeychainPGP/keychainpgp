@@ -266,5 +266,14 @@
   "date_na": "N.v.t.",
   "fingerprint_copy": "Vingerafdruk kopiëren",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "Automatisch",
+  "settings_opsec_title_placeholder": "Notities",
+  "sync_copy_btn": "Kopiëren",
+  "sync_pause": "Pauzeren",
+  "sync_play": "Afspelen",
+  "qr_code_alt": "QR-code",
+  "error_sync_qr_wrong_context": "Dit is een synchronisatie-QR-code. Gebruik Instellingen → Sleutelsynchronisatie → Sleutels importeren.",
+  "error_sync_qr_use_sync": "Dit is een synchronisatie-QR-code. Gebruik in plaats daarvan de synchronisatiefunctie.",
+  "error_not_sync_qr": "Geen synchronisatie-QR-code. Gebruik de sleutelimportfunctie voor afzonderlijke sleutels."
 }

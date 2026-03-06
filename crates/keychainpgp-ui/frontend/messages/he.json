@@ -266,5 +266,14 @@
   "date_na": "לא זמין",
   "fingerprint_copy": "העתק טביעת אצבע",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "אוטומטי",
+  "settings_opsec_title_placeholder": "פתקים",
+  "sync_copy_btn": "העתק",
+  "sync_pause": "השהה",
+  "sync_play": "הפעל",
+  "qr_code_alt": "קוד QR",
+  "error_sync_qr_wrong_context": "זהו קוד QR לסנכרון. השתמש בהגדרות → סנכרון מפתחות → ייבא מפתחות.",
+  "error_sync_qr_use_sync": "זהו קוד QR לסנכרון. השתמש בפונקציית הסנכרון במקום.",
+  "error_not_sync_qr": "זה לא קוד QR לסנכרון. השתמש בפונקציית ייבוא מפתח למפתחות בודדים."
 }

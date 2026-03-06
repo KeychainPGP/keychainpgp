@@ -231,7 +231,7 @@
         class="rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm
                focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
       >
-        <option value="auto">Auto</option>
+        <option value="auto">{m.settings_locale_auto()}</option>
         {#each localeStore.locales as loc}
           <option value={loc}>{LOCALE_LABELS[loc] ?? loc}</option>
         {/each}
@@ -437,8 +437,10 @@
             type="text"
             value={settingsStore.settings.opsec_window_title}
             onchange={(e) =>
-              settingsStore.save({ opsec_window_title: e.currentTarget.value || "Notes" })}
-            placeholder="Notes"
+              settingsStore.save({
+                opsec_window_title: e.currentTarget.value || m.settings_opsec_title_placeholder(),
+              })}
+            placeholder={m.settings_opsec_title_placeholder()}
             class="w-32 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm
                  focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
           />

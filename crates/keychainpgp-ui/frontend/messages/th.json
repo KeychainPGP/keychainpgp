@@ -266,5 +266,14 @@
   "date_na": "ไม่มีข้อมูล",
   "fingerprint_copy": "คัดลอกลายนิ้วมือ",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "อัตโนมัติ",
+  "settings_opsec_title_placeholder": "บันทึก",
+  "sync_copy_btn": "คัดลอก",
+  "sync_pause": "หยุดชั่วคราว",
+  "sync_play": "เล่น",
+  "qr_code_alt": "QR โค้ด",
+  "error_sync_qr_wrong_context": "นี่คือ QR code สำหรับซิงค์ ใช้ การตั้งค่า → ซิงค์คีย์ → นำเข้าคีย์",
+  "error_sync_qr_use_sync": "นี่คือ QR code สำหรับซิงค์ ใช้ฟังก์ชันซิงค์แทน",
+  "error_not_sync_qr": "ไม่ใช่ QR code สำหรับซิงค์ ใช้ฟังก์ชันนำเข้าคีย์สำหรับคีย์แต่ละรายการ"
 }

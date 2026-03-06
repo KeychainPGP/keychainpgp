@@ -266,5 +266,14 @@
   "date_na": "N/A",
   "fingerprint_copy": "フィンガープリントをコピー",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "自動",
+  "settings_opsec_title_placeholder": "メモ",
+  "sync_copy_btn": "コピー",
+  "sync_pause": "一時停止",
+  "sync_play": "再生",
+  "qr_code_alt": "QRコード",
+  "error_sync_qr_wrong_context": "これは同期用QRコードです。設定 → 鍵の同期 → 鍵をインポートを使用してください。",
+  "error_sync_qr_use_sync": "これは同期用QRコードです。代わりに同期機能を使用してください。",
+  "error_not_sync_qr": "これは同期用QRコードではありません。個別の鍵には鍵のインポート機能を使用してください。"
 }

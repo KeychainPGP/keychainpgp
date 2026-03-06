@@ -97,7 +97,7 @@
 
         {#if qrSvgs[wallet.id]}
           <div class="flex justify-center rounded-lg bg-white p-3">
-            <img src="data:image/svg+xml;base64,{btoa(qrSvgs[wallet.id])}" alt="QR Code" />
+            <img src="data:image/svg+xml;base64,{btoa(qrSvgs[wallet.id])}" alt={m.qr_code_alt()} />
           </div>
         {:else}
           <p class="text-center text-xs text-[var(--color-text-secondary)]">

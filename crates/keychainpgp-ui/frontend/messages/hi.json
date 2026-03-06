@@ -266,5 +266,14 @@
   "date_na": "उपलब्ध नहीं",
   "fingerprint_copy": "फ़िंगरप्रिंट कॉपी करें",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "स्वचालित",
+  "settings_opsec_title_placeholder": "नोट्स",
+  "sync_copy_btn": "कॉपी करें",
+  "sync_pause": "रोकें",
+  "sync_play": "चलाएं",
+  "qr_code_alt": "QR कोड",
+  "error_sync_qr_wrong_context": "यह एक सिंक QR कोड है। सेटिंग्स → कुंजी सिंक → कुंजियाँ आयात करें का उपयोग करें।",
+  "error_sync_qr_use_sync": "यह एक सिंक QR कोड है। इसके बजाय सिंक फ़ंक्शन का उपयोग करें।",
+  "error_not_sync_qr": "यह सिंक QR कोड नहीं है। एकल कुंजियों के लिए कुंजी आयात फ़ंक्शन का उपयोग करें।"
 }

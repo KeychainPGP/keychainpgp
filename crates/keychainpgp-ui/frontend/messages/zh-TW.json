@@ -266,5 +266,14 @@
   "date_na": "不適用",
   "fingerprint_copy": "複製指紋",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "自動",
+  "settings_opsec_title_placeholder": "備忘錄",
+  "sync_copy_btn": "複製",
+  "sync_pause": "暫停",
+  "sync_play": "播放",
+  "qr_code_alt": "QR碼",
+  "error_sync_qr_wrong_context": "這是同步QR碼，請使用設定 → 金鑰同步 → 匯入金鑰。",
+  "error_sync_qr_use_sync": "這是同步QR碼，請改用同步功能。",
+  "error_not_sync_qr": "這不是同步QR碼，請使用匯入金鑰功能匯入個別金鑰。"
 }

@@ -266,5 +266,14 @@
   "date_na": "Yok",
   "fingerprint_copy": "Parmak izini kopyala",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "Otomatik",
+  "settings_opsec_title_placeholder": "Notlar",
+  "sync_copy_btn": "Kopyala",
+  "sync_pause": "Duraklat",
+  "sync_play": "Oynat",
+  "qr_code_alt": "QR Kodu",
+  "error_sync_qr_wrong_context": "Bu bir senkronizasyon QR kodudur. Ayarlar → Anahtar Senkronizasyonu → Anahtarları İçe Aktar'ı kullanın.",
+  "error_sync_qr_use_sync": "Bu bir senkronizasyon QR kodudur. Bunun yerine Senkronizasyon işlevini kullanın.",
+  "error_not_sync_qr": "Bu bir senkronizasyon QR kodu değildir. Tek anahtarlar için Anahtar İçe Aktar işlevini kullanın."
 }

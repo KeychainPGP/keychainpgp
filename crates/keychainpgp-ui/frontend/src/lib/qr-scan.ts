@@ -7,6 +7,7 @@
  */
 import QrScanner from "qr-scanner";
 import { importKey, type KeyInfo } from "$lib/tauri";
+import * as m from "$lib/paraglide/messages.js";
 
 /** Active scanner instance (singleton — only one scan session at a time). */
 let activeScanner: QrScanner | null = null;
@@ -77,9 +78,7 @@ export function cancelScan(): void {
  */
 export async function importScannedContent(content: string): Promise<KeyInfo> {
   if (content.startsWith("KCPGP:")) {
-    throw new Error(
-      "This is a sync QR code. Use Settings → Key Sync → Import Keys to scan sync codes.",
-    );
+    throw new Error(m.error_sync_qr_wrong_context());
   }
   return await importKey(content);
 }

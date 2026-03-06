@@ -118,7 +118,7 @@
           <button
             class="rounded p-1.5 transition-colors hover:bg-[var(--color-border)]"
             onclick={copyPassphrase}
-            title="Copy"
+            title={m.sync_copy_btn()}
           >
             <Copy size={16} />
           </button>
@@ -139,7 +139,7 @@
           >
             <img
               src="data:image/svg+xml;base64,{btoa(bundle.qr_parts[currentQrIndex])}"
-              alt="QR Code"
+              alt={m.qr_code_alt()}
             />
           </div>
           {#if bundle.qr_parts.length > 1}
@@ -156,7 +156,7 @@
               <button
                 class="rounded p-1.5 transition-colors hover:bg-[var(--color-bg-secondary)]"
                 onclick={toggleAutoPlay}
-                title={autoPlay ? "Pause" : "Play"}
+                title={autoPlay ? m.sync_pause() : m.sync_play()}
               >
                 {#if autoPlay}
                   <Pause size={18} />

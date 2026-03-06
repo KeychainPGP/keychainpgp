@@ -266,5 +266,14 @@
   "date_na": "해당 없음",
   "fingerprint_copy": "지문 복사",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "자동",
+  "settings_opsec_title_placeholder": "메모",
+  "sync_copy_btn": "복사",
+  "sync_pause": "일시정지",
+  "sync_play": "재생",
+  "qr_code_alt": "QR 코드",
+  "error_sync_qr_wrong_context": "동기화 QR 코드입니다. 설정 → 키 동기화 → 키 가져오기를 사용하세요.",
+  "error_sync_qr_use_sync": "동기화 QR 코드입니다. 대신 동기화 기능을 사용하세요.",
+  "error_not_sync_qr": "동기화 QR 코드가 아닙니다. 단일 키에는 키 가져오기 기능을 사용하세요."
 }

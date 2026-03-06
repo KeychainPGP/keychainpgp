@@ -266,5 +266,14 @@
   "date_na": "Н/Д",
   "fingerprint_copy": "Копировать отпечаток",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Shift"
+  "kbd_shift": "Shift",
+  "settings_locale_auto": "Авто",
+  "settings_opsec_title_placeholder": "Заметки",
+  "sync_copy_btn": "Копировать",
+  "sync_pause": "Пауза",
+  "sync_play": "Воспроизвести",
+  "qr_code_alt": "QR-код",
+  "error_sync_qr_wrong_context": "Это QR-код синхронизации. Используйте Настройки → Синхронизация ключей → Импортировать ключи.",
+  "error_sync_qr_use_sync": "Это QR-код синхронизации. Вместо этого используйте функцию синхронизации.",
+  "error_not_sync_qr": "Это не QR-код синхронизации. Используйте функцию импорта ключа для отдельных ключей."
 }

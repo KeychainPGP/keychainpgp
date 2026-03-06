@@ -266,5 +266,14 @@
   "date_na": "N/D",
   "fingerprint_copy": "Copia impronta digitale",
   "kbd_ctrl": "Ctrl",
-  "kbd_shift": "Maiusc"
+  "kbd_shift": "Maiusc",
+  "settings_locale_auto": "Automatico",
+  "settings_opsec_title_placeholder": "Note",
+  "sync_copy_btn": "Copia",
+  "sync_pause": "Pausa",
+  "sync_play": "Riproduci",
+  "qr_code_alt": "Codice QR",
+  "error_sync_qr_wrong_context": "Questo è un codice QR di sincronizzazione. Usa Impostazioni → Sincronizzazione chiavi → Importa chiavi.",
+  "error_sync_qr_use_sync": "Questo è un codice QR di sincronizzazione. Usa invece la funzione Sincronizza.",
+  "error_not_sync_qr": "Non è un codice QR di sincronizzazione. Usa la funzione Importa chiave per le chiavi singole."
 }
