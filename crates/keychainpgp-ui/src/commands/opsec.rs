@@ -14,7 +14,7 @@ pub fn enable_opsec_mode(
     #[allow(unused_variables)] app: AppHandle,
     state: State<'_, AppState>,
     #[allow(unused_variables)] title: Option<String>,
-) -> Result<(), String> {
+) -> Result<bool, String> {
     state.opsec_mode.store(true, Ordering::SeqCst);
 
     #[cfg(desktop)]
@@ -30,8 +30,18 @@ pub fn enable_opsec_mode(
         }
     }
 
+    // Force disable auto-upload to keyservers if enabled
+    let mut settings = crate::commands::settings::get_settings(app.clone(), state.clone());
+    let disabled_upload = if settings.upload_to_keyservers {
+        settings.upload_to_keyservers = false;
+        crate::commands::settings::update_settings(app.clone(), state.clone(), settings)?;
+        true
+    } else {
+        false
+    };
+
     tracing::info!("OPSEC mode enabled");
-    Ok(())
+    Ok(disabled_upload)
 }
 
 /// Disable OPSEC mode: restore window title, clear RAM keys.

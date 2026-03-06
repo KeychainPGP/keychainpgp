@@ -33,6 +33,7 @@
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
   import RevokeKeyModal from "./components/modals/RevokeKeyModal.svelte";
   import DonateModal from "./components/modals/DonateModal.svelte";
+  import NoticeDialog from "./components/modals/NoticeDialog.svelte";
 
   let initialized = $state(false);
   let mobile = $state(false);
@@ -147,6 +148,8 @@
     <ErrorDialog />
   {:else if appStore.activeModal === "confirm"}
     <ConfirmDialog />
+  {:else if appStore.activeModal === "notice"}
+    <NoticeDialog />
   {:else if appStore.activeModal === "verify-result"}
     <VerifyResultModal />
   {:else if appStore.activeModal === "qr-export"}

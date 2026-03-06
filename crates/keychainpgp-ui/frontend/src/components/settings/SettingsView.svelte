@@ -110,10 +110,19 @@
     const newValue = !settingsStore.settings.opsec_mode;
     await settingsStore.save({ opsec_mode: newValue });
     if (newValue) {
-      await enableOpsecMode(
+      const disabledUpload = await enableOpsecMode(
         settingsStore.settings.opsec_window_title || undefined,
       );
-      appStore.setStatus(m.opsec_enabled());
+      if (disabledUpload) {
+        appStore.openModal("notice", {
+          title: m.settings_opsec(),
+          message: m.opsec_upload_disabled(),
+        });
+        // Reload settings to ensure UI reflects the change
+        await settingsStore.load();
+      } else {
+        appStore.setStatus(m.opsec_enabled());
+      }
     } else {
       await disableOpsecMode();
       appStore.setStatus(m.opsec_disabled());

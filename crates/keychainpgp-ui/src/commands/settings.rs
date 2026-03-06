@@ -95,7 +95,7 @@ impl Default for Settings {
             encrypt_to_self_keys: Vec::new(),
             theme: "system".into(),
             passphrase_cache_secs: 600,
-            keyserver_url: "https://keys.openpgp.org,https://keyserver.ubuntu.com".into(),
+            keyserver_url: "https://keys.openpgp.org".into(),
             include_armor_headers: true,
             locale: "auto".into(),
             proxy_url: "socks5h://127.0.0.1:9050".into(),

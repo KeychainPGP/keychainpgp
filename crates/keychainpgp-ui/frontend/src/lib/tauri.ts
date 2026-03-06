@@ -261,7 +261,7 @@ export async function saveSyncFile(path: string, data: string): Promise<void> {
 
 // --- OPSEC ---
 
-export async function enableOpsecMode(title?: string): Promise<void> {
+export async function enableOpsecMode(title?: string): Promise<boolean> {
   return invoke("enable_opsec_mode", { title });
 }
 

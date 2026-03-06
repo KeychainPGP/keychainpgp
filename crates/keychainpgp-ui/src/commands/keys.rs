@@ -155,7 +155,7 @@ pub async fn generate_key_pair(
 
     // Automatic Keyserver Upload
     let settings = super::settings::get_settings(app.clone(), state.clone());
-    if settings.upload_to_keyservers {
+    if settings.upload_to_keyservers && !state.opsec_mode.load(Ordering::SeqCst) {
         let fingerprint = record.fingerprint.clone();
         let urls: Vec<String> = settings
             .keyserver_url

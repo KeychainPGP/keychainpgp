@@ -258,6 +258,7 @@
   "opsec_closing_in": "Closing in {seconds}s...",
   "opsec_enabled": "OPSEC mode enabled.",
   "opsec_disabled": "OPSEC mode disabled.",
+  "opsec_upload_disabled": "Automatic keyserver upload has been disabled for safety.",
   "settings_proxy": "Network Proxy",
   "settings_proxy_desc": "Route keyserver traffic through a SOCKS5 proxy (Tor, Lokinet, etc.).",
   "settings_proxy_enable": "Enable proxy",
