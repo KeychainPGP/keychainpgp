@@ -87,7 +87,6 @@ export interface Settings {
   opsec_mode: boolean;
   opsec_window_title: string;
   opsec_view_timeout_secs: number;
-  upload_to_keyservers: boolean;
 }
 
 // --- Crypto ---
@@ -256,7 +255,7 @@ export async function importKeyBundle(
 // --- OPSEC ---
 
 export async function enableOpsecMode(title?: string): Promise<boolean> {
-  return invoke("enable_opsec_mode", { title });
+  return await invoke("enable_opsec_mode", { title });
 }
 
 export async function disableOpsecMode(): Promise<void> {

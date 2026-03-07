@@ -201,10 +201,6 @@
   "settings_key_discovery": "Key Discovery",
   "settings_keyserver_label": "Keyserver URL",
   "settings_keyserver_desc": "Used for key search and upload. Can be comma-separated.",
-  "settings_upload_existing_title": "Upload existing keys?",
-  "settings_upload_existing_message": "Would you like to upload your existing public keys to the configured keyservers now?",
-  "settings_upload_success_all": "Successfully uploaded all own keys to keyservers.",
-  "settings_upload_status": "Uploaded keys: {success} successful, {failed} failed.",
   "settings_language": "Language",
   "settings_language_label": "Display language",
   "settings_language_desc": "Choose the language for the interface",
@@ -272,8 +268,5 @@
   "none_value": "(none)",
   "date_na": "N/A",
   "fingerprint_copy": "Copy fingerprint",
-  "kbd_ctrl": "Ctrl",
   "kbd_shift": "Shift"
-  ,"settings_keyserver_upload_label": "Automatic Keyserver Upload"
-  ,"settings_keyserver_upload_desc": "Automatically upload newly generated public keys"
 }
