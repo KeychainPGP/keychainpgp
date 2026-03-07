@@ -246,8 +246,8 @@ export interface SyncBundle {
   file_data: string;
 }
 
-export async function exportKeyBundle(): Promise<SyncBundle> {
-  return invoke("export_key_bundle");
+export async function exportKeyBundle(qrPartSize?: number): Promise<SyncBundle> {
+  return invoke("export_key_bundle", { qrPartSize: qrPartSize ?? null });
 }
 
 export async function importKeyBundle(encryptedData: string, passphrase: string): Promise<number> {

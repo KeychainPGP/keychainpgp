@@ -287,6 +287,10 @@
   "sync_pause": "Pausa",
   "sync_play": "Riproduci",
   "qr_code_alt": "Codice QR",
+  "sync_qr_size_label": "Densità QR",
+  "sync_qr_size_small": "Piccolo (facile da scansionare)",
+  "sync_qr_size_medium": "Medio",
+  "sync_qr_size_large": "Grande (meno codici)",
   "error_sync_qr_wrong_context": "Questo è un codice QR di sincronizzazione. Usa Impostazioni → Sincronizzazione chiavi → Importa chiavi.",
   "error_sync_qr_use_sync": "Questo è un codice QR di sincronizzazione. Usa invece la funzione Sincronizza.",
   "error_not_sync_qr": "Non è un codice QR di sincronizzazione. Usa la funzione Importa chiave per le chiavi singole."

@@ -287,6 +287,10 @@
   "sync_pause": "Pause",
   "sync_play": "Play",
   "qr_code_alt": "QR Code",
+  "sync_qr_size_label": "QR density",
+  "sync_qr_size_small": "Small (easy to scan)",
+  "sync_qr_size_medium": "Medium",
+  "sync_qr_size_large": "Large (fewer codes)",
   "error_sync_qr_wrong_context": "This is a sync QR code. Use Settings → Key Sync → Import Keys.",
   "error_sync_qr_use_sync": "This is a sync QR code. Use the Sync function instead.",
   "error_not_sync_qr": "Not a sync QR code. Use the Import Key function for single keys."

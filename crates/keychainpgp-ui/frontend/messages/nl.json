@@ -287,6 +287,10 @@
   "sync_pause": "Pauzeren",
   "sync_play": "Afspelen",
   "qr_code_alt": "QR-code",
+  "sync_qr_size_label": "QR-dichtheid",
+  "sync_qr_size_small": "Klein (makkelijk te scannen)",
+  "sync_qr_size_medium": "Gemiddeld",
+  "sync_qr_size_large": "Groot (minder codes)",
   "error_sync_qr_wrong_context": "Dit is een synchronisatie-QR-code. Gebruik Instellingen → Sleutelsynchronisatie → Sleutels importeren.",
   "error_sync_qr_use_sync": "Dit is een synchronisatie-QR-code. Gebruik in plaats daarvan de synchronisatiefunctie.",
   "error_not_sync_qr": "Geen synchronisatie-QR-code. Gebruik de sleutelimportfunctie voor afzonderlijke sleutels."

@@ -287,6 +287,10 @@
   "sync_pause": "Pause",
   "sync_play": "Abspielen",
   "qr_code_alt": "QR-Code",
+  "sync_qr_size_label": "QR-Dichte",
+  "sync_qr_size_small": "Klein (leicht zu scannen)",
+  "sync_qr_size_medium": "Mittel",
+  "sync_qr_size_large": "Groß (weniger Codes)",
   "error_sync_qr_wrong_context": "Dies ist ein Sync-QR-Code. Verwende Einstellungen → Schlüssel-Synchronisation → Schlüssel importieren.",
   "error_sync_qr_use_sync": "Dies ist ein Sync-QR-Code. Verwende stattdessen die Sync-Funktion.",
   "error_not_sync_qr": "Kein Sync-QR-Code. Verwende die Schlüssel-Import-Funktion für einzelne Schlüssel."

@@ -3,7 +3,13 @@
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { importKeyBundle } from "$lib/tauri";
-  import { parseKcpgpPart, cancelScan } from "$lib/qr-scan";
+  import {
+    parseKcpgpPart,
+    parseFountainPart,
+    fountainRecover,
+    cancelScan,
+    type FountainPart,
+  } from "$lib/qr-scan";
   import { isMobile } from "$lib/platform";
   import { Upload, Camera } from "lucide-svelte";
   import QrScanOverlay from "../shared/QrScanOverlay.svelte";
@@ -20,6 +26,7 @@
   // Multi-part QR scanning state
   let scanning = $state(false);
   let scannedParts = $state<Map<number, string>>(new Map());
+  let scannedFountain = $state<FountainPart[]>([]);
   let totalParts = $state(0);
   let passphraseFromQr = $state(false);
 
@@ -30,6 +37,14 @@
     encryptedData = await file.text();
   }
 
+  function reassembleAndFinish(): boolean {
+    const sorted = Array.from(scannedParts.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([, data]) => data);
+    encryptedData = sorted.join("");
+    return true;
+  }
+
   function handleScanResult(content: string): boolean {
     // Auto-detect passphrase QR
     if (content.startsWith("KCPGP-PASS:")) {
@@ -38,6 +53,23 @@
       return false; // keep scanning for data parts
     }
 
+    // Try as fountain parity part
+    const fountain = parseFountainPart(content);
+    if (fountain) {
+      totalParts = fountain.total;
+      scannedFountain = [...scannedFountain, fountain];
+      // Try fountain recovery
+      if (
+        scannedParts.size < totalParts &&
+        fountainRecover(scannedParts, scannedFountain, totalParts)
+      ) {
+        scannedParts = new Map(scannedParts);
+        return reassembleAndFinish();
+      }
+      return false; // continue scanning
+    }
+
+    // Regular data part
     const part = parseKcpgpPart(content);
     if (!part) {
       error = m.error_not_sync_qr();
@@ -49,19 +81,22 @@
     scannedParts = new Map(scannedParts); // trigger reactivity
 
     if (scannedParts.size >= part.total) {
-      // All parts collected — reassemble
-      const sorted = Array.from(scannedParts.entries())
-        .sort(([a], [b]) => a - b)
-        .map(([, data]) => data);
-      encryptedData = sorted.join("");
-      return true; // stop
+      return reassembleAndFinish();
     }
+
+    // Try fountain recovery with collected parity parts
+    if (scannedFountain.length > 0 && fountainRecover(scannedParts, scannedFountain, totalParts)) {
+      scannedParts = new Map(scannedParts);
+      return reassembleAndFinish();
+    }
+
     return false; // continue scanning
   }
 
   function startScan() {
     error = null;
     scannedParts = new Map();
+    scannedFountain = [];
     totalParts = 0;
     passphraseFromQr = false;
     scanning = true;

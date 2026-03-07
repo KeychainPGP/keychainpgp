@@ -6,6 +6,12 @@
   import { Copy, Download, Pause, Play, ChevronLeft, ChevronRight } from "lucide-svelte";
   import * as m from "$lib/paraglide/messages.js";
 
+  const QR_SIZES = [
+    { value: 100, label: () => m.sync_qr_size_small() },
+    { value: 200, label: () => m.sync_qr_size_medium() },
+    { value: 400, label: () => m.sync_qr_size_large() },
+  ];
+
   let bundle: SyncBundle | null = $state(null);
   let error: string | null = $state(null);
   let loading = $state(true);
@@ -14,14 +20,20 @@
   let passphraseCopied = $state(false);
   let autoPlay = $state(true);
   let intervalId: ReturnType<typeof setInterval> | null = $state(null);
-  /** Interval in ms — 200 (fast) … 2000 (slow). Default 600. */
-  let speed = $state(600);
+  /** Interval in ms — 100 (fast) … 2000 (slow). Default 400. */
+  let speed = $state(400);
+  let qrPartSize = $state(200);
 
-  $effect(() => {
-    exportKeyBundle()
+  function loadBundle() {
+    loading = true;
+    error = null;
+    bundle = null;
+    currentQrIndex = 0;
+    if (intervalId) clearInterval(intervalId);
+
+    exportKeyBundle(qrPartSize)
       .then((b) => {
         bundle = b;
-        // Compute the largest SVG width across all QR parts to lock the container size
         let maxSize = 0;
         for (const svg of b.qr_parts) {
           const match = svg.match(/width="(\d+)"/);
@@ -35,7 +47,11 @@
         error = String(e);
         loading = false;
       });
+  }
 
+  // Load on mount; cleanup interval on destroy
+  loadBundle();
+  $effect(() => {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
@@ -80,6 +96,11 @@
   function handleSpeedChange(e: Event) {
     speed = Number((e.currentTarget as HTMLInputElement).value);
     restartIfPlaying();
+  }
+
+  function handleQrSizeChange(e: Event) {
+    qrPartSize = Number((e.currentTarget as HTMLSelectElement).value);
+    loadBundle();
   }
 
   function copyPassphrase() {
@@ -183,7 +204,7 @@
             <div class="flex items-center gap-2 px-2">
               <input
                 type="range"
-                min="200"
+                min="100"
                 max="2000"
                 step="100"
                 value={speed}
@@ -196,6 +217,22 @@
               >
             </div>
           {/if}
+          <!-- QR size selector -->
+          <div class="flex items-center justify-center gap-2">
+            <label class="text-xs text-[var(--color-text-secondary)]" for="qr-size-select"
+              >{m.sync_qr_size_label()}</label
+            >
+            <select
+              id="qr-size-select"
+              value={qrPartSize}
+              onchange={handleQrSizeChange}
+              class="rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs"
+            >
+              {#each QR_SIZES as size}
+                <option value={size.value}>{size.label()}</option>
+              {/each}
+            </select>
+          </div>
         </div>
       {/if}
 

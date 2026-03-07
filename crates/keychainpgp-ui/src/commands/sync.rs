@@ -20,7 +20,10 @@ pub struct SyncBundle {
 
 /// Export all own keys as an encrypted bundle for sync.
 #[tauri::command]
-pub fn export_key_bundle(state: State<'_, AppState>) -> Result<SyncBundle, String> {
+pub fn export_key_bundle(
+    state: State<'_, AppState>,
+    qr_part_size: Option<u32>,
+) -> Result<SyncBundle, String> {
     let keyring = state
         .keyring
         .lock()
@@ -55,7 +58,7 @@ pub fn export_key_bundle(state: State<'_, AppState>) -> Result<SyncBundle, Strin
     }
 
     let bundle = keychainpgp_keys::sync::KeyBundle {
-        version: 1,
+        version: 2,
         keys: entries,
     };
 
@@ -74,8 +77,9 @@ pub fn export_key_bundle(state: State<'_, AppState>) -> Result<SyncBundle, Strin
         .encrypt_symmetric(&compressed, passphrase.as_bytes())
         .map_err(|e| format!("Encryption failed: {e}"))?;
 
-    // Split into QR-sized parts and render each as SVG
-    let parts = keychainpgp_keys::sync::split_for_qr(&encrypted);
+    // Split into QR-sized parts with fountain parity codes
+    let part_size = qr_part_size.unwrap_or(200) as usize;
+    let parts = keychainpgp_keys::sync::split_for_qr_with_size(&encrypted, part_size);
 
     // First QR code: passphrase (so the scanner can auto-fill it)
     let pass_qr_data = format!("KCPGP-PASS:{passphrase}");
@@ -98,7 +102,7 @@ pub fn export_key_bundle(state: State<'_, AppState>) -> Result<SyncBundle, Strin
         })
         .collect();
 
-    // Prepend passphrase QR, then data QRs
+    // Prepend passphrase QR, then data QRs (including fountain parity)
     let mut qr_parts = vec![pass_svg];
     qr_parts.extend(data_qr_parts?);
 
@@ -133,7 +137,7 @@ pub fn import_key_bundle(
     let bundle: keychainpgp_keys::sync::KeyBundle =
         serde_json::from_slice(&json_data).map_err(|e| format!("Invalid bundle format: {e}"))?;
 
-    if bundle.version != 1 {
+    if bundle.version > 2 {
         return Err(format!(
             "Unsupported bundle version: {}. Please update KeychainPGP.",
             bundle.version
@@ -156,7 +160,7 @@ pub fn import_key_bundle(
                 continue;
             }
             if entry.secret_key.is_some() {
-                // Upgrade: existing public-only → own key with secret material
+                // Upgrade: existing public-only -> own key with secret material
                 let _ = keyring.delete_key(&existing_key.fingerprint);
             } else {
                 // Already have this public key — skip

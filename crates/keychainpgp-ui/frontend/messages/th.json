@@ -287,6 +287,10 @@
   "sync_pause": "หยุดชั่วคราว",
   "sync_play": "เล่น",
   "qr_code_alt": "QR โค้ด",
+  "sync_qr_size_label": "ความหนาแน่น QR",
+  "sync_qr_size_small": "เล็ก (สแกนง่าย)",
+  "sync_qr_size_medium": "กลาง",
+  "sync_qr_size_large": "ใหญ่ (โค้ดน้อยลง)",
   "error_sync_qr_wrong_context": "นี่คือ QR code สำหรับซิงค์ ใช้ การตั้งค่า → ซิงค์คีย์ → นำเข้าคีย์",
   "error_sync_qr_use_sync": "นี่คือ QR code สำหรับซิงค์ ใช้ฟังก์ชันซิงค์แทน",
   "error_not_sync_qr": "ไม่ใช่ QR code สำหรับซิงค์ ใช้ฟังก์ชันนำเข้าคีย์สำหรับคีย์แต่ละรายการ"

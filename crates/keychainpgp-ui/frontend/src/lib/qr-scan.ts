@@ -94,6 +94,8 @@ export interface QrPart {
 export function parseKcpgpPart(content: string): QrPart | null {
   if (!content.startsWith("KCPGP:")) return null;
   const rest = content.slice(6);
+  // Skip fountain parts (start with F)
+  if (rest.startsWith("F")) return null;
   const colonIdx = rest.indexOf(":");
   if (colonIdx < 0) return null;
   const header = rest.slice(0, colonIdx);
@@ -104,4 +106,76 @@ export function parseKcpgpPart(content: string): QrPart | null {
   const total = parseInt(header.slice(slashIdx + 1), 10);
   if (isNaN(part) || isNaN(total) || part < 1 || total < 1) return null;
   return { part, total, data };
+}
+
+/** Parsed fountain parity part. */
+export interface FountainPart {
+  i: number;
+  j: number;
+  total: number;
+  data: string;
+}
+
+/** Parse a KCPGP fountain parity QR code (format: KCPGP:F<i>+<j>/<total>:<base64_xor>). */
+export function parseFountainPart(content: string): FountainPart | null {
+  if (!content.startsWith("KCPGP:F")) return null;
+  const rest = content.slice(7); // after "KCPGP:F"
+  const colonIdx = rest.indexOf(":");
+  if (colonIdx < 0) return null;
+  const header = rest.slice(0, colonIdx);
+  const data = rest.slice(colonIdx + 1);
+  const slashIdx = header.indexOf("/");
+  if (slashIdx < 0) return null;
+  const indices = header.slice(0, slashIdx);
+  const total = parseInt(header.slice(slashIdx + 1), 10);
+  const plusIdx = indices.indexOf("+");
+  if (plusIdx < 0) return null;
+  const i = parseInt(indices.slice(0, plusIdx), 10);
+  const j = parseInt(indices.slice(plusIdx + 1), 10);
+  if (isNaN(i) || isNaN(j) || isNaN(total)) return null;
+  return { i, j, total, data };
+}
+
+/** Decode base64 string to Uint8Array. */
+function b64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+/**
+ * Try to recover missing data parts using fountain parity XOR codes.
+ * Mutates `dataParts` in place. Returns true if all parts are now available.
+ */
+export function fountainRecover(
+  dataParts: Map<number, string>,
+  fountainParts: FountainPart[],
+  total: number,
+): boolean {
+  let progress = true;
+  while (progress && dataParts.size < total) {
+    progress = false;
+    for (const fp of fountainParts) {
+      const hasI = dataParts.has(fp.i);
+      const hasJ = dataParts.has(fp.j);
+      if ((hasI && hasJ) || (!hasI && !hasJ)) continue;
+
+      const knownKey = hasI ? fp.i : fp.j;
+      const missingKey = hasI ? fp.j : fp.i;
+
+      const xorBytes = b64ToBytes(fp.data);
+      const knownBytes = new TextEncoder().encode(dataParts.get(knownKey)!);
+      const recovered = new Uint8Array(xorBytes.length);
+      for (let k = 0; k < xorBytes.length; k++) {
+        recovered[k] = (xorBytes[k] || 0) ^ (knownBytes[k] || 0);
+      }
+      // Trim trailing zeros (base64 chars are never 0x00)
+      let end = recovered.length;
+      while (end > 0 && recovered[end - 1] === 0) end--;
+      dataParts.set(missingKey, new TextDecoder().decode(recovered.slice(0, end)));
+      progress = true;
+    }
+  }
+  return dataParts.size >= total;
 }
