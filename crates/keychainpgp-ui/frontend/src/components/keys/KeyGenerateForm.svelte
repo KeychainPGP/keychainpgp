@@ -23,10 +23,18 @@
     error = "";
     generating = true;
     try {
-      await generateKeyPair(name.trim(), email.trim(), passphrase || undefined);
+      const info = await generateKeyPair(
+        name.trim(),
+        email.trim(),
+        passphrase || undefined,
+      );
       await keyStore.refresh();
       appStore.setStatus(m.keygen_success());
+
       onDone();
+      setTimeout(() => {
+        appStore.openModal("publish-prompt", { fingerprint: info.fingerprint });
+      }, 100);
     } catch (e) {
       error = String(e);
     } finally {
@@ -35,7 +43,9 @@
   }
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-3">
+<div
+  class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 space-y-3"
+>
   <h3 class="font-medium">{m.keygen_title()}</h3>
   <div class="grid grid-cols-2 gap-3">
     <input

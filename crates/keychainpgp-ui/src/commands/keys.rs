@@ -13,6 +13,9 @@ use secrecy::{ExposeSecret, SecretBox};
 
 use crate::state::AppState;
 
+/// Settings file name used in portable mode.
+const PORTABLE_SETTINGS_FILE: &str = "settings.json";
+
 /// Validate that a keyserver URL uses an allowed protocol.
 fn validate_keyserver_url(url: &str) -> Result<(), String> {
     if url.starts_with("https://") || url.starts_with("http://") {
@@ -31,20 +34,56 @@ fn validate_proxy_url(url: &str) -> Result<(), String> {
     }
 }
 
-/// Read the proxy URL from settings if proxy is enabled.
-fn get_proxy_url(app: &AppHandle) -> Option<String> {
-    let store = app.store("settings.json").ok()?;
-    let val = store.get("settings")?;
-    let settings: super::settings::Settings = serde_json::from_value(val).ok()?;
-    if !settings.proxy_enabled {
-        return None;
+/// Load settings for network operations in both normal and portable mode.
+fn load_network_settings(
+    app: &AppHandle,
+    state: &AppState,
+) -> Result<super::settings::Settings, String> {
+    if let Some(ref portable_dir) = state.portable_dir {
+        let path = portable_dir.join(PORTABLE_SETTINGS_FILE);
+        return match std::fs::read_to_string(&path) {
+            Ok(data) => serde_json::from_str::<super::settings::Settings>(&data)
+                .map_err(|e| format!("Failed to parse portable settings: {e}")),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                Ok(super::settings::Settings::default())
+            }
+            Err(e) => Err(format!("Failed to read portable settings: {e}")),
+        };
     }
-    let url = match settings.proxy_preset.as_str() {
+
+    let store = app
+        .store("settings.json")
+        .map_err(|e| format!("Failed to open settings store: {e}"))?;
+
+    match store.get("settings") {
+        Some(val) => serde_json::from_value::<super::settings::Settings>(val)
+            .map_err(|e| format!("Failed to parse settings: {e}")),
+        None => Ok(super::settings::Settings::default()),
+    }
+}
+
+/// Resolve proxy URL for network operations with hard-fail semantics.
+fn get_proxy_url(app: &AppHandle, state: &AppState) -> Result<Option<String>, String> {
+    let settings = load_network_settings(app, state)?;
+    if !settings.proxy_enabled {
+        return Ok(None);
+    }
+
+    let proxy_url = match settings.proxy_preset.as_str() {
         "tor" => "socks5h://127.0.0.1:9050".to_string(),
         "lokinet" => "socks5h://127.0.0.1:1080".to_string(),
-        _ => settings.proxy_url,
+        _ => settings.proxy_url.trim().to_string(),
     };
-    if url.is_empty() { None } else { Some(url) }
+
+    if proxy_url.is_empty() {
+        return Err(
+            "Proxy is enabled but no proxy URL is configured. Disable proxy or set a valid SOCKS5 URL."
+                .into(),
+        );
+    }
+
+    validate_proxy_url(&proxy_url)?;
+    Ok(Some(proxy_url))
 }
 
 /// Key information returned to the frontend.
@@ -433,7 +472,7 @@ pub async fn wkd_lookup(
     state: State<'_, AppState>,
     email: String,
 ) -> Result<Option<KeyInfo>, String> {
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, state.inner())?;
     let key_bytes = keychainpgp_keys::network::wkd::wkd_lookup(&email, proxy.as_deref())
         .await
         .map_err(|e| e.to_string())?;
@@ -469,7 +508,7 @@ pub async fn keyserver_search(
 ) -> Result<Vec<KeyInfo>, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
     validate_keyserver_url(&url)?;
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, state.inner())?;
 
     let results =
         keychainpgp_keys::network::keyserver::keyserver_search(&query, &url, proxy.as_deref())
@@ -511,7 +550,7 @@ pub async fn keyserver_upload(
 ) -> Result<String, String> {
     let url = keyserver_url.unwrap_or_else(|| "https://keys.openpgp.org".to_string());
     validate_keyserver_url(&url)?;
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, state.inner())?;
 
     let key_data = {
         let keyring = state

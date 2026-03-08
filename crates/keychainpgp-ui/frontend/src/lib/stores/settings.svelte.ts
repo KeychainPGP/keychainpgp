@@ -11,6 +11,7 @@ const defaults: Settings = {
   theme: "system",
   passphrase_cache_secs: 600,
   keyserver_url: "https://keys.openpgp.org",
+  unverified_keyserver_url: "https://keyserver.ubuntu.com",
   include_armor_headers: true,
   locale: "auto",
   proxy_url: "socks5://127.0.0.1:9050",

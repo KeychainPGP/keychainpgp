@@ -33,6 +33,7 @@
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
   import DonateModal from "./components/modals/DonateModal.svelte";
   import NoticeDialog from "./components/modals/NoticeDialog.svelte";
+  import PublishPromptModal from "./components/modals/PublishPromptModal.svelte";
 
   let initialized = $state(false);
   let mobile = $state(false);
@@ -147,5 +148,7 @@
     <KeySyncImportModal />
   {:else if appStore.activeModal === "donate"}
     <DonateModal />
+  {:else if appStore.activeModal === "publish-prompt"}
+    <PublishPromptModal />
   {/if}
 </main>

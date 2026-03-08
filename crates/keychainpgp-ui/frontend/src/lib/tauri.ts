@@ -78,6 +78,7 @@ export interface Settings {
   theme: string;
   passphrase_cache_secs: number;
   keyserver_url: string;
+  unverified_keyserver_url: string;
   include_armor_headers: boolean;
   locale: string;
   proxy_url: string;

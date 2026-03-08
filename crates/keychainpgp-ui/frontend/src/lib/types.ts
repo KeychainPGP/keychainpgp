@@ -15,6 +15,7 @@ export type ModalType =
   | "key-discovery"
   | "key-sync-export"
   | "key-sync-import"
+  | "publish-prompt"
   | "donate";
 
 export interface ModalProps {
@@ -42,7 +43,7 @@ export interface ModalProps {
 export const TRUST_LABELS: Record<number, string> = {
   0: "Unknown",
   1: "Imported",
-  2: "Verified",
+  2: "Trusted",
 };
 
 export const TRUST_COLORS: Record<number, string> = {
