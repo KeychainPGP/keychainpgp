@@ -33,11 +33,14 @@
   import KeySyncImportModal from "./components/modals/KeySyncImportModal.svelte";
   import RevokeKeyModal from "./components/modals/RevokeKeyModal.svelte";
   import DonateModal from "./components/modals/DonateModal.svelte";
+  import NoticeDialog from "./components/modals/NoticeDialog.svelte";
+  import PublishPromptModal from "./components/modals/PublishPromptModal.svelte";
 
   let initialized = $state(false);
   let mobile = $state(false);
   let unlistenTray: UnlistenFn | null = null;
   let keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  let unlistenUpload: UnlistenFn | null = null;
 
   onMount(async () => {
     await initPlatform();
@@ -86,6 +89,11 @@
         const action = event.payload as AppAction;
         if (action) appStore.dispatchAction(action);
       });
+
+      // Listen for background auto-upload results
+      unlistenUpload = await listen<string>("auto-upload-result", (event) => {
+        appStore.setStatus(event.payload);
+      });
     } else {
       // On mobile, default to compose mode (no system clipboard monitoring)
       appStore.inputMode = "compose";
@@ -99,6 +107,7 @@
       unregisterPanicHotkey();
       unlistenTray?.();
       if (keydownHandler) window.removeEventListener("keydown", keydownHandler);
+      unlistenUpload?.();
     }
   });
 
@@ -147,6 +156,8 @@
     <ErrorDialog />
   {:else if appStore.activeModal === "confirm"}
     <ConfirmDialog />
+  {:else if appStore.activeModal === "notice"}
+    <NoticeDialog />
   {:else if appStore.activeModal === "verify-result"}
     <VerifyResultModal />
   {:else if appStore.activeModal === "qr-export"}
@@ -161,5 +172,7 @@
     <RevokeKeyModal onConfirmRevoke={appStore.modalProps.onConfirmRevoke!} />
   {:else if appStore.activeModal === "donate"}
     <DonateModal />
+  {:else if appStore.activeModal === "publish-prompt"}
+    <PublishPromptModal />
   {/if}
 </main>

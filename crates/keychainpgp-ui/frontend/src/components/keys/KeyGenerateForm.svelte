@@ -23,10 +23,18 @@
     error = "";
     generating = true;
     try {
-      await generateKeyPair(name.trim(), email.trim(), passphrase || undefined);
+      const info = await generateKeyPair(
+        name.trim(),
+        email.trim(),
+        passphrase || undefined,
+      );
       await keyStore.refresh();
       appStore.setStatus(m.keygen_success());
+
       onDone();
+      setTimeout(() => {
+        appStore.openModal("publish-prompt", { fingerprint: info.fingerprint });
+      }, 100);
     } catch (e) {
       error = String(e);
     } finally {

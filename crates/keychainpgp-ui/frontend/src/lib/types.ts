@@ -8,6 +8,7 @@ export type ModalType =
   | "key-import"
   | "key-details"
   | "confirm"
+  | "notice"
   | "error"
   | "verify-result"
   | "qr-export"
@@ -15,6 +16,7 @@ export type ModalType =
   | "key-sync-export"
   | "key-sync-import"
   | "key-revoke"
+  | "publish-prompt"
   | "donate";
 
 export interface ModalProps {
@@ -26,6 +28,7 @@ export interface ModalProps {
   title?: string;
   message?: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm?: () => void;
   /** For revoke modal */
   onConfirmRevoke?: (deleteLocal: boolean) => void;

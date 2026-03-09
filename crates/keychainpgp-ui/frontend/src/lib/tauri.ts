@@ -17,6 +17,10 @@ export interface KeyInfo {
   is_revoked: boolean;
 }
 
+export interface DiscoveryResult extends KeyInfo {
+  source: string;
+}
+
 export interface EncryptResult {
   success: boolean;
   message: string;
@@ -80,6 +84,7 @@ export interface Settings {
   theme: string;
   passphrase_cache_secs: number;
   keyserver_url: string;
+  unverified_keyserver_url: string;
   include_armor_headers: boolean;
   locale: string;
   proxy_url: string;
@@ -196,7 +201,14 @@ export async function wkdLookup(email: string): Promise<KeyInfo | null> {
   return invoke("wkd_lookup", { email });
 }
 
-export async function keyserverSearch(query: string, keyserverUrl?: string): Promise<KeyInfo[]> {
+export async function wkdFetchAndImport(email: string): Promise<KeyInfo> {
+  return invoke("wkd_fetch_and_import", { email });
+}
+
+export async function keyserverSearch(
+  query: string,
+  keyserverUrl?: string,
+): Promise<DiscoveryResult[]> {
   return invoke("keyserver_search", { query, keyserverUrl: keyserverUrl ?? null });
 }
 
@@ -260,8 +272,8 @@ export async function saveSyncFile(path: string, data: string): Promise<void> {
 
 // --- OPSEC ---
 
-export async function enableOpsecMode(title?: string): Promise<void> {
-  return invoke("enable_opsec_mode", { title });
+export async function enableOpsecMode(title?: string): Promise<boolean> {
+  return await invoke("enable_opsec_mode", { title });
 }
 
 export async function disableOpsecMode(): Promise<void> {

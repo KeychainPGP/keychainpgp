@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlertTriangle } from "lucide-svelte";
+  import { TriangleAlert } from "lucide-svelte";
   import ModalContainer from "./ModalContainer.svelte";
   import { appStore } from "$lib/stores/app.svelte";
   import * as m from "$lib/paraglide/messages.js";
@@ -8,7 +8,7 @@
 <ModalContainer title={m.error_title()}>
   <div class="space-y-3">
     <div class="flex items-start gap-3">
-      <AlertTriangle size={20} class="mt-0.5 shrink-0 text-[var(--color-danger)]" />
+      <TriangleAlert size={20} class="text-[var(--color-danger)] shrink-0 mt-0.5" />
       <div>
         <p class="text-sm">{appStore.modalProps.error ?? m.error_fallback()}</p>
         {#if appStore.modalProps.suggestion}

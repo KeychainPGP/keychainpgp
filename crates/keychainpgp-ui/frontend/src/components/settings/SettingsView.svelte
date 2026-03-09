@@ -1,12 +1,6 @@
 <script lang="ts">
   import { settingsStore } from "$lib/stores/settings.svelte";
-  import {
-    clearPassphraseCache,
-    enableOpsecMode,
-    disableOpsecMode,
-    testProxyConnection,
-    isPortable as checkPortable,
-  } from "$lib/tauri";
+  import { clearPassphraseCache, enableOpsecMode, disableOpsecMode, testProxyConnection, isPortable as checkPortable } from "$lib/tauri";
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { shortFingerprint } from "$lib/utils";
@@ -18,11 +12,7 @@
   const desktop = isDesktop();
   let portable = $state(false);
   if (desktop) {
-    checkPortable()
-      .then((v) => {
-        portable = v;
-      })
-      .catch(() => {});
+    checkPortable().then(v => { portable = v; }).catch(() => {});
   }
 
   let proxyTesting = $state(false);
@@ -56,7 +46,7 @@
   function toggleSelfKey(fp: string) {
     let current = settingsStore.settings.encrypt_to_self_keys;
     if (current.length === 0) {
-      current = keyStore.ownKeys.map((k) => k.fingerprint);
+      current = keyStore.ownKeys.map(k => k.fingerprint);
     }
     const next = current.includes(fp) ? current.filter((k) => k !== fp) : [...current, fp];
     const allOwn = keyStore.ownKeys.map((k) => k.fingerprint);
@@ -64,14 +54,7 @@
     settingsStore.save({ encrypt_to_self_keys: isAll ? [] : next });
   }
 
-  function toggle(
-    key:
-      | "auto_clear_enabled"
-      | "clipboard_monitoring"
-      | "encrypt_to_self"
-      | "auto_clear_after_encrypt"
-      | "include_armor_headers",
-  ) {
+  function toggle(key: "auto_clear_enabled" | "clipboard_monitoring" | "encrypt_to_self" | "auto_clear_after_encrypt" | "include_armor_headers") {
     settingsStore.save({ [key]: !settingsStore.settings[key] });
   }
 
@@ -109,8 +92,19 @@
     const newValue = !settingsStore.settings.opsec_mode;
     await settingsStore.save({ opsec_mode: newValue });
     if (newValue) {
-      await enableOpsecMode(settingsStore.settings.opsec_window_title || undefined);
-      appStore.setStatus(m.opsec_enabled());
+      const disabledUpload = await enableOpsecMode(
+        settingsStore.settings.opsec_window_title || undefined,
+      );
+      if (disabledUpload) {
+        appStore.openModal("notice", {
+          title: m.settings_opsec(),
+          message: m.opsec_disabled(),
+        });
+        // Reload settings to ensure UI reflects the change
+        await settingsStore.load();
+      } else {
+        appStore.setStatus(m.opsec_enabled());
+      }
     } else {
       await disableOpsecMode();
       appStore.setStatus(m.opsec_disabled());
@@ -197,9 +191,7 @@
       >
         <div>
           <p class="text-sm font-medium">{m.settings_close_to_tray_label()}</p>
-          <p class="text-xs text-[var(--color-text-secondary)]">
-            {m.settings_close_to_tray_desc()}
-          </p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_close_to_tray_desc()}</p>
         </div>
         <input
           type="checkbox"
@@ -250,8 +242,8 @@
         class="flex items-center justify-between rounded-lg border border-[var(--color-border)] p-3"
       >
         <div>
-          <p class="text-sm font-medium">{m.settings_auto_clear_label()}</p>
-          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_auto_clear_desc()}</p>
+          <p class="text-sm font-medium">{m.settings_auto_clear_delay_label()}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_auto_clear_delay_desc()}</p>
         </div>
         <input
           type="checkbox"
@@ -297,9 +289,7 @@
     >
       <div>
         <p class="text-sm font-medium">{m.settings_encrypt_to_self_label()}</p>
-        <p class="text-xs text-[var(--color-text-secondary)]">
-          {m.settings_encrypt_to_self_desc()}
-        </p>
+        <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_encrypt_to_self_desc()}</p>
       </div>
       <input
         type="checkbox"
@@ -317,9 +307,7 @@
           {:else if settingsStore.settings.encrypt_to_self_keys.length === 1}
             {m.settings_self_keys_count_one()}
           {:else}
-            {m.settings_self_keys_count_other({
-              count: settingsStore.settings.encrypt_to_self_keys.length,
-            })}
+            {m.settings_self_keys_count_other({ count: settingsStore.settings.encrypt_to_self_keys.length })}
           {/if}
         </p>
         <div class="space-y-1">
@@ -373,9 +361,7 @@
     >
       <div>
         <p class="text-sm font-medium">{m.settings_passphrase_cache_label()}</p>
-        <p class="text-xs text-[var(--color-text-secondary)]">
-          {m.settings_passphrase_cache_desc()}
-        </p>
+        <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_passphrase_cache_desc()}</p>
       </div>
       <input
         type="number"
@@ -412,8 +398,8 @@
         class="flex items-center justify-between rounded-lg border border-[var(--color-border)] p-3"
       >
         <div>
-          <p class="text-sm font-medium">{m.settings_opsec_enable()}</p>
-          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_enable_desc()}</p>
+          <p class="text-sm font-medium">{m.settings_opsec_title_label()}</p>
+          <p class="text-xs text-[var(--color-text-secondary)]">{m.settings_opsec_title_desc()}</p>
         </div>
         <input
           type="checkbox"
@@ -470,6 +456,7 @@
         </label>
       {/if}
     </section>
+
   {/if}
 
   <!-- Key Discovery -->
@@ -494,6 +481,23 @@
           })}
         class="w-56 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm
                focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none"
+      />
+    </label>
+
+    <label class="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+      <div>
+        <p class="text-sm font-medium">{m.settings_unverified_keyserver_label()}</p>
+        <p class="text-xs text-[var(--color-text-secondary)]">
+          {m.settings_unverified_keyserver_desc()}
+          <span class="block mt-1 text-[var(--color-danger)] font-medium">{m.settings_unverified_keyservers_warning()}</span>
+        </p>
+      </div>
+      <input
+        type="text"
+        value={settingsStore.settings.unverified_keyserver_url}
+        onchange={(e) => settingsStore.save({ unverified_keyserver_url: e.currentTarget.value })}
+        class="w-56 px-2 py-1 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg)]
+               focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
       />
     </label>
 
@@ -528,11 +532,7 @@
               class:border-[var(--color-border)]={settingsStore.settings.proxy_preset !== preset}
               onclick={() => selectProxyPreset(preset)}
             >
-              {preset === "tor"
-                ? "Tor"
-                : preset === "lokinet"
-                  ? "Lokinet"
-                  : m.settings_proxy_custom()}
+              {preset === "tor" ? "Tor" : preset === "lokinet" ? "Lokinet" : m.settings_proxy_custom()}
             </button>
           {/each}
         </div>
@@ -563,11 +563,8 @@
             {proxyTesting ? m.settings_proxy_testing() : m.settings_proxy_test()}
           </button>
           {#if proxyTestResult}
-            <p
-              class="text-xs"
-              class:text-green-600={proxyTestSuccess}
-              class:text-red-600={!proxyTestSuccess}
-            >
+            <p class="text-xs" class:text-green-600={proxyTestSuccess}
+               class:text-red-600={!proxyTestSuccess}>
               {proxyTestResult}
             </p>
           {/if}

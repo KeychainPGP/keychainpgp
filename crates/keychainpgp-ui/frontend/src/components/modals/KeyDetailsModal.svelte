@@ -5,6 +5,7 @@
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { setKeyTrust, inspectKeyDetailed, type KeyDetailedInfo } from "$lib/tauri";
+  import { Globe, User, Shield, Key as KeyIcon, Mail, Calendar, Hash, MoreHorizontal } from "lucide-svelte";
   import { formatDate } from "$lib/utils";
   import * as m from "$lib/paraglide/messages.js";
 
@@ -157,6 +158,15 @@
           >
             {m.key_details_qr_btn()}
           </button>
+          {#if keyInfo.is_own_key}
+            <button
+              class="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-secondary)] transition-colors flex items-center gap-1.5"
+              onclick={() => appStore.openModal("publish-prompt", { fingerprint: keyInfo.fingerprint })}
+            >
+              <Globe size={14} />
+              {m.publish_prompt_title()}
+            </button>
+          {/if}
         </div>
         <button
           class="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white

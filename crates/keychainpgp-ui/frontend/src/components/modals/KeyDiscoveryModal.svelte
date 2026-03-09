@@ -3,11 +3,23 @@
   import { appStore } from "$lib/stores/app.svelte";
   import { keyStore } from "$lib/stores/keys.svelte";
   import { settingsStore } from "$lib/stores/settings.svelte";
-  import { wkdLookup, keyserverSearch, fetchAndImportKey, type KeyInfo } from "$lib/tauri";
+  import {
+    wkdLookup,
+    wkdFetchAndImport,
+    keyserverSearch,
+    fetchAndImportKey,
+    type KeyInfo,
+    type DiscoveryResult,
+  } from "$lib/tauri";
   import * as m from "$lib/paraglide/messages.js";
 
+  interface SearchResult {
+    key: DiscoveryResult | KeyInfo;
+    source: string;
+  }
+
   let query = $state("");
-  let results: KeyInfo[] = $state([]);
+  let results: SearchResult[] = $state([]);
   let searching = $state(false);
   let error: string | null = $state(null);
   let importedFps: Set<string> = $state(new Set());
@@ -20,40 +32,37 @@
 
     const isEmail = query.includes("@");
 
-    try {
-      // Run WKD and Keyserver search in parallel
-      // Resilience: Wrap each promise in a .catch to prevent one failure from blocking everything
-      const searchPromises: Promise<any>[] = [
-        keyserverSearch(query.trim()).catch((e) => {
-          console.error("Keyserver search failed:", e);
-          return [];
-        }),
-      ];
+    let ksError: string | null = null;
 
+    try {
+      const ksPromise = keyserverSearch(query.trim()).catch((e) => {
+        ksError = String(e);
+        return [] as DiscoveryResult[];
+      });
+
+      let wkdPromise: Promise<KeyInfo | null> | undefined;
       if (isEmail) {
-        searchPromises.push(
-          wkdLookup(query.trim()).catch((e) => {
-            console.error("WKD lookup failed:", e);
-            return null;
-          }),
-        );
+        wkdPromise = wkdLookup(query.trim()).catch(() => null);
       }
 
-      const [ksResults, wkdResult] = await Promise.all(searchPromises);
+      const [ksResults, wkdResult] = await Promise.all([ksPromise, wkdPromise]);
 
-      let allResults = [...(ksResults || [])];
+      let allResults: SearchResult[] = (ksResults || []).map((r) => ({
+        key: r,
+        source: r.source,
+      }));
+
       if (wkdResult) {
-        // De-duplicate if WKD finds the same key
-        const exists = allResults.some((r) => r.fingerprint === wkdResult.fingerprint);
+        const exists = allResults.some((r) => r.key.fingerprint === wkdResult.fingerprint);
         if (!exists) {
-          allResults.unshift(wkdResult);
+          allResults.push({ key: wkdResult, source: "WKD" });
         }
       }
 
       results = allResults;
 
       if (results.length === 0) {
-        error = m.discovery_not_found();
+        error = ksError ?? m.discovery_not_found();
       }
     } catch (e) {
       error = String(e);
@@ -62,18 +71,27 @@
     }
   }
 
-  async function handleImport(key: KeyInfo) {
+  async function handleImport(result: SearchResult) {
     try {
       searching = true;
       appStore.setStatus(m.discovery_searching());
 
-      const importedKey = await fetchAndImportKey(
-        key.fingerprint,
-        settingsStore.settings.keyserver_url,
-      );
+      let importedKey: KeyInfo;
+
+      if (result.source === "WKD" && result.key.email) {
+        importedKey = await wkdFetchAndImport(result.key.email);
+      } else {
+        const allUrls = [
+          settingsStore.settings.keyserver_url,
+          settingsStore.settings.unverified_keyserver_url,
+        ]
+          .filter(Boolean)
+          .join(",");
+        importedKey = await fetchAndImportKey(result.key.fingerprint, allUrls);
+      }
 
       await keyStore.refresh();
-      importedFps.add(key.fingerprint);
+      importedFps.add(result.key.fingerprint);
       appStore.setStatus(
         m.import_success_key({
           name: (importedKey.name ?? importedKey.email ?? importedKey.fingerprint) || "",
@@ -120,28 +138,50 @@
 
     {#if results.length > 0}
       <div class="max-h-64 space-y-2 overflow-auto">
-        {#each results as key}
+        {#each results as result}
           <div
-            class="flex items-center justify-between rounded-lg border border-[var(--color-border)] p-3"
+            class="rounded-lg border border-[var(--color-border)] p-3 {result.source === 'WKD'
+              ? 'opacity-75'
+              : ''}"
           >
-            <div class="text-sm">
-              <p class="font-medium">{key.name ?? m.unnamed()}</p>
-              <p class="text-[var(--color-text-secondary)]">{key.email ?? ""}</p>
-              <p class="font-mono text-xs text-[var(--color-text-secondary)]">
-                {key.fingerprint.slice(-16)}
-              </p>
+            <div class="flex items-center justify-between">
+              <div class="text-sm">
+                <p class="font-medium">{result.key.name ?? m.unnamed()}</p>
+                <p class="text-[var(--color-text-secondary)]">
+                  {result.key.email ?? ""}
+                </p>
+                <div class="mt-0.5 flex flex-wrap items-center gap-1.5">
+                  <p class="font-mono text-xs text-[var(--color-text-secondary)]">
+                    {result.key.fingerprint.slice(-16)}
+                  </p>
+                  {#each result.source.split(", ") as src}
+                    <span
+                      class="rounded-full px-1.5 py-0.5 text-[10px] font-medium {src === 'WKD'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-600'}"
+                    >
+                      {src}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+              {#if importedFps.has(result.key.fingerprint)}
+                <span class="text-xs font-medium text-green-600">{m.discovery_found()}</span>
+              {:else}
+                <button
+                  class="rounded-md bg-[var(--color-primary)] px-3 py-1 text-xs font-medium text-white
+                         transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
+                  onclick={() => handleImport(result)}
+                  disabled={searching}
+                >
+                  {searching ? m.discovery_searching() : m.keys_import_btn()}
+                </button>
+              {/if}
             </div>
-            {#if importedFps.has(key.fingerprint)}
-              <span class="text-xs font-medium text-green-600">{m.discovery_found()}</span>
-            {:else}
-              <button
-                class="rounded-md bg-[var(--color-primary)] px-3 py-1 text-xs font-medium text-white
-                       transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
-                onclick={() => handleImport(key)}
-                disabled={searching}
-              >
-                {searching ? m.discovery_searching() : m.keys_import_btn()}
-              </button>
+            {#if result.source === "WKD"}
+              <p class="mt-2 text-xs text-amber-600">
+                {m.discovery_wkd_warning()}
+              </p>
             {/if}
           </div>
         {/each}

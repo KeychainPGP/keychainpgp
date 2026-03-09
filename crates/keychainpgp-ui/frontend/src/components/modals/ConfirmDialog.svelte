@@ -15,11 +15,16 @@
                transition-colors hover:bg-[var(--color-bg-secondary)]"
         onclick={() => appStore.closeModal()}
       >
-        {m.confirm_cancel()}
+        {appStore.modalProps.cancelLabel ?? m.confirm_cancel()}
       </button>
       <button
         class="rounded-lg bg-[var(--color-danger)] px-4 py-2 text-sm font-medium text-white
                transition-opacity hover:opacity-90"
+        class:bg-[var(--color-danger)]={!appStore.modalProps.confirmLabel ||
+          appStore.modalProps.confirmLabel === m.confirm_delete()}
+        class:bg-[var(--color-primary)]={appStore.modalProps.confirmLabel &&
+          appStore.modalProps.confirmLabel !== m.confirm_delete()}
+        class:text-white={true}
         onclick={() => appStore.modalProps.onConfirm?.()}
       >
         {appStore.modalProps.confirmLabel ?? m.confirm_delete()}
