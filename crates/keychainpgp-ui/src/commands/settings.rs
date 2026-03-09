@@ -31,10 +31,10 @@ pub struct Settings {
     pub theme: String,
     /// Passphrase cache duration in seconds (0 = disabled).
     pub passphrase_cache_secs: u64,
-    /// Keyserver URL for key discovery.
+    #[serde(default = "default_keyserver_url")]
     pub keyserver_url: String,
     /// Unverified keyservers for search and upload (comma-separated).
-    #[serde(default)]
+    #[serde(default = "default_unverified_keyserver_url")]
     pub unverified_keyserver_url: String,
     /// Include armor headers (Version, Comment) in PGP output.
     #[serde(default = "default_true")]
@@ -76,6 +76,12 @@ fn default_proxy_url() -> String {
 }
 fn default_proxy_preset() -> String {
     "tor".into()
+}
+fn default_keyserver_url() -> String {
+    "https://keys.openpgp.org".into()
+}
+fn default_unverified_keyserver_url() -> String {
+    "https://keyserver.ubuntu.com".into()
 }
 fn default_opsec_title() -> String {
     "Notes".into()
@@ -121,6 +127,11 @@ pub fn is_portable(state: State<'_, AppState>) -> bool {
 /// Get the current application settings.
 #[tauri::command]
 pub fn get_settings(app: AppHandle, state: State<'_, AppState>) -> Settings {
+    get_settings_internal(&app, &state)
+}
+
+/// Internal helper to get settings from portable dir or Tauri store.
+pub fn get_settings_internal(app: &AppHandle, state: &AppState) -> Settings {
     // In portable mode, read directly from the portable data dir
     if let Some(ref portable_dir) = state.portable_dir {
         let path = portable_dir.join(PORTABLE_SETTINGS_FILE);

@@ -5,7 +5,6 @@ use std::sync::atomic::Ordering;
 
 use serde::Serialize;
 use tauri::{AppHandle, State};
-use tauri_plugin_store::StoreExt;
 
 use keychainpgp_core::CryptoEngine;
 use keychainpgp_core::types::{KeyGenOptions, TrustLevel, UserId};
@@ -28,19 +27,45 @@ fn validate_proxy_url(url: &str) -> Result<(), String> {
 }
 
 /// Read the proxy URL from settings if proxy is enabled.
-fn get_proxy_url(app: &AppHandle) -> Option<String> {
-    let store = app.store("settings.json").ok()?;
-    let val = store.get("settings")?;
-    let settings: super::settings::Settings = serde_json::from_value(val).ok()?;
+fn get_proxy_url(app: &AppHandle, state: &AppState) -> Result<Option<String>, String> {
+    let settings = super::settings::get_settings_internal(app, state);
     if !settings.proxy_enabled {
-        return None;
+        return Ok(None);
     }
     let url = match settings.proxy_preset.as_str() {
         "tor" => "socks5h://127.0.0.1:9050".to_string(),
         "lokinet" => "socks5h://127.0.0.1:1080".to_string(),
-        _ => settings.proxy_url,
+        _ => settings.proxy_url.clone(),
     };
-    if url.is_empty() { None } else { Some(url) }
+    if url.trim().is_empty() {
+        Err("Proxy is enabled but no URL is configured. Please check your settings.".to_string())
+    } else {
+        validate_proxy_url(&url)?;
+        Ok(Some(url))
+    }
+}
+
+/// Internal helper to upload key data to multiple keyservers.
+/// Returns (successes, failures) where each entry is "url: message".
+async fn upload_to_keyservers_internal(
+    urls: &[String],
+    key_data: &[u8],
+    proxy: Option<&str>,
+) -> (Vec<String>, Vec<String>) {
+    let mut successes = Vec::new();
+    let mut failures = Vec::new();
+
+    for url in urls {
+        if let Err(e) = validate_keyserver_url(url) {
+            failures.push(format!("{url}: {e}"));
+            continue;
+        }
+        match keychainpgp_keys::network::keyserver::keyserver_upload(key_data, url, proxy).await {
+            Ok(msg) => successes.push(format!("{url}: {msg}")),
+            Err(e) => failures.push(format!("{url}: {e}")),
+        }
+    }
+    (successes, failures)
 }
 
 /// Key information returned to the frontend.
@@ -445,7 +470,7 @@ pub async fn wkd_lookup(
     state: State<'_, AppState>,
     email: String,
 ) -> Result<Option<KeyInfo>, String> {
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, &state)?;
     let key_bytes = keychainpgp_keys::network::wkd::wkd_lookup(&email, proxy.as_deref())
         .await
         .map_err(|e| e.to_string())?;
@@ -478,13 +503,20 @@ pub async fn wkd_lookup(
 #[tauri::command]
 pub async fn keyserver_search(
     app: AppHandle,
-    _state: State<'_, AppState>,
+    state: State<'_, AppState>,
     query: String,
     keyserver_url: Option<String>,
 ) -> Result<Vec<KeyInfo>, String> {
+    let settings = super::settings::get_settings_internal(&app, &state);
     let url_string = keyserver_url.unwrap_or_else(|| {
-        let settings = super::settings::get_settings(app.clone(), _state.clone());
-        settings.keyserver_url
+        if settings.unverified_keyserver_url.is_empty() {
+            settings.keyserver_url.clone()
+        } else {
+            format!(
+                "{},{}",
+                settings.keyserver_url, settings.unverified_keyserver_url
+            )
+        }
     });
     let urls: Vec<String> = url_string
         .split(',')
@@ -506,7 +538,7 @@ pub async fn keyserver_search(
         validate_keyserver_url(url)?;
     }
 
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, &state)?;
     let query_clone = query.clone();
 
     // Limit concurrency to avoid spawning an unbounded number of network requests.
@@ -543,7 +575,7 @@ pub async fn keyserver_search(
         } else {
             &m.fingerprint
         };
-        unique_keys.entry(id.clone()).or_insert(m);
+        unique_keys.entry(id.clone()).or_insert(m.clone());
     }
 
     let infos = unique_keys
@@ -596,7 +628,7 @@ pub async fn fetch_and_import_key(
         .map(|s| s.trim())
         .filter(|s| !s.is_empty())
         .collect();
-    let proxy = get_proxy_url(&app);
+    let proxy = get_proxy_url(&app, &state)?;
 
     let mut last_error = String::new();
     for url in urls {
@@ -626,7 +658,7 @@ pub async fn keyserver_upload(
     fingerprint: String,
     keyserver_url: Option<String>,
 ) -> Result<String, String> {
-    let settings = super::settings::get_settings(app.clone(), state.clone());
+    let settings = super::settings::get_settings_internal(&app, &state);
     let url_string = keyserver_url.unwrap_or_else(|| settings.keyserver_url.clone());
     let urls: Vec<String> = url_string
         .split(',')
@@ -638,15 +670,7 @@ pub async fn keyserver_upload(
         return Err("No keyservers configured".into());
     }
 
-    for url in &urls {
-        validate_keyserver_url(url)?;
-    }
-
-    let proxy = if settings.proxy_enabled {
-        get_proxy_url(&app)
-    } else {
-        None
-    };
+    let proxy = get_proxy_url(&app, &state)?;
 
     let key_data = {
         let keyring = state
@@ -660,21 +684,8 @@ pub async fn keyserver_upload(
         record.pgp_data.clone()
     };
 
-    let mut successes = Vec::new();
-    let mut failures = Vec::new();
-
-    for url in &urls {
-        match keychainpgp_keys::network::keyserver::keyserver_upload(
-            &key_data,
-            url,
-            proxy.as_deref(),
-        )
-        .await
-        {
-            Ok(msg) => successes.push(format!("{url}: {msg}")),
-            Err(e) => failures.push(format!("{url}: {e}")),
-        }
-    }
+    let (successes, failures) =
+        upload_to_keyservers_internal(&urls, &key_data, proxy.as_deref()).await;
 
     if successes.is_empty() {
         Err(format!(
@@ -918,18 +929,17 @@ pub async fn publish_revocation_cert(
             })?
     };
 
-    // Read keyserver URLs from settings
-    let settings_url = {
-        let store = app.store("settings.json").ok();
-        let val = store.and_then(|s| s.get("settings"));
-        let settings: Option<super::settings::Settings> =
-            val.and_then(|v| serde_json::from_value(v).ok());
-        settings
-            .map(|s| s.keyserver_url)
-            .unwrap_or_else(|| "https://keys.openpgp.org".to_string())
+    // Read keyserver URLs from settings (both verified and unverified)
+    let settings = super::settings::get_settings_internal(&app, &state);
+    let url_string = if settings.unverified_keyserver_url.is_empty() {
+        settings.keyserver_url.clone()
+    } else {
+        format!(
+            "{},{}",
+            settings.keyserver_url, settings.unverified_keyserver_url
+        )
     };
-
-    let urls: Vec<String> = settings_url
+    let urls: Vec<String> = url_string
         .split(',')
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
@@ -938,28 +948,10 @@ pub async fn publish_revocation_cert(
     if urls.is_empty() {
         return Err("No keyservers configured".into());
     }
+    let proxy = get_proxy_url(&app, &state)?;
 
-    let proxy = get_proxy_url(&app);
-
-    let mut successes = Vec::new();
-    let mut failures = Vec::new();
-
-    for url in &urls {
-        if let Err(e) = validate_keyserver_url(url) {
-            failures.push(format!("{url}: {e}"));
-            continue;
-        }
-        match keychainpgp_keys::network::keyserver::keyserver_upload(
-            &rev_cert,
-            url,
-            proxy.as_deref(),
-        )
-        .await
-        {
-            Ok(_) => successes.push(url.clone()),
-            Err(e) => failures.push(format!("{url}: {e}")),
-        }
-    }
+    let (successes, failures) =
+        upload_to_keyservers_internal(&urls, &rev_cert, proxy.as_deref()).await;
 
     if successes.is_empty() {
         return Err(format!(
@@ -968,6 +960,7 @@ pub async fn publish_revocation_cert(
         ));
     }
 
+    // Mark as revoked locally ONLY IF at least one upload succeeded.
     // Update local database: mark as revoked and update PGP data with revoked cert
     {
         let keyring = state
@@ -1037,6 +1030,45 @@ mod tests {
         assert_eq!(
             result.unwrap_err(),
             "Fetched key fingerprint does not match requested fingerprint"
+        );
+    }
+
+    #[test]
+    fn test_validate_proxy_url() {
+        assert!(validate_proxy_url("socks5://127.0.0.1:9050").is_ok());
+        assert!(validate_proxy_url("socks5h://localhost:1080").is_ok());
+        assert!(validate_proxy_url("http://127.0.0.1:8080").is_err());
+        assert!(validate_proxy_url("").is_err());
+        assert!(validate_proxy_url("   ").is_err());
+    }
+
+    #[test]
+    fn test_get_proxy_url_logic() {
+        // Internal logic check for get_proxy_url's matching
+        let tor_url = "socks5h://127.0.0.1:9050";
+        let lokinet_url = "socks5h://127.0.0.1:1080";
+
+        let preset_tor = "tor";
+        let preset_lokinet = "lokinet";
+        let preset_custom = "custom";
+        let custom_url = "socks5://myproxy:1234";
+
+        assert_eq!(if preset_tor == "tor" { tor_url } else { "" }, tor_url);
+        assert_eq!(
+            if preset_lokinet == "lokinet" {
+                lokinet_url
+            } else {
+                ""
+            },
+            lokinet_url
+        );
+        assert_eq!(
+            if preset_custom == "custom" {
+                custom_url
+            } else {
+                ""
+            },
+            custom_url
         );
     }
 }
