@@ -583,6 +583,7 @@ mod tests {
         }
     }
 
+    #[test]
     fn detect_keyserver_kind_matches_keys_openpgp_org() {
         assert_eq!(
             detect_keyserver_kind("https://keys.openpgp.org"),
