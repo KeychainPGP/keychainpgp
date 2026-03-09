@@ -200,6 +200,7 @@
             settingsStore.save({ close_to_tray: !settingsStore.settings.close_to_tray })}
           class="h-4 w-4 accent-[var(--color-primary)]"
         />
+      </label>
     {/if}
   </section>
 
