@@ -140,8 +140,8 @@ keychainpgp/
 git clone https://github.com/keychainpgp/keychainpgp.git
 cd keychainpgp
 
-# Install frontend dependencies
-cd crates/keychainpgp-ui/frontend && npm install && cd ../../..
+# Install frontend dependencies and build the UI
+cd crates/keychainpgp-ui/frontend && npm install && npm run build && cd ../../..
 
 # Build the desktop app
 cargo build --release -p keychainpgp-ui
