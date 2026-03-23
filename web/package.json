@@ -10,7 +10,7 @@
     "wasm": "wasm-pack build ../crates/keychainpgp-wasm --target web --out-dir ../../web/pkg"
   },
   "dependencies": {
-    "svelte": "^5.54.1"
+    "svelte": "^5.55.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
